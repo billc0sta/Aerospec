@@ -1,0 +1,8 @@
+lib: [
+  "_build/install/default/lib/upl/META"
+  "_build/install/default/lib/upl/dune-package"
+  "_build/install/default/lib/upl/opam"
+]
+bin: [
+  "_build/install/default/bin/upl.exe"
+]

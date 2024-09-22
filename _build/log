@@ -1,0 +1,17 @@
+# dune exec ./_build/default/bin/main.exe
+# OCAMLPARAM: unset
+# Shared cache: disabled
+# Shared cache location: C:\Users\zoom
+# 01098929115\AppData\Local\Microsoft\Windows\INetCache\dune\db
+# Workspace root: "D:\\Programming\\upl"
+# Auto-detected concurrency: 4
+# Dune context:
+#  { name = "default"
+#  ; kind = "default"
+#  ; profile = Dev
+#  ; merlin = true
+#  ; fdo_target_exe = None
+#  ; build_dir = In_build_dir "default"
+#  ; instrument_with = []
+#  }
+$ C:\Users\ZOOM01~1\AppData\Local\Programs\DKMLNA~1\bin\ocamlc.opt.exe -config > C:\Users\ZOOM01~1\AppData\Local\Temp\dune_48f2df_output
