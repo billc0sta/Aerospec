@@ -1,1 +1,1 @@
-lib/lexer.ml: Char Printf String
+lib/lexer.ml: Char List String

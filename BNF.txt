@@ -1,0 +1,16 @@
+expression -> literal | binary | unary | grouping;
+literal -> FLOAT;
+binary -> expression bop expression
+bop -> "+" | "-" | "*" | "/" | "%" | ">" | "<" | "==" | "<=" | ">=" | "!=" | "&&" | "||";
+unary -> uop expression;
+uop -> "!" | "#" | "@";
+grouping -> "(" expression ")"
+
+expression -> logical;
+logical -> equality (("&&" | "||") equality);
+equality -> relational (("==" | "!=") relational)*;
+relational -> basic ((">" | "<" | ">=" | "<=") basic)*
+basic -> factor (("+" | "-") factor)*;
+factor -> primary (("*" | "/" | "%") primary)*;
+unary -> unary (unary)* | primary;
+primary -> FLOAT | "(" expression ")"

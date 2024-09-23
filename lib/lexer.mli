@@ -1,6 +1,6 @@
 type tokentype = EOF | Unknown | PHLD
-| Dot
 | At
+| Dot
 | Semicolon
 | Literal
 | Ident
@@ -18,20 +18,18 @@ type tokentype = EOF | Unknown | PHLD
 | Lesser
 | Greater 
 | LessEqual 
-| GreaterEqual 
+| GreatEqual 
 | Assign 
 | BodyAssign 
 | Question 
-| Sizeof 
+| Hash
 | Column 
-| OpenParen 
-| CloseParen
+| OpenParen
+| CloseParen 
 
-type token
-type t
+type token = {value: string; line: int; pos: int; typeof: tokentype}
+type t = {raw: string; pos: int; line: int;}
 
-val next_token: t -> t * token
 val make: string -> t 
-val pretty: token -> unit
-val print_value: token -> unit
-val print_all: (token -> unit) -> t -> unit 
+val lex: t -> token list
+val nameof: tokentype -> string

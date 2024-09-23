@@ -18,15 +18,16 @@ type tokentype = EOF | Unknown | PHLD
 | Lesser
 | Greater 
 | LessEqual 
-| GreaterEqual 
+| GreatEqual 
 | Assign 
 | BodyAssign 
 | Question 
-| Sizeof 
+| Hash
 | Column 
-| OpenParen 
-| CloseParen
+| OpenParen
+| CloseParen 
 
+exception LexerError of string
 
 type token = {value: string; line: int; pos: int; typeof: tokentype}
 type t = {raw: string; pos: int; line: int;}
@@ -53,11 +54,11 @@ let nameof = function
 	| Lesser -> "<"
 	| Greater -> ">"
 	| LessEqual -> "<="
-	| GreaterEqual -> ">="
+	| GreatEqual -> ">="
 	| Assign -> "="
 	| BodyAssign -> "->"
 	| Question -> "?"
-	| Sizeof -> "#"
+	| Hash -> "#"
 	| Column -> "|"
 	| OpenParen -> "("
 	| CloseParen -> ")"
@@ -121,7 +122,6 @@ let valid_literal str =
 	String.index str '.' > 0
 
 let next_token lexer =
-	if lexer.pos = String.length lexer.raw then (lexer, {value="";line=lexer.line;pos=lexer.pos;typeof=EOF}) else
 	let (lexer, c) = chop_char (skip_space lexer) in
 	let (lexer, typeof) = match c with
 	| '@' -> (lexer, At)
@@ -129,7 +129,7 @@ let next_token lexer =
 	| ';' -> (lexer, Semicolon)
 	| '(' -> (lexer, OpenParen)
 	| ')' -> (lexer, CloseParen)
-	| '#' -> (lexer, Sizeof)
+	| '#' -> (lexer, Hash)
 	| '?' -> (lexer, Question)
 	| '+' -> (lexer, Plus)
 	| '*' -> (lexer, Star)
@@ -138,13 +138,14 @@ let next_token lexer =
 	| ',' -> (lexer, Comma)
 	| '-' -> follows '>' BodyAssign Minus lexer
 	| '=' -> follows '=' Equal Assign lexer
-	| '>' -> follows '=' GreaterEqual Greater lexer
+	| '>' -> follows '=' GreatEqual Greater lexer
 	| '<' -> follows '=' LessEqual Lesser lexer
 	| '!' -> follows '=' NotEqual Not lexer
 	| '&' -> follows '&' And Unknown lexer
 	| '|' -> follows '|' Or Column lexer
 	| c when is_num c -> (lexer, Literal)
 	| c when is_alpha c || c = '_' -> (lexer, Ident)
+	| c when c = Char.chr 0 -> (lexer, EOF)
 	| _ -> (lexer, Unknown)
 	in
 
@@ -158,16 +159,10 @@ let next_token lexer =
 
 	(lexer, {value; typeof; pos=(lexer.pos - (String.length value)); line=lexer.line})
 
-let pretty tkn = 
-	Printf.printf "{value: %s $ pos: %d $ line: %d $ typeof: %s}\n" tkn.value tkn.pos tkn.line (nameof tkn.typeof)
-
-let print_value tkn =
-	print_string tkn.value; print_string " "
-
-let print_all ppf lexer =
-	let rec loop lexer =
-		let (lexer, tkn) = next_token lexer in
-		match tkn.typeof with
-		| EOF -> ()
-		| _ -> ppf tkn; loop lexer
-	in loop lexer
+let lex lexer =
+	let rec aux acc lexer =
+		let (lexer, tk) = next_token lexer in
+		match tk.typeof with
+		| Unknown -> raise (LexerError ("::Unrecognized token '"^tk.value^"' at line: "^(string_of_int tk.line)^"\n"))
+		| _ -> aux (tk::acc) lexer
+	in List.rev (aux [] lexer)

@@ -6,3 +6,6 @@ lib: [
 bin: [
   "_build/install/default/bin/upl.exe"
 ]
+doc: [
+  "_build/install/default/doc/upl/README.md"
+]
