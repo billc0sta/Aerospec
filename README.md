@@ -121,11 +121,3 @@
 
 - Plus operator concatenates two arrays.
 - `arr op float` is the same as `[;; arr.i op float]`.
-<<<<<<< HEAD
-
-
-
-
-
-=======
->>>>>>> abddc43fc62baeec96ad0b432d0ee5185c871a78
