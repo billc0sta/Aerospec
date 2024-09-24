@@ -20,12 +20,15 @@ type tokentype = EOF | Unknown | PHLD
 | LessEqual 
 | GreatEqual 
 | Assign 
-| BodyAssign 
 | Question 
 | Hash
-| Column 
+| Colon
 | OpenParen
 | CloseParen 
+| OpenCurly
+| CloseCurly
+| OpenSqr
+| CloseSqr
 
 type token = {value: string; line: int; pos: int; typeof: tokentype}
 type t = {raw: string; pos: int; line: int;}
@@ -33,3 +36,5 @@ type t = {raw: string; pos: int; line: int;}
 val make: string -> t 
 val lex: t -> token list
 val nameof: tokentype -> string
+
+exception LexError of string

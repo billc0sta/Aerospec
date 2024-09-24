@@ -54,8 +54,7 @@
 - Printing: `@`.
 - Size-of: `#`.
 - If: `?`
-- Pattern: `|`
-- Body-assign: `->`
+- Else: `:`
 - Parenthesis: `()`
 - Assignment: `=`.
 - Equals: `==`.
@@ -69,9 +68,11 @@
 - Multiply: `*`.
 - Division: `/`.
 - Modulo: `%`.
-- Logical and: `&&`.
-- Logical or: `||`.
+- Square Brackets: `[]`
+- Curly Brackets: `{}`
+- Logical and: `&`.
+- Logical or: `|`.
 - Logical not: `!`.
 
 - Plus operator concatenates two arrays.
-- `arr op float` is the same as `(;; arr.i op float)`.
+- `arr op float` is the same as `[;; arr.i op float]`.

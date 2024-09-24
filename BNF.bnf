@@ -1,0 +1,24 @@
+expression -> literal | binary | unary | grouping;
+literal -> FLOAT;
+binary -> expression bop expression
+bop -> "+" | "-" | "*" | "/" | "%" | ">" | "<" | "==" | "<=" | ">=" | "!=" | "&&" | "||";
+unary -> uop expression;
+uop -> "!" | "#" | "@";
+grouping -> "(" expression ")"
+
+expression -> builtin;
+logical -> equality (("&&" | "||") logical);
+equality -> relational (("==" | "!=") equality)*;
+relational -> basic ((">" | "<" | ">=" | "<=") relational)*
+basic -> factor (("+" | "-") basic)*;
+factor -> primary (("*" | "/" | "%") factor)*;
+unary -> ("!" | "+" | "-" | "#") (unary)+ | primary;
+primary -> FLOAT | "(" expression ")"; | "[" (expression ("," expression)+)? "]"
+
+statement -> declaration | block | print;
+declaration -> varDecl | funDecl;
+varDecl -> IDENT ("=" | ":=") expression;
+funDecl -> IDENT "(" parameters? ")" block;
+parameters -> IDENT ("," IDENT)*;
+block -> "{" statement* "}";
+print -> "@" expression;

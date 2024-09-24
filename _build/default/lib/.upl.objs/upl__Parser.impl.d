@@ -1,1 +1,1 @@
-lib/parser.ml: Lexer List
+lib/parser.ml: Lexer List String

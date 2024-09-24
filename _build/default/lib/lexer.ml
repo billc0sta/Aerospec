@@ -20,20 +20,23 @@ type tokentype = EOF | Unknown | PHLD
 | LessEqual 
 | GreatEqual 
 | Assign 
-| BodyAssign 
 | Question 
 | Hash
-| Column 
+| Colon
 | OpenParen
 | CloseParen 
+| OpenCurly
+| CloseCurly
+| OpenSqr
+| CloseSqr
 
-exception LexerError of string
+exception LexError of string
 
 type token = {value: string; line: int; pos: int; typeof: tokentype}
 type t = {raw: string; pos: int; line: int;}
 
 let nameof = function 
-	| EOF -> "end of file" 
+	| EOF -> "EOF" 
 	| Unknown -> "unknown"
 	| Literal -> "literal"
 	| Ident -> "identifier"
@@ -47,8 +50,8 @@ let nameof = function
 	| Modulo -> "%"
 	| Comma -> ","
 	| Not -> "!"
-	| And -> "&&"
-	| Or -> "||"
+	| And -> "&"
+	| Or -> "|"
 	| Equal -> "=="
 	| NotEqual -> "!="
 	| Lesser -> "<"
@@ -56,12 +59,15 @@ let nameof = function
 	| LessEqual -> "<="
 	| GreatEqual -> ">="
 	| Assign -> "="
-	| BodyAssign -> "->"
 	| Question -> "?"
 	| Hash -> "#"
-	| Column -> "|"
+	| Colon -> ":"
 	| OpenParen -> "("
 	| CloseParen -> ")"
+	| OpenCurly -> "{"
+	| CloseCurly -> "}"
+	| OpenSqr -> "["
+	| CloseSqr -> "]"
 	| _ -> raise (failwith "unrecognized tokentype")
 
 let make raw = {raw; pos=0; line=1}
@@ -106,21 +112,22 @@ let consume_literal lexer = consume_while (fun c -> is_num c || c = '.') lexer
 
 let consume_ident lexer = consume_while (fun c -> is_alnum c || c = '_') lexer
 
+(*
 let string_count str c =
 	let rec aux acc i =
 		if i = String.length str then i else
 		if str.[i] = c then aux (acc+1) (i+1) else
 		aux acc (i+1)
 	in aux 0 0
-
+*)
 let valid_literal str =
 	String.length str > 0 &&
-	String.for_all (fun c -> is_num c || c = '.') str &&
-	not (String.contains str '.') ||
-	string_count str '.' = 1 &&
-	String.length str > 3 &&
+	String.for_all (fun c -> is_num c || c = '.') str (*&&
+	not (String.contains str '.') || 
+	string_count str '.' = 1 && 
+	String.length str >= 3 && 
 	String.index str '.' > 0
-
+	*)
 let next_token lexer =
 	let (lexer, c) = chop_char (skip_space lexer) in
 	let (lexer, typeof) = match c with
@@ -132,20 +139,25 @@ let next_token lexer =
 	| '#' -> (lexer, Hash)
 	| '?' -> (lexer, Question)
 	| '+' -> (lexer, Plus)
+	| '-' -> (lexer, Minus)
 	| '*' -> (lexer, Star)
 	| '/' -> (lexer, Slash)
 	| '%' -> (lexer, Modulo)
 	| ',' -> (lexer, Comma)
-	| '-' -> follows '>' BodyAssign Minus lexer
+	| '|' -> (lexer, Or)
+	| '&' -> (lexer, And)
+	| ':' -> (lexer, Colon)
+	| '{' -> (lexer, OpenCurly)
+	| '}' -> (lexer, CloseCurly)
+	| '[' -> (lexer, OpenSqr)
+	| ']' -> (lexer, CloseSqr)
 	| '=' -> follows '=' Equal Assign lexer
 	| '>' -> follows '=' GreatEqual Greater lexer
 	| '<' -> follows '=' LessEqual Lesser lexer
 	| '!' -> follows '=' NotEqual Not lexer
-	| '&' -> follows '&' And Unknown lexer
-	| '|' -> follows '|' Or Column lexer
 	| c when is_num c -> (lexer, Literal)
 	| c when is_alpha c || c = '_' -> (lexer, Ident)
-	| c when c = Char.chr 0 -> (lexer, EOF)
+	| c when c = Char.chr 0 || lexer.pos = String.length lexer.raw -> (lexer, EOF)
 	| _ -> (lexer, Unknown)
 	in
 
@@ -157,12 +169,13 @@ let next_token lexer =
 
 	let typeof = if typeof = Literal && not (valid_literal value) then Unknown else typeof in
 
-	(lexer, {value; typeof; pos=(lexer.pos - (String.length value)); line=lexer.line})
+	(lexer, {value; typeof; pos=lexer.pos; line=lexer.line})
 
 let lex lexer =
 	let rec aux acc lexer =
 		let (lexer, tk) = next_token lexer in
 		match tk.typeof with
-		| Unknown -> raise (LexerError ("::Unrecognized token '"^tk.value^"' at line: "^(string_of_int tk.line)^"\n"))
+		| EOF -> tk::acc
+		| Unknown -> raise (LexError ("::Unrecognized token '"^tk.value^"' at line: "^(string_of_int tk.line)^"\n"))
 		| _ -> aux (tk::acc) lexer
 	in List.rev (aux [] lexer)
