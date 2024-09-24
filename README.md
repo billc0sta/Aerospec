@@ -60,9 +60,8 @@
     - `[; arr.i > 1; arr.i]` — Keep elements greater than 1.
 
   - **Reduction**
-    - `acc = 0 [;; acc = acc + arr.i]` — Sum all elements of `arr`.
-    - `acc = 1 [;; acc = acc * arr.i]` — Multiply all elements of `arr`.
-    - `acc = 0 [;; acc = acc op arr.i]` — Use a custom operator `op` to combine elements (optimized to avoid array creation).
+    - `acc = 0 [;; {acc = acc + arr.i}]` — Sum all elements of `arr`.
+    - `acc = 1 [;; {acc = acc * arr.i}]` — Multiply all elements of `arr`.
 
   - **Indexing**:
     - `arr.x:y`
@@ -84,8 +83,7 @@
     - `arr.5:8` — Access elements from index 5 to 8 (exclusive).
   
   - **Selection**:
-    - `arr.0, 2` — Select elements at index 0 and 2.
-    - `arr.x:y,z` — Select a range and specific elements, e.g., `arr.1:3, 0` selects elements from index 1 to 3 and the element at index 0.
+    - `arr.x:y,z` — Select index `z` from range `x:y`, e.g., `arr.1:3, 0` Selects index `0` from each subarray in range `1:3`
     - `arr.:,2` — Select all elements and include index 2.
     - `arr.x:3,y` — Select elements from index x to index 3 and include index y.
 
