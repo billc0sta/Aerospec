@@ -1,6 +1,6 @@
 ## Traits
+- Minimal
 - Guaranteed tail optimizations.
-- Minimal functional programming language that allows side effects.
 - Statically typed with type inference.
 - Turing complete.
 - Highly influenced by mathematical notation.
