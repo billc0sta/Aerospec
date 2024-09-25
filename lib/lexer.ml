@@ -1,34 +1,44 @@
-type tokentype = EOF | Unknown | PHLD
-| At
-| Dot
-| Semicolon
-| Literal
-| Ident
-| Plus 
-| Minus 
-| Star 
-| Slash 
+type tokentype = 
+| EOF 
+| Unknown
+| Plus
+| Minus
+| Star
+| Slash
 | Modulo
-| Comma
-| Not 
-| And 
-| Or 
-| Equal 
-| NotEqual 
+| Greater
 | Lesser
-| Greater 
-| LessEqual 
-| GreatEqual 
-| Assign 
-| Question 
+| GreatEqual
+| LessEqual
+| Equal
+| ConEqual
+| EqualEqual
+| ExcEqual
+| Exclamation
+| TwoExc
+| Arrow
+| Right
+| Left
 | Hash
+| At
+| Dollar
+| Ident
+| FloatLiteral
+| StringLiteral
+| OParen
+| CParen
+| OSquare
+| CSquare
+| OCurly
+| CCurly
+| Question
 | Colon
-| OpenParen
-| CloseParen 
-| OpenCurly
-| CloseCurly
-| OpenSqr
-| CloseSqr
+| Semicolon
+| Ampersands
+| Columns
+| Dot
+| Comma
+| TwoSlash
 
 exception LexError of string
 
@@ -36,144 +46,134 @@ type token = {value: string; line: int; pos: int; typeof: tokentype}
 type t = {raw: string; pos: int; line: int;}
 
 let nameof = function 
-	| EOF -> "EOF" 
+	| EOF -> "EOF"
 	| Unknown -> "unknown"
-	| Literal -> "literal"
-	| Ident -> "identifier"
-	| At -> "@"
-	| Dot -> "."
-	| Semicolon -> ";"
 	| Plus -> "+"
 	| Minus -> "-"
 	| Star -> "*"
 	| Slash -> "/"
 	| Modulo -> "%"
-	| Comma -> ","
-	| Not -> "!"
-	| And -> "&"
-	| Or -> "|"
-	| Equal -> "=="
-	| NotEqual -> "!="
-	| Lesser -> "<"
 	| Greater -> ">"
-	| LessEqual -> "<="
+	| Lesser -> "<"
 	| GreatEqual -> ">="
-	| Assign -> "="
-	| Question -> "?"
-	| Hash -> "#"
+	| LessEqual -> "<="
+	| Equal -> "="
+	| ConEqual -> ":="
+	| EqualEqual -> "=="
+	| ExcEqual -> "!="
+	| Exclamation -> "!"
+	| At -> "@"
 	| Colon -> ":"
-	| OpenParen -> "("
-	| CloseParen -> ")"
-	| OpenCurly -> "{"
-	| CloseCurly -> "}"
-	| OpenSqr -> "["
-	| CloseSqr -> "]"
-	| _ -> raise (failwith "unrecognized tokentype")
-
+	| Semicolon -> ";"
+	| Ampersands -> "&&"
+	| Columns -> "||"
+	| TwoExc -> "!!"
+	| Arrow -> "->"
+	| Right -> ">>"
+	| Left -> "<<"
+	| Hash -> "#"
+	| Dollar -> "$"
+	| Ident -> "Identifier"
+	| Literal -> "float literal"
+	| OParen -> "("
+	| CParen -> ")"
+	| OSquare -> "["
+	| CSquare -> "]"
+	| OCurly -> "{"
+	| CCurly -> "}"
+	| Question -> "?"
+	| Dot -> "."
+	| Comma -> ","
+	| TwoSlash -> "comment"
+	
 let make raw = {raw; pos=0; line=1}
 
-let peek_char lexer = 
+let peek lexer = 
 	if lexer.pos >= (String.length lexer.raw) then (Char.chr 0) else lexer.raw.[lexer.pos]
 
-let advance lexer =
-	match peek_char lexer with
+let forward lexer =
+	match peek lexer with
 	| c when c = (Char.chr 0) -> lexer
 	| '\n' -> {lexer with line=lexer.line+1; pos=lexer.pos+1} 
 	| _ -> {lexer with pos=lexer.pos+1}
 
-let chop_char lexer = let c = peek_char lexer in (advance lexer, c)
-
-let unchop_char lexer =
-	if lexer.pos = 0 || (lexer.pos - 1) = -1 then lexer else 
-		if lexer.raw.[lexer.pos-1] = '\n'
-		then {lexer with line=lexer.line-1; pos=lexer.pos-1}
-		else {lexer with pos=lexer.pos-1}
-
 let rec skip_space lexer = 
-	match peek_char lexer with	
-	| '\n' | ' ' | '\t' | '\r' -> skip_space (advance lexer)
+	match peek lexer with	
+	| '\n' | ' ' | '\t' | '\r' -> skip_space (forward lexer)
 	| _ -> lexer
-
-let follows c expected default lexer =
-	if (peek_char lexer) = c then (advance lexer, expected) else (lexer, default)
-
-let consume_while f lexer =
-	let rec aux acc lexer =
-		let c = peek_char lexer in
-		if f c then aux (acc ^ Char.escaped c) (advance lexer)
-		else (lexer, acc)
-	in aux "" lexer
 
 let is_num c = '0' <= c && c <= '9'
 let is_alpha c = 'A' <= c && c <= 'Z' || 'a' <= c && c <= 'z'
 let is_alnum c = is_num c || is_alpha c
 
-let consume_literal lexer = consume_while (fun c -> is_num c || c = '.') lexer
+let float_literal lexer = 
+	let rec aux acc dotted lexer =
+		match peek lexer with
+		| '.' -> if dotted then (acc, lexer) else aux (acc + 1) true (forward lexer)
+		| c when is_num c -> aux (acc + 1) dotted (forward lexer)
+		| _ -> (acc, lexer)
+	in let (count, lexer) = aux 0 false lexer in
+	(String.sub (lexer.pos - count) count lexer.raw, lexer)
 
-let consume_ident lexer = consume_while (fun c -> is_alnum c || c = '_') lexer
+let builder f lexer =
+	let rec aux acc lexer =
+		let c = peek lexer in
+		if f c then
+			aux (acc + 1) (forward lexer)
+		else
+			(acc, lexer)
+	in let (count, lexer) = aux 0 lexer in 
+	(String.sub (lexer.pos - count) count, lexer)
 
-(*
-let string_count str c =
-	let rec aux acc i =
-		if i = String.length str then i else
-		if str.[i] = c then aux (acc+1) (i+1) else
-		aux acc (i+1)
-	in aux 0 0
-*)
-let valid_literal str =
-	String.length str > 0 &&
-	String.for_all (fun c -> is_num c || c = '.') str (*&&
-	not (String.contains str '.') || 
-	string_count str '.' = 1 && 
-	String.length str >= 3 && 
-	String.index str '.' > 0
-	*)
+let string_literal lexer = builder (fun c -> c <> '"') lexer
+let ident lexer = builder (fun c -> is_alnum c || c = '_') lexer
+let comment lexer = builder (fun c -> c <> '\n') lexer
+
 let next_token lexer =
-	let (lexer, c) = chop_char (skip_space lexer) in
-	let (lexer, typeof) = match c with
-	| '@' -> (lexer, At)
-	| '.' -> (lexer, Dot)
-	| ';' -> (lexer, Semicolon)
-	| '(' -> (lexer, OpenParen)
-	| ')' -> (lexer, CloseParen)
-	| '#' -> (lexer, Hash)
-	| '?' -> (lexer, Question)
-	| '+' -> (lexer, Plus)
-	| '-' -> (lexer, Minus)
-	| '*' -> (lexer, Star)
-	| '/' -> (lexer, Slash)
-	| '%' -> (lexer, Modulo)
-	| ',' -> (lexer, Comma)
-	| '|' -> (lexer, Or)
-	| '&' -> (lexer, And)
-	| ':' -> (lexer, Colon)
-	| '{' -> (lexer, OpenCurly)
-	| '}' -> (lexer, CloseCurly)
-	| '[' -> (lexer, OpenSqr)
-	| ']' -> (lexer, CloseSqr)
-	| '=' -> follows '=' Equal Assign lexer
-	| '>' -> follows '=' GreatEqual Greater lexer
-	| '<' -> follows '=' LessEqual Lesser lexer
-	| '!' -> follows '=' NotEqual Not lexer
-	| c when is_num c -> (lexer, Literal)
-	| c when is_alpha c || c = '_' -> (lexer, Ident)
-	| c when c = Char.chr 0 || lexer.pos = String.length lexer.raw -> (lexer, EOF)
-	| _ -> (lexer, Unknown)
+	let lexer = skip_space lexer in
+	let (typeof, lexer) = match peek lexer with
+	| '+' -> (Plus, forward lexer)
+	| '*' -> (Star, forward lexer)
+	| '%' -> (Modulo, forward lexer)
+	| ';' -> (Semicolon, forward lexer)
+	| ',' -> (Comma, forward lexer)
+	| '.' -> (Dot, forward lexer)
+	| '@' -> (At, forward lexer)
+	| '#' -> (Hash, forward lexer)
+	| '(' -> (OParen, forward lexer)
+	| ')' -> (CParen, forward lexer)
+	| '[' -> (OSquare, forward lexer)
+	| ']' -> (CSquare, forward lexer)
+	| '{' -> (OCurly, forward lexer)
+	| '}' -> (CCurly, forward lexer)
+	| '$' -> (Dollar, forward lexer)
+	| '?' -> (Question, forward lexer)
+	| '"' -> (StringLiteral, forward lexer)
+	| '&' -> begin let lexer = forward lexer in match peek lexer with '&' -> (Ampersands, forward lexer) | _ -> (Unknown, lexer) end
+	| '|' -> begin let lexer = forward lexer in match peek lexer with '|' -> (Columns, forward lexer) | _ -> (Unknown, lexer) end
+	| '=' -> begin let lexer = forward lexer in match peek lexer with '=' -> (EqualEqual, forward lexer) | _ -> (Equal, lexer) end
+	| '/' -> begin let lexer = forward lexer in match peek lexer with '/' -> (TwoSlash, forward lexer) | _ -> (Slash, lexer) end
+	| '-' -> begin let lexer = forward lexer in match peek lexer with '>' -> (Arrow, forward lexer) | _ -> (Minus, lexer) end
+	| '>' -> begin let lexer = forward lexer in match peek lexer with '>' -> (Right, forward lexer) | '=' -> (GreatEqual, forward lexer) | _ -> (Greater, lexer) end
+	| '<' -> begin let lexer = forward lexer in match peek lexer with '<' -> (Lesser, forward lexer) | '=' -> (GreatEqual, forward lexer) | _ -> (Left, lexer) end
+	| ':' -> begin let lexer = forward lexer in match peek lexer with '=' -> (ConEqual, forward lexer) | _ -> (Colon, lexer) end
+	| '!' -> begin let lexer = forward lexer in match peek lexer with '=' -> (ExcEqual, forward lexer) | '!' -> (TwoExc, forward lexer) | _ -> (Exclamation, lexer) end
+	| c when c = (Char.chr 0) -> (EOF, lexer)
+	| c when is_num c -> (FloatLiteral, lexer)
+	| c when is_alpha c || c = '_' -> (Ident, lexer)
+	| _ -> (Unknown, lexer)
 	in
-
-	let (lexer, value) = match typeof with
-	| Literal -> consume_literal (unchop_char lexer)
-	| Ident -> consume_ident (unchop_char lexer)
-	| _ -> (lexer, nameof typeof)
+	let (value, lexer) = match typeof with
+	| FloatLiteral  -> float_literal lexer 
+	| StringLiteral -> string_literal lexer
+	| Ident    -> ident lexer
+	| TwoSlash -> comment lexer
+	| _        -> (nameof typeof, lexer)
 	in
-
-	let typeof = if typeof = Literal && not (valid_literal value) then Unknown else typeof in
-
-	(lexer, {value; typeof; pos=lexer.pos; line=lexer.line})
-
+	({pos=lexer.pos;line=lexer.line;value;typeof}, lexer)
 let lex lexer =
 	let rec aux acc lexer =
-		let (lexer, tk) = next_token lexer in
+		let (tk, lexer) = next_token lexer in
 		match tk.typeof with
 		| EOF -> tk::acc
 		| Unknown -> raise (LexError ("::Unrecognized token '"^tk.value^"' at line: "^(string_of_int tk.line)^"\n"))
