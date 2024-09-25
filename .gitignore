@@ -1,0 +1,7 @@
+*
+!.gitignore
+!bin/main
+!examples
+!lib
+!spec
+!README.md
