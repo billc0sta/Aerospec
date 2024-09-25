@@ -1,11 +1,14 @@
 type expr =
   | FloatLit of float
+  | StringLit of string
   | Binary of expr * Lexer.token * expr
   | Unary of Lexer.token * expr
   | Grouping of expr
+  | Ident of string
 
 type statement = 
   | Print of expr
+  | Assignment of expr * Lexer.token * statement
   | Exprstmt of expr
 
 type t = {

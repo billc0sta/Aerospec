@@ -23,7 +23,8 @@ type tokentype =
 | At
 | Dollar
 | Ident
-| Literal
+| FloatLiteral
+| StringLiteral
 | OParen
 | CParen
 | OSquare

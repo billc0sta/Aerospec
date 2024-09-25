@@ -2,12 +2,15 @@ open Lexer
 
 type expr =
   | FloatLit of float
+  | StringLit of string
   | Binary of expr * token * expr
   | Unary of token * expr
   | Grouping of expr
+  | Ident of string
 
 type statement = 
   | Print of expr
+  | Assignment of expr * token * statement
   | Exprstmt of expr
 
 type t = {
@@ -33,7 +36,7 @@ let rec expression parser = logical parser
 
 and logical parser = build_binary [Ampersands; Columns] logical equality parser
 
-and equality parser = build_binary [Equal; ExcEqual] equality relational parser
+and equality parser = build_binary [EqualEqual; ExcEqual] equality relational parser
 
 and relational parser = build_binary [Greater; GreatEqual; Lesser; LessEqual] relational basic parser
 
@@ -52,7 +55,9 @@ and unary parser =
 and primary parser =
   let tk = peek parser in
   match tk.typeof with
-  | Literal -> (FloatLit (float_of_string tk.value), forward parser)
+  | FloatLiteral -> (FloatLit (float_of_string tk.value), forward parser)
+  | StringLiteral -> (StringLit tk.value, forward parser)
+  | Ident -> (Ident tk.value, forward parser)
   | OParen -> grouping (forward parser)
   | _ -> raise (ParseError ("::Expected an expression", tk))
 
@@ -72,13 +77,22 @@ and build_binary ops f1 f2 parser =
 
 let print_stmt parser = let (expr, parser) = expression parser in (Print expr, parser)
 
+let rec expr_stmt parser = 
+  let (expr, parser) = expression parser in
+  let peeking = peek parser in
+  match peeking.typeof with
+  | Equal | ConEqual -> 
+  let (expr2, parser) = expr_stmt (forward parser) in
+  (Assignment (expr, peeking, expr2), parser)
+  | _ -> (Exprstmt expr, parser)
+
 let parse parser =
   let rec aux acc parser =
     let tk = peek parser in
     match tk.typeof with
     | EOF -> acc
     | At -> let (stmt, parser) = print_stmt (forward parser) in aux (stmt::acc) parser
-    | _  -> let (expr, parser) = expression parser in aux (Exprstmt expr::acc) parser
+    | _  -> let (stmt, parser) = expr_stmt parser in aux (stmt::acc) parser
   in List.rev (aux [] parser)
 
 let rec print_expr expr =
@@ -103,3 +117,4 @@ let rec print_expr expr =
       print_string "(";
       print_expr expr;
       print_string ")"
+  | StringLit str | Ident str -> print_string str;

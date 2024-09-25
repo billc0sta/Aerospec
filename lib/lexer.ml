@@ -74,7 +74,8 @@ let nameof = function
 	| Hash -> "#"
 	| Dollar -> "$"
 	| Ident -> "Identifier"
-	| Literal -> "float literal"
+	| FloatLiteral -> "float literal"
+	| StringLiteral -> "string literal"
 	| OParen -> "("
 	| CParen -> ")"
 	| OSquare -> "["
@@ -113,7 +114,7 @@ let float_literal lexer =
 		| c when is_num c -> aux (acc + 1) dotted (forward lexer)
 		| _ -> (acc, lexer)
 	in let (count, lexer) = aux 0 false lexer in
-	(String.sub (lexer.pos - count) count lexer.raw, lexer)
+	(String.sub lexer.raw (lexer.pos - count) count, lexer)
 
 let builder f lexer =
 	let rec aux acc lexer =
@@ -123,7 +124,7 @@ let builder f lexer =
 		else
 			(acc, lexer)
 	in let (count, lexer) = aux 0 lexer in 
-	(String.sub (lexer.pos - count) count, lexer)
+	(String.sub lexer.raw (lexer.pos - count) count, lexer)
 
 let string_literal lexer = builder (fun c -> c <> '"') lexer
 let ident lexer = builder (fun c -> is_alnum c || c = '_') lexer
