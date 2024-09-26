@@ -7,11 +7,13 @@ type expr =
   | Unary of token * expr
   | Grouping of expr
   | Ident of string
+  | IfExpr of expr * expr * expr
 
 type statement = 
   | Print of expr
-  | Assignment of expr * token * statement
   | Exprstmt of expr
+  | IfStmt of expr * statement * statement option
+  | Block of statement list
 
 type t = {
   raw: token list;
@@ -32,7 +34,17 @@ let forward parser =
 let consume typeof error parser =
 	if (peek parser).typeof = typeof then forward parser else raise (ParseError (error, peek parser))
 
-let rec expression parser = logical parser
+let rec expression parser = assignexpr
+
+and assignexpr parser = build_binary [Equal; ConEqual] assignexpr ifexpr parser
+
+and ifexpr parser =
+  let (expr1, parser) = logical parser in
+  if (peek parser).typeof = Question then
+  let (expr2, parser) = ifexpr parser in
+  let parser =consume Colon "::Expected an else branch (colon ':')" parser in 
+  let (expr3, parser) = ifexpr parser in
+  (IfExpr (expr1, expr2, expr3), parser)
 
 and logical parser = build_binary [Ampersands; Columns] logical equality parser
 
@@ -77,22 +89,44 @@ and build_binary ops f1 f2 parser =
 
 let print_stmt parser = let (expr, parser) = expression parser in (Print expr, parser)
 
-let rec expr_stmt parser = 
+let rec statement parser =
+  let tk = peek parser in
+    match tk.typeof with
+    | EOF -> raise (ParseError ("::Expected a statement", tk))
+    | At -> print_stmt (forward parser)
+    | Question -> if_stmt (forward parser)
+    | OCurly -> block (forward parser)
+    | _  -> expr_stmt parser
+
+and expr_stmt parser = 
   let (expr, parser) = expression parser in
-  let peeking = peek parser in
-  match peeking.typeof with
-  | Equal | ConEqual -> 
-  let (expr2, parser) = expr_stmt (forward parser) in
-  (Assignment (expr, peeking, expr2), parser)
-  | _ -> (Exprstmt expr, parser)
+  (Exprstmt expr, parser) 
+  
+and block parser =
+  let parser = consume OCurly "::Expected a block (open curly bracket '{')" parser in
+  let rec aux acc parser =
+    match (peek parser).typeof with
+    | CCurly -> (acc, forward parser)
+    | _ -> let (stmt, parser) = statement parser in aux (stmt::acc) parser
+  in let (acc, parser) = aux [] parser in
+  (Block (List.rev acc), parser) 
+
+and if_stmt parser = 
+  let (cond, parser) = expression parser in
+  let (whentrue, parser) = block parser in
+  if (peek parser).typeof = Colon then
+    let (whenfalse, parser) = statement parser in
+    (IfStmt (cond, whentrue, (Some whenfalse)), parser)
+  else 
+    (IfStmt (cond, whentrue, None), parser)
 
 let parse parser =
   let rec aux acc parser =
-    let tk = peek parser in
-    match tk.typeof with
-    | EOF -> acc
-    | At -> let (stmt, parser) = print_stmt (forward parser) in aux (stmt::acc) parser
-    | _  -> let (stmt, parser) = expr_stmt parser in aux (stmt::acc) parser
+    try
+      let (stmt, parser) = statement parser
+      in aux (stmt::acc) parser 
+    with
+    | ParseError (message, _) -> print_string message; acc
   in List.rev (aux [] parser)
 
 let rec print_expr expr =
@@ -117,4 +151,8 @@ let rec print_expr expr =
       print_string "(";
       print_expr expr;
       print_string ")"
+  | IfExpr (cond, whentrue, whenfalse) -> 
+    print_string "if "; print_expr cond;
+    print_string " then "; print_expr whentrue; print_string " else ";
+    print_expr whenfalse  
   | StringLit str | Ident str -> print_string str;

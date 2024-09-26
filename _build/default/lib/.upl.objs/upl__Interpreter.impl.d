@@ -1,1 +1,1 @@
-lib/interpreter.ml: Format Hashtbl Lexer List Parser String
+lib/interpreter.ml: Hashtbl Lexer List Parser String

@@ -5,9 +5,9 @@ type value =
 
 exception RuntimeError of string
 
-type environment = {values: (string, (value * bool)) Hashtbl.t;}
+type environment = {values: (string, (value * bool)) Hashtbl.t; parent: environment option;}
 
-let env_make () = {values=(Hashtbl.create 16)}
+let env_make () = {values=(Hashtbl.create 16); parent=None}
 
 let env_find ident env = Hashtbl.find_opt env.values ident
 
@@ -15,14 +15,21 @@ let env_add ident value env = Hashtbl.add env.values ident value
 
 let env_replace ident value env = Hashtbl.replace env.values ident value
 
-type t = {env: environment; raw: statement list; length: int; pos: int}
+type t = {env: environment; raw: statement list;}
 
-let make raw = {env=(env_make ()); raw; length=List.length raw; pos=0}
-let forward inp = {inp with raw=List.tl inp.raw; pos=inp.pos+1}
-let peek inp = List.hd inp.raw
+let make raw = {env=(env_make ()); raw}
+
+let enter_scope inp =
+	let new_env = {(env_make ()) with parent=(Some inp.env)}
+	in {inp with env=new_env}
+
+let exit_scope inp =
+	match inp.env.parent with
+	| None -> assert false;
+	| Some env -> {inp with env}
 
 let truth = function
-	| Float f -> f != 0.0
+	| Float f -> f <> 0.0
 	| String str -> String.length str > 0
 
 let bool_to_float b = if b then 1.0 else 0.0 
@@ -35,7 +42,9 @@ let rec evaluate expr inp =
 	| Unary (op, expr) -> evaluate_unary op expr inp 
 	| Grouping expr -> evaluate expr inp
 	| Ident name -> evaluate_ident name inp
+	| IfExpr (cond, whentrue, whenfalse) -> evaluate_ifexpr cond whentrue whenfalse inp
 
+(*TODO: add short circuiting*)
 and evaluate_binary expr1 expr2 op inp =
 	let (ev1, ev2) = (evaluate expr1 inp, evaluate expr2 inp) in
 	match (ev1, ev2) with
@@ -49,7 +58,8 @@ and evaluate_binary expr1 expr2 op inp =
 		| Modulo -> Float (mod_float fl1 fl2)
 		| Greater -> Float (bool_to_float (fl1 > fl2))
 		| Lesser -> Float (bool_to_float (fl1 < fl2))
-		| Equal -> Float (bool_to_float (fl1 = fl2))
+		| EqualEqual -> Float (bool_to_float (fl1 = fl2))
+		| ExcEqual -> Float (bool_to_float (fl1 <> fl2))
 		| GreatEqual -> Float (bool_to_float (fl1 >= fl2)) 
 		| LessEqual -> Float (bool_to_float (fl1 <= fl2))
 		| Ampersands -> Float (bool_to_float ((truth (Float fl1)) && (truth (Float fl2)))) 
@@ -91,17 +101,30 @@ and evaluate_unary op expr inp =
 	end
 
 and evaluate_ident name inp =
-	match env_find name inp.env with
-	| None -> raise (RuntimeError ("::Unbinded variable '"^name^"' was referenced"))
-	| Some (value, _) -> value
+	let rec aux env = 	 
+		match env_find name env with
+		| None -> 
+			begin
+				match env.parent with
+				| None -> raise (RuntimeError ("::Unbinded variable '"^name^"' was referenced")) 
+				| Some env -> aux env
+			end
+		| Some (value, _) -> value
+	in aux inp.env
 
-let print expr inp = 
+and evaluate_ifexpr cond whentrue whenfalse inp =
+	let ev = evaluate cond inp in
+	let trued = truth (ev) in
+	if trued then evaluate whentrue inp
+	else evaluate whenfalse inp	
+
+let print_stmt expr inp = 
 	let valof = evaluate expr inp in
 	match valof with
-	| Float fl -> Format.print_float fl
+	| Float fl -> print_float fl
 	| String str -> print_string str
 
-let assignment target stmt token inp =
+let assignment_stmt target stmt token inp =
 	let rec aux target stmt token inp =
 		let value = match stmt with
 			| Exprstmt expr -> evaluate expr inp
@@ -126,16 +149,38 @@ let assignment target stmt token inp =
 				else
 					env_replace name (value, mut) inp.env; value
 		end
-		| _ -> assert false; 
+		| _ -> raise (RuntimeError "::Cannot assign to an expression") 
 	in 
 	ignore (aux target stmt token inp)
 
-let rec run inp =
-	if inp.pos = inp.length then () else
-	let (stmt, inp) = (peek inp, forward inp) in
+let rec exec_stmt stmt inp =
 	match stmt with
-	| Print expr -> print expr inp
-	| Exprstmt expr -> ignore (evaluate expr inp)
-	| Assignment (target, token, stmt) -> assignment target stmt token inp
-	;
-	run inp
+	| Print expr -> print_stmt expr inp; inp
+	| Exprstmt expr -> ignore (evaluate expr inp); inp
+	| Assignment (target, token, stmt) -> assignment_stmt target stmt token inp; inp
+	| IfStmt (cond, whentrue, whenfalse) -> if_stmt cond whentrue whenfalse inp; inp
+	| Block stmts -> 
+		let inp = enter_scope inp in 
+		block_stmt stmts inp;
+		let inp = exit_scope inp in
+		{inp with raw=List.tl inp.raw}
+
+and block_stmt stmts inp =
+	match stmts with
+		| [] -> ()
+		| x::xs -> let inp = exec_stmt x inp in block_stmt xs inp
+
+and if_stmt cond whentrue whenfalse inp =
+	let trued = truth (evaluate cond inp) in
+	if trued then
+		match whentrue with
+		| Block block -> block_stmt block inp
+		| _ -> assert false;
+	else
+		match whenfalse with
+		| None -> ()
+		| Some Block block -> block_stmt block inp
+		| _ -> assert false
+
+let run inp =
+	ignore (block_stmt inp.raw inp)

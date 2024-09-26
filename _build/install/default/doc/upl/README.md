@@ -1,9 +1,3 @@
-## Traits
-- Minimal
-- Guaranteed tail optimizations.
-- Statically typed with type inference.
-- Highly influenced by mathematical notation.
-
 ## Structures
 - Literals 
 - Types
@@ -21,9 +15,9 @@
 - Support for capturing.
 - Must have at least one parameter.
 - Function calls: `f(x, y)`.
-- Function definition: `f(x, y) {x + y}`.
+- Function definition: `f := (x, y) {x + y}`.
 - Lambda definition: `(p1, p2) {p1 op p2}`
-- Function definition `f(x) {x+1}` is just a syntax sugar for `f = (x) {x+1}`
+- a functions is just a constant variable to lambda, there's absolutely no difference 
 - Recursive
 
 ### Types
@@ -39,7 +33,7 @@
 - **Indexing**: Denoted by `.`; **Ranging**: Denoted by `:`; **Selections**: Denoted by `,`.
 - **Getting Size**: `#arr`.
 - **Builders**:
-  - Syntax: `arr = [range; condition; generator]` or `arr = [0 < i < 10; i % 2 == 0; i]`.
+  - Syntax: `arr = [range; condition; expression]`, e.g `arr = [0 < i < 10; i % 2 == 0; i]`.
   - Identifier `i` is optional.
   - Conditional expressions can be omitted: `[5 < i < 10;; i]`.
   - Range expressions can be omitted if an identifier is used for indexing: `[;; arr.i + 10]` evaluates to `[0 < i < #arr; 1; arr.i + 10]`.
@@ -60,8 +54,9 @@
     - `[; arr.i > 1; arr.i]` — Keep elements greater than 1.
 
   - **Reduction**
-    - `acc = 0 [;; {acc = acc + arr.i}]` — Sum all elements of `arr`.
-    - `acc = 1 [;; {acc = acc * arr.i}]` — Multiply all elements of `arr`.
+    - `acc = 0 [;; acc = acc + arr.i]` — Sum all elements of `arr`.
+    - `acc = 1 [;; acc = acc * arr.i]` — Multiply all elements of `arr`.
+    - `acc = 0 [;; acc = acc op arr.i]` — Use a custom operator `op` to combine elements (optimized to avoid array creation).
 
   - **Indexing**:
     - `arr.x:y`
@@ -83,23 +78,24 @@
     - `arr.5:8` — Access elements from index 5 to 8 (exclusive).
   
   - **Selection**:
-    - `arr.x:y,z` — Select index `z` from range `x:y`, e.g., `arr.1:3, 0` Selects index `0` from each subarray in range `1:3`
+    - `arr.0, 2` — Select elements at index 0 and 2.
+    - `arr.x:y,z` — Select a range and specific elements, e.g., `arr.1:3, 0` selects elements from index 1 to 3 and the element at index 0.
     - `arr.:,2` — Select all elements and include index 2.
     - `arr.x:3,y` — Select elements from index x to index 3 and include index y.
 
 ### Variables
-- Strongly and Statically-typed.
-- Implicitly declared: `a = [i<3;;i]` initializes `a` constant and sets it's value to [0, 1, 2]
-- There are two init operators, `:=` defines a mutable variable, while `=` defines a constant
-- Initializations can be chained: this is valid initialization `x = y = z = 10`
+- Strongly and Dynamically-typed.
+- Implicitly declared: `a := [i<3;;i]` assigns `a` to value `[0, 1, 2]`
+- There are two assignment operators, `=` defines a mutable variable, while `:=` defines a constant
+- assignments can be chained: this is a valid assignment `x = y := z = 10`
 
-### Operators
+### Operators and Symbols
+- Input: `$`
 - Printing: `@`.
 - Size-of: `#`.
 - If: `?`
 - Else: `:` 
 - Parenthesis: `()`
-- Assignment: `=`.
 - Equals: `==`.
 - Not-equals: `!=`.
 - Greater-than: `>`.
@@ -113,9 +109,12 @@
 - Modulo: `%`.
 - Square Brackets: `[]`
 - Curly Brackets: `{}`.
-- Logical and: `&`.
-- Logical or: `|`.
+- Logical and: `&&`.
+- Logical or: `||`.
 - Logical not: `!`.
+- Init-const: `:=`.
+- Init-mutable: `=`.
+- Loop: `>>`
 
 - Plus operator concatenates two arrays.
 - `arr op float` is the same as `[;; arr.i op float]`.

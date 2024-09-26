@@ -5,11 +5,13 @@ type expr =
   | Unary of Lexer.token * expr
   | Grouping of expr
   | Ident of string
+  | IfExpr of expr * expr * expr
 
 type statement = 
   | Print of expr
-  | Assignment of expr * Lexer.token * statement
   | Exprstmt of expr
+  | IfStmt of expr * statement * statement option
+  | Block of statement list
 
 type t = {
   raw: Lexer.token list;

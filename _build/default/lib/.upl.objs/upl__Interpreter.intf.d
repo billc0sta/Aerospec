@@ -1,1 +1,1 @@
-lib/interpreter.mli: Parser
+lib/interpreter.mli: Lexer Parser

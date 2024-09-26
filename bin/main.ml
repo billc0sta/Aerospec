@@ -8,25 +8,45 @@ let rec print_lexed l =
 let rec print_parsed l = 
 	let rec aux stmt =
 		match stmt with
-		| Parser.Print expr -> print_string "print"; Parser.print_expr expr
+		| Parser.Print expr -> print_string "print"; Parser.print_expr expr; print_string "\n"
 		| Parser.Assignment (expr, token, stmt) -> Parser.print_expr expr; print_string (Lexer.nameof token.typeof); aux stmt
 		| Parser.Exprstmt expr -> Parser.print_expr expr
+		| Parser.IfStmt (expr, whentrue, whenfalse) -> 
+			print_string "if "; 
+			Parser.print_expr expr; 
+			print_string " do \n"; 
+			aux whentrue;
+			begin
+			match whenfalse with
+			| None -> ()
+			| Some block -> print_string "else do \n"; aux block
+			end
+		| Parser.Block block -> print_parsed block;
 		; print_string "\n"
 	in
 	match l with
 	| [] -> ()
 	| x::xs -> aux x; print_parsed xs
 
-let lexer = Lexer.make 
+let program = 
 "
-a := x := y := 10
-@a + x + y
-@y
+(1 + 1 == 2) ? 1 : {arr = 0}
+
+a = x := 2
+@1
+1 + 21
 "
-let lexed = Lexer.lex lexer
+
 let _ = print_lexed
+let lexer = Lexer.make program
+let lexed = Lexer.lex lexer
 let parser = Parser.make lexed
 let parsed = Parser.parse parser
 let () = print_parsed parsed
+let () = print_int (List.length parsed)
+(*
+let analyzer = Analyzer.make parsed
+let () = Analyzer.analyze analyzer
 let interpreter = Interpreter.make parsed
 let () = Interpreter.run interpreter
+*)

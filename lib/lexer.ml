@@ -124,7 +124,7 @@ let builder f lexer =
 		else
 			(acc, lexer)
 	in let (count, lexer) = aux 0 lexer in 
-	(String.sub lexer.raw (lexer.pos - count) count, lexer)
+	(String.sub lexer.raw (lexer.pos - count) count, {lexer with pos=lexer.pos+1})
 
 let string_literal lexer = builder (fun c -> c <> '"') lexer
 let ident lexer = builder (fun c -> is_alnum c || c = '_') lexer
