@@ -15,7 +15,6 @@ type tokentype =
 | EqualEqual
 | ExcEqual
 | Exclamation
-| TwoExc
 | Arrow
 | Right
 | Left
@@ -39,6 +38,9 @@ type tokentype =
 | Dot
 | Comma
 | TwoSlash
+| TwoStar
+| TwoQuestion
+| TwoColon
 
 type token = {value: string; line: int; pos: int; typeof: tokentype}
 type t = {raw: string; pos: int; line: int;}
@@ -47,4 +49,4 @@ val make: string -> t
 val lex: t -> token list
 val nameof: tokentype -> string
 
-exception LexError of string
+exception LexError of string * token

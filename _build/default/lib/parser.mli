@@ -4,15 +4,17 @@ type expr =
   | Binary of expr * Lexer.token * expr
   | Unary of Lexer.token * expr
   | Grouping of expr
-  | Ident of string
+  | IdentExpr of Lexer.token
   | IfExpr of expr * expr * expr
 
 type statement = 
   | Print of expr
-  | Assignment of expr * Lexer.token * statement
   | Exprstmt of expr
   | IfStmt of expr * statement * statement option
+  | LoopStmt of expr * statement
   | Block of statement list
+  | Break
+  | Continue
 
 type t = {
   raw: Lexer.token list;

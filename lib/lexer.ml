@@ -15,7 +15,6 @@ type tokentype =
 | EqualEqual
 | ExcEqual
 | Exclamation
-| TwoExc
 | Arrow
 | Right
 | Left
@@ -39,11 +38,15 @@ type tokentype =
 | Dot
 | Comma
 | TwoSlash
+| TwoStar
+| TwoQuestion
+| TwoColon
 
-exception LexError of string
 
 type token = {value: string; line: int; pos: int; typeof: tokentype}
 type t = {raw: string; pos: int; line: int;}
+
+exception LexError of string * token
 
 let nameof = function 
 	| EOF -> "EOF"
@@ -67,7 +70,6 @@ let nameof = function
 	| Semicolon -> ";"
 	| Ampersands -> "&&"
 	| Columns -> "||"
-	| TwoExc -> "!!"
 	| Arrow -> "->"
 	| Right -> ">>"
 	| Left -> "<<"
@@ -86,6 +88,9 @@ let nameof = function
 	| Dot -> "."
 	| Comma -> ","
 	| TwoSlash -> "comment"
+	| TwoStar -> "break"
+	| TwoQuestion -> "??"
+	| TwoColon -> "::"
 	
 let make raw = {raw; pos=0; line=1}
 
@@ -116,25 +121,43 @@ let float_literal lexer =
 	in let (count, lexer) = aux 0 false lexer in
 	(String.sub lexer.raw (lexer.pos - count) count, lexer)
 
-let builder f lexer =
-	let rec aux acc lexer =
-		let c = peek lexer in
-		if f c then
-			aux (acc + 1) (forward lexer)
-		else
-			(acc, lexer)
-	in let (count, lexer) = aux 0 lexer in 
+let string_literal lexer =
+	let rec aux acc escaped lexer =
+		match peek lexer with
+		| '"' -> if escaped then aux (acc+1) false (forward lexer) else (acc, lexer) 
+		| '\\' -> aux (acc+1) true (forward lexer) 
+		| ' ' -> aux (acc+1) false (forward lexer)
+		| c -> let escaped = (escaped && is_num c) in aux (acc+1) escaped (forward lexer)
+
+	in let (count, lexer) = aux 0 false lexer in	
 	(String.sub lexer.raw (lexer.pos - count) count, {lexer with pos=lexer.pos+1})
 
-let string_literal lexer = builder (fun c -> c <> '"') lexer
-let ident lexer = builder (fun c -> is_alnum c || c = '_') lexer
-let comment lexer = builder (fun c -> c <> '\n') lexer
+let ident lexer =
+	let rec aux acc lexer =
+		let c = peek lexer in
+		if is_alnum c || c = '_' then
+			aux (acc+1) (forward lexer)
+		else
+			(acc, lexer)
+
+	in let (count, lexer) = aux 0 lexer in
+	(String.sub lexer.raw (lexer.pos - count) count, lexer)
+
+let comment lexer =
+	let rec aux acc lexer =
+		let c = peek lexer in
+		if c <> '\n' then
+			aux (acc+1) (forward lexer)
+		else
+			(acc, lexer)
+
+	in let (count, lexer) = aux 0 lexer in
+	(String.sub lexer.raw (lexer.pos - count) count, lexer)
 
 let next_token lexer =
 	let lexer = skip_space lexer in
 	let (typeof, lexer) = match peek lexer with
 	| '+' -> (Plus, forward lexer)
-	| '*' -> (Star, forward lexer)
 	| '%' -> (Modulo, forward lexer)
 	| ';' -> (Semicolon, forward lexer)
 	| ',' -> (Comma, forward lexer)
@@ -148,17 +171,18 @@ let next_token lexer =
 	| '{' -> (OCurly, forward lexer)
 	| '}' -> (CCurly, forward lexer)
 	| '$' -> (Dollar, forward lexer)
-	| '?' -> (Question, forward lexer)
 	| '"' -> (StringLiteral, forward lexer)
+	| '?' -> begin let lexer = forward lexer in match peek lexer with '?' -> (TwoQuestion, forward lexer) | _ -> (Question, lexer) end
+	| '*' -> begin let lexer = forward lexer in match peek lexer with '*' -> (TwoStar, forward lexer) | _ -> (Star, lexer) end
 	| '&' -> begin let lexer = forward lexer in match peek lexer with '&' -> (Ampersands, forward lexer) | _ -> (Unknown, lexer) end
 	| '|' -> begin let lexer = forward lexer in match peek lexer with '|' -> (Columns, forward lexer) | _ -> (Unknown, lexer) end
 	| '=' -> begin let lexer = forward lexer in match peek lexer with '=' -> (EqualEqual, forward lexer) | _ -> (Equal, lexer) end
 	| '/' -> begin let lexer = forward lexer in match peek lexer with '/' -> (TwoSlash, forward lexer) | _ -> (Slash, lexer) end
 	| '-' -> begin let lexer = forward lexer in match peek lexer with '>' -> (Arrow, forward lexer) | _ -> (Minus, lexer) end
 	| '>' -> begin let lexer = forward lexer in match peek lexer with '>' -> (Right, forward lexer) | '=' -> (GreatEqual, forward lexer) | _ -> (Greater, lexer) end
-	| '<' -> begin let lexer = forward lexer in match peek lexer with '<' -> (Lesser, forward lexer) | '=' -> (GreatEqual, forward lexer) | _ -> (Left, lexer) end
-	| ':' -> begin let lexer = forward lexer in match peek lexer with '=' -> (ConEqual, forward lexer) | _ -> (Colon, lexer) end
-	| '!' -> begin let lexer = forward lexer in match peek lexer with '=' -> (ExcEqual, forward lexer) | '!' -> (TwoExc, forward lexer) | _ -> (Exclamation, lexer) end
+	| '<' -> begin let lexer = forward lexer in match peek lexer with '<' -> (Left, forward lexer) | '=' -> (GreatEqual, forward lexer) | _ -> (Lesser, lexer) end
+	| ':' -> begin let lexer = forward lexer in match peek lexer with '=' -> (ConEqual, forward lexer) | ':' -> (TwoQuestion, forward lexer) | _ -> (Colon, lexer) end
+	| '!' -> begin let lexer = forward lexer in match peek lexer with '=' -> (ExcEqual, forward lexer) | _ -> (Exclamation, lexer) end
 	| c when c = (Char.chr 0) -> (EOF, lexer)
 	| c when is_num c -> (FloatLiteral, lexer)
 	| c when is_alpha c || c = '_' -> (Ident, lexer)
@@ -172,11 +196,12 @@ let next_token lexer =
 	| _        -> (nameof typeof, lexer)
 	in
 	({pos=lexer.pos;line=lexer.line;value;typeof}, lexer)
+
 let lex lexer =
 	let rec aux acc lexer =
 		let (tk, lexer) = next_token lexer in
 		match tk.typeof with
 		| EOF -> tk::acc
-		| Unknown -> raise (LexError ("::Unrecognized token '"^tk.value^"' at line: "^(string_of_int tk.line)^"\n"))
+		| Unknown -> raise (LexError ("::Unrecognized token '"^tk.value^"'", tk))
 		| _ -> aux (tk::acc) lexer
 	in List.rev (aux [] lexer)
