@@ -1,7 +1,7 @@
 *
 !.gitignore
-!bin/main
-!examples
-!lib
-!spec
-!README.md
+!./bin
+!./examples
+!./lib
+!./spec
+!./README.md
