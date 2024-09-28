@@ -1,5 +1,0 @@
-(executable
- (public_name upl)
- (name main)
- (modes byte)
- (libraries upl))
