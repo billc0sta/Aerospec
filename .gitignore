@@ -1,7 +1,7 @@
-*
-!.gitignore
-!./bin
-!./examples
-!./lib
-!./spec
-!./README.md
+dune-project
+upl.opam
+test
+_build
+.git
+./lib/dune
+./bin/dune
