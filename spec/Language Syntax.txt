@@ -2,7 +2,7 @@
 
 program          = (statement | comment)*
 statement        = ifstmt | loop | print | input | block | return | break | continue | exprstmt
-ifstmt           = '?' expression statement (':' statement)?
+ifstmt           = '??' expression statement ('::' statement)?
 expression       = assignexpr
 assignexpr       = ifexpr (('=' | ":=") assignexpr)?
 ifexpr           = logic ('?' ifexpr ':' ifexpr)?
@@ -11,8 +11,12 @@ equality         = relation (("==" | "!=") equality)?
 relation         = basic ((">" | "<" | ">=" | "<=") relation)?
 basic            = factor (("+" | "-") basic)?
 factor           = unary (("*" | "/" | "%") factor)?
-unary            = ("!" | "+" | "-" | "#") unary | primary
-primary          = ident | float | array | string | grouping | lambda | builder | funcall | prototype
+unary            = ("!" | "+" | "-" | "#") unary | postary
+postary          = postary ((arguments) | (indexing)) | primary
+arguments        = '(' (expression (',' expression)*)? ')'
+indexing         = '[' (expression | (arr-range)) (',' (expression | arr-range))? ']'
+arr-range        = (expression)? ':' (expression)?
+primary          = ident | float | string | array | prototype | grouping | lambda | builder
 ident            = (alphabet | '_') (alphabet | '_' | digit)*
 alphabet         = ('a'->'z' | 'A->Z')
 digit            = '0'->'9'
@@ -26,16 +30,13 @@ writable         = ' ' -> '~'
 grouping         = '(' expression ')'
 lambda           = "(" ident ("," ident)* ")" block
 builder          = '[' (range)? ';' (expression)? ';' expression ']'
-arr-indexing     = expression '.' (expression | (arr-range)) (',' (expression | arr-range))?
-arr-range        = (expression)? ':' (expression)?
-funcall          = ident '(' (expression (',' expression)*)? ')'
-prototype        = '{' (ident ('=' ':=') expression)* '}'
+prototype        = '{' (ident ('=' | ':=') expression)* '}'
 loop             = ">>" expression statement
 block            = '{' (statement)* '}'
 print            = '@' expression
 input            = '$'
-exprstmt         = expression | assignment
+exprstmt         = expression
 return           = "->" (expression)?
-break            = "~~"
+break            = "**"
 continue         = "<<"
 comment          = "//" writable*
