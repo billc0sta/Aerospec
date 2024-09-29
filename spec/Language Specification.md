@@ -93,8 +93,6 @@ Booleans are the result of any equality or comparison operation. All types can e
 Since the language contains no keywords, the idiomatic way to obtain boolean values is `1 == 1`, `1 == 0`.  
 To obtain the truthiness of a value, use `!!value`.  
 
----
-
 ### Evaluation rules:
 
 1. All equality and comparison operators result in a boolean.
