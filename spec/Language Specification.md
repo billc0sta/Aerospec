@@ -59,7 +59,7 @@ The operator `:=` defines a constant field that cannot be changed by the object 
 
 ## Arrays
 
-Arrays are n-dimensional, indexable, homogeneous, and resizable.  
+Arrays are n-dimensional, homogeneous, and resizable.  
 Arrays are central to the language, with much built-in syntax specifically for their usage.  
 They support complex ranging and selection, as well as a constructor called a builder (a slightly more powerful list comprehension).  
 Array expression syntax: `[1, 2, 3, 4, 5]`. A specific operator for obtaining the size of an array is `#` (pronounced as "size of"): `#arr` is the size of array `arr`.  
@@ -72,8 +72,6 @@ Selections only work on multi-dimensional arrays, where it selects a specific in
 Example: `arr[1:10, 0:5]` selects elements from range `1` through `9` and from subarrays from range `0` through `4`.  
 This also works for indexing one element:  
 Example: `arr[0, 1, 2]` selects index `1` from index `0`, and then index `2` from `[0][1]`.
-
----
 
 ### More examples on indexing, ranging, and selection:
 
@@ -123,4 +121,3 @@ Here’s how you can perform the three transformation bundles: mapping, filterin
 - Filtering: `[; f(arr[i]); arr[i]]`
 - Reduction: `acc = 0 [;; acc = f(arr[i], acc)]`  
   Assignments are expressions, so they can be used here. This is optimized to avoid array creation.
-  This avoids unnecessary array creation for efficiency.

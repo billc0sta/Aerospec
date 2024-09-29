@@ -87,8 +87,8 @@ let nameof = function
 	| Question -> "?"
 	| Dot -> "."
 	| Comma -> ","
-	| TwoSlash -> "comment"
-	| TwoStar -> "break"
+	| TwoSlash -> "//"
+	| TwoStar -> "**"
 	| TwoQuestion -> "??"
 	| TwoColon -> "::"
 	
@@ -122,38 +122,47 @@ let float_literal lexer =
 	(String.sub lexer.raw (lexer.pos - count) count, lexer)
 
 let string_literal lexer =
-	let rec aux acc escaped lexer =
+	let rec count acc escaped lexer =
 		match peek lexer with
 		| '"' -> if escaped then aux (acc+1) false (forward lexer) else (acc, lexer) 
-		| '\\' -> aux (acc+1) true (forward lexer) 
-		| ' ' -> aux (acc+1) false (forward lexer)
-		| c -> let escaped = (escaped && is_num c) in aux (acc+1) escaped (forward lexer)
+		| '\\' -> aux (acc+1) (not escaped) (forward lexer) 
+		| c when c = (Char.chr 0) -> 
+			raise (LexError("::Non-terminated string", {value=""; typeof=StringLiteral; pos=lexer.pos; line=lexer.line}))
+		| _ -> aux (acc+1) false (forward lexer)
 
-	in let (count, lexer) = aux 0 false lexer in	
-	(String.sub lexer.raw (lexer.pos - count) count, {lexer with pos=lexer.pos+1})
+	in let (length, lexer) = count 0 false lexer in
+	let bytes = Bytes.create length in
+	let rec blit wp rp escaped =
+		if rp >= length then wp else
+		let c = lexer.raw.[rp+(lexer.pos-length)] in 
+		match c with
+		| '\\' -> if escaped then set bytes wp c; blit (wp+1) (rp+1) false else blit wp (rp+1) true
+		| 'b' -> let c = if escaped then (Char.chr 10) else 'b' in set bytes wp c; blit (wp+1) (rp+1) false
+		| 't' -> let c = if escaped then (Char.chr 11) else 't' in set bytes wp c; blit (wp+1) (rp+1) false
+		| 'n' -> let c = if escaped then (Char.chr 12) else 'n' in set bytes wp c; blit (wp+1) (rp+1) false
+		| 'v' -> let c = if escaped then (Char.chr 13) else 'v' in set bytes wp c; blit (wp+1) (rp+1) false
+		| 'f' -> let c = if escaped then (Char.chr 14) else 'f' in set bytes wp c; blit (wp+1) (rp+1) false 
+		| 'r' -> let c = if escaped then (Char.chr 15) else 'r' in set bytes wp c; blit (wp+1) (rp+1) false
+		| _ -> set bytes wp c; blit (wp+1) (rp+1) false
+	in 
+	let written = blit 0 0 false in
+	let str = Bytes.sub_string bytes (lexer.pos - length) written
+	in (str, lexer)
 
-let ident lexer =
+let builder f lexer = 
 	let rec aux acc lexer =
 		let c = peek lexer in
-		if is_alnum c || c = '_' then
+		if f c then
 			aux (acc+1) (forward lexer)
 		else
-			(acc, lexer)
-
+			(acc, lexer) 
 	in let (count, lexer) = aux 0 lexer in
 	(String.sub lexer.raw (lexer.pos - count) count, lexer)
 
-let comment lexer =
-	let rec aux acc lexer =
-		let c = peek lexer in
-		if c <> '\n' then
-			aux (acc+1) (forward lexer)
-		else
-			(acc, lexer)
+let ident = builder (fun c -> is_alnum c || c = '_')
 
-	in let (count, lexer) = aux 0 lexer in
-	(String.sub lexer.raw (lexer.pos - count) count, lexer)
-
+let comment = builder (fun c -> c <> '\n')
+	
 let next_token lexer =
 	let lexer = skip_space lexer in
 	let (typeof, lexer) = match peek lexer with
@@ -203,5 +212,6 @@ let lex lexer =
 		match tk.typeof with
 		| EOF -> tk::acc
 		| Unknown -> raise (LexError ("::Unrecognized token '"^tk.value^"'", tk))
+		| TwoSlash -> aux acc lexer
 		| _ -> aux (tk::acc) lexer
 	in List.rev (aux [] lexer)

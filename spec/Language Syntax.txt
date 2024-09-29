@@ -4,13 +4,13 @@ program          = (statement | comment)*
 statement        = ifstmt | loop | print | input | block | return | break | continue | exprstmt
 ifstmt           = '??' expression statement ('::' statement)?
 expression       = assignexpr
-assignexpr       = ifexpr (('=' | ":=") assignexpr)?
+assignexpr       = ifexpr (('=' | ":=") ifexpr)*
 ifexpr           = logic ('?' ifexpr ':' ifexpr)?
-logic            = equality (("||" | "&&") logic)?
-equality         = relation (("==" | "!=") equality)?
-relation         = basic ((">" | "<" | ">=" | "<=") relation)?
-basic            = factor (("+" | "-") basic)?
-factor           = unary (("*" | "/" | "%") factor)?
+logic            = equality (("||" | "&&") equality)*
+equality         = relation (("==" | "!=") relation)*
+relation         = basic ((">" | "<" | ">=" | "<=") basic)*
+basic            = factor (("+" | "-") factor)*
+factor           = unary (("*" | "/" | "%") unary)*
 unary            = ("!" | "+" | "-" | "#") unary | postary
 postary          = postary ((arguments) | (indexing)) | primary
 arguments        = '(' (expression (',' expression)*)? ')'

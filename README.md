@@ -123,4 +123,3 @@ Here’s how you can perform the three transformation bundles: mapping, filterin
 - Filtering: `[; f(arr[i]); arr[i]]`
 - Reduction: `acc = 0 [;; acc = f(arr[i], acc)]`  
   Assignments are expressions, so they can be used here. This is optimized to avoid array creation.
-  This avoids unnecessary array creation for efficiency.

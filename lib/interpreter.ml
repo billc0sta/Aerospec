@@ -6,39 +6,43 @@ type value =
 
 exception RuntimeError of string * Lexer.token
 
-type environment = {values: (string, (value * bool)) Hashtbl.t; parent: environment option;}
+module Environment = struct
+	type t = {values: (string, (value * bool)) Hashtbl.t; parent: environment option;}
+	let make () = {values=(Hashtbl.create 16); parent=None}
+	let find ident env = Hashtbl.find_opt env.values ident
+	let add ident value env = Hashtbl.add env.values ident value
+	let replace ident value env = Hashtbl.replace env.values ident value
+	
+	let child_of env =
+		{(make ()) with parent=(Some env)}
 
-let env_make () = {values=(Hashtbl.create 16); parent=None}
-
-let env_find ident env = Hashtbl.find_opt env.values ident
-
-let env_add ident value env = Hashtbl.add env.values ident value
-
-let env_replace ident value env = Hashtbl.replace env.values ident value
+	let parent_of env =
+		match env.parent with
+		| None -> raise (Invalid_argument "Environment.parent_of")
+		| Some env -> env
+end 
 
 type t = {env: environment; raw: statement list;}
 
-let make raw = {env=(env_make ()); raw}
-
-let enter_scope inp =
-	let new_env = {(env_make ()) with parent=(Some inp.env)}
-	in {inp with env=new_env}
-
-let exit_scope inp =
-	match inp.env.parent with
-	| None -> assert false;
-	| Some env -> {inp with env}
+let make raw = {env=(Environment.make ()); raw}
 
 let truth = function
 	| Float f -> f <> 0.0
 	| String str -> String.length str > 0
 	| Bool b -> b 
 
-let nameof value =
-	match value with
+let nameof = function
 	| String _ -> "string"
 	| Float  _ -> "float"
 	| Bool _ -> "bool"
+
+let stringify_value = function
+	| String str -> str
+	| Float fl -> let str = string_of_float fl in
+								if String.ends_with ~suffix:"." 
+								then String.sub str (String.length str - 1)
+								else str 
+	| Bool b -> if b then "true" else "false"
 
 let rec evaluate expr inp =
 	match expr with
@@ -106,7 +110,7 @@ and evaluate_unary op expr inp =
 
 and evaluate_ident tk inp =
 	let rec aux env = 	 
-		match env_find tk.value env with
+		match Environment.find tk.value env with
 		| None -> 
 			begin
 				match env.parent with
@@ -131,19 +135,15 @@ and assignment target expr token inp =
 	let name = match target with | IdentExpr tk -> tk.value | _ -> assert false; in
 	let value = evaluate expr inp in
 	
-	match (env_find name inp.env) with
-	| None -> env_add name (value, mut) inp.env; value
+	match (Environment.find name inp.env) with
+	| None -> Environment.add name (value, mut) inp.env; value
 	| Some (_, mut) -> 
 		if not mut then raise (RuntimeError ("::Cannot re-assign to a constant", token))
-		else env_replace name (value, mut) inp.env; value
+		else Environment.replace name (value, mut) inp.env; value
 
 let print_stmt expr inp = 
 	let valof = evaluate expr inp in
-	let () = match valof with
-	| Float fl -> print_float fl
-	| String str -> print_string str
-	| Bool b -> print_string (if b then "true" else "false") in
-	inp
+	print_string (stringify_value valof); inp
 
 let rec exec_stmt stmt inp =
 	match stmt with
@@ -188,6 +188,4 @@ and loop_stmt cond stmt inp =
 		else inp
 	in aux inp
 
-let run inp = ignore (block_stmt inp.raw inp)
-
-let _ = (enter_scope, exit_scope)
+let run inp = ignore (exec_stmt (Block inp.raw) inp)

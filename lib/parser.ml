@@ -15,8 +15,8 @@ type statement =
   | IfStmt of expr * statement * statement option
   | LoopStmt of expr * statement
   | Block of statement list
-  | Break
-  | Continue
+  | Break of token
+  | Continue of token
 
 type t = {
   raw: token list;
@@ -37,7 +37,8 @@ let forward parser =
 let consume typeof error parser =
 	if (peek parser).typeof = typeof then forward parser else raise (ParseError (error, peek parser))
 
-let rec print_expr expr =
+(*test*)
+let rec _print_expr expr =
   match expr with
   | FloatLit fl ->
       let str = string_of_float fl in
@@ -112,16 +113,20 @@ and grouping parser =
   let parser = consume CParen "::Expected a Closing Parenthesis ')'" parser in
   (Grouping expr, parser)
 
-and build_binary ops f1 f2 parser =
-  let (expr1, parser) = f2 parser in
-  let op = peek parser in
-  if List.mem op.typeof ops then
-    let (expr2, parser) = f1 (forward parser) in
-    (Binary (expr1, op, expr2), parser)
-  else
-    (expr1, parser)
+and build_binary ops f parser =
+  let rec aux expr parser =
+    let op = peek parser in
+    if List.mem op.typeof op then
+      let (expr2, parser) = f (forward parser) in
+      let expr = (Binary (expr, op, expr2)) in
+      aux expr parser
+    else
+      (expr, parser)
+  in let (expr, parser) = f parser 
+  in aux expr parser
 
-let print_stmt parser = let (expr, parser) = expression parser in (Print expr, parser)
+let print_stmt parser = 
+  let (expr, parser) = expression parser in (Print expr, parser)
 
 let rec statement parser =
   let tk = peek parser in
@@ -131,8 +136,8 @@ let rec statement parser =
     | Right -> loop_stmt (forward parser)
     | OCurly -> block_stmt parser
     | TwoQuestion -> if_stmt (forward parser)
-    | TwoStar -> (Break, forward parser)
-    | Left -> (Continue, forward parser)
+    | TwoStar -> (Break tk, forward parser)
+    | Left -> (Continue tk, forward parser)
     | _  -> expr_stmt parser
 
 and loop_stmt parser =
