@@ -49,47 +49,62 @@ let rec _print_expr expr =
           str)
   | Binary (expr1, op, expr2) ->
       print_string "(";
-      print_expr expr1;
+      _print_expr expr1;
       print_string (op.value);
-      print_expr expr2;
+      _print_expr expr2;
       print_string ")"
   | Unary (op, expr) ->
       print_string (op.value);
-      print_expr expr
+      _print_expr expr
   | Grouping expr ->
       print_string "(";
-      print_expr expr;
+      _print_expr expr;
       print_string ")"
   | IfExpr (cond, whentrue, whenfalse) -> 
-    print_string "if "; print_expr cond;
-    print_string " then "; print_expr whentrue; print_string " else ";
-    print_expr whenfalse  
+    print_string "if "; _print_expr cond;
+    print_string " then "; _print_expr whentrue; print_string " else ";
+    _print_expr whenfalse  
   | StringLit str -> print_string str;
   | IdentExpr tk -> print_string tk.value
 
 let rec expression parser = assignexpr parser
 
-and assignexpr parser = build_binary [Equal; ConEqual] assignexpr ifexpr parser
+and assignexpr parser = 
+  let (expr, parser) = ifexpr parser in
+  let rec aux expr parser = 
+    let tk = peek parser in
+    match tk.typeof with
+    | Equal | ConEqual -> 
+    begin
+      let parser = forward parser in
+      match expr with
+      | IdentExpr _ -> let (expr2, parser) = ifexpr parser in aux (Binary (expr, tk, expr2)) parser
+      | _ -> raise (ParseError ("Cannot assign to an expression", tk))
+    end
+    | _ -> (expr, parser)
+  in aux expr parser
 
 and ifexpr parser =
-  let (expr1, parser) = logical parser in
+  let (expr1, parser) = logical_or parser in
   if (peek parser).typeof = Question then begin
     let (expr2, parser) = ifexpr (forward parser) in
-    let parser = consume Colon "::Expected an else branch (colon ':')" parser in 
+    let parser = consume Colon "Expected an else branch (colon ':')" parser in 
     let (expr3, parser) = ifexpr parser in
     (IfExpr (expr1, expr2, expr3), parser)
   end else 
     (expr1, parser) 
 
-and logical parser = build_binary [Ampersands; Columns] logical equality parser
+and logical_or parser = build_binary [Columns] logical_and parser
 
-and equality parser = build_binary [EqualEqual; ExcEqual] equality relational parser
+and logical_and parser = build_binary [Ampersands] equality parser
 
-and relational parser = build_binary [Greater; GreatEqual; Lesser; LessEqual] relational basic parser
+and equality parser = build_binary [EqualEqual; ExcEqual] relational parser
 
-and basic parser = build_binary [Plus; Minus] basic factor parser
+and relational parser = build_binary [Greater; GreatEqual; Lesser; LessEqual] basic parser
 
-and factor parser = build_binary [Slash; Star; Modulo] factor unary parser
+and basic parser = build_binary [Plus; Minus] factor parser
+
+and factor parser = build_binary [Slash; Star; Modulo] unary parser
 
 and unary parser =
   let tk = peek parser in
@@ -106,23 +121,23 @@ and primary parser =
   | StringLiteral -> (StringLit tk.value, forward parser)
   | Ident -> (IdentExpr tk, forward parser)
   | OParen -> grouping (forward parser)
-  | _ -> raise (ParseError ("::Expected an expression", tk))
+  | _ -> raise (ParseError ("Expected an expression", tk))
 
 and grouping parser =
   let (expr, parser) = expression parser in
-  let parser = consume CParen "::Expected a Closing Parenthesis ')'" parser in
+  let parser = consume CParen "Expected a Closing Parenthesis ')'" parser in
   (Grouping expr, parser)
 
 and build_binary ops f parser =
+  let (expr, parser) = f parser in 
   let rec aux expr parser =
     let op = peek parser in
-    if List.mem op.typeof op then
+    if List.mem op.typeof ops then
       let (expr2, parser) = f (forward parser) in
       let expr = (Binary (expr, op, expr2)) in
       aux expr parser
     else
       (expr, parser)
-  in let (expr, parser) = f parser 
   in aux expr parser
 
 let print_stmt parser = 
@@ -131,7 +146,7 @@ let print_stmt parser =
 let rec statement parser =
   let tk = peek parser in
     match tk.typeof with
-    | EOF -> raise (ParseError ("::Expected a statement", tk))
+    | EOF -> raise (ParseError ("Expected a statement", tk))
     | At -> print_stmt (forward parser)
     | Right -> loop_stmt (forward parser)
     | OCurly -> block_stmt parser
@@ -150,12 +165,12 @@ and expr_stmt parser =
   (Exprstmt expr, parser) 
   
 and block_stmt parser =
-  let parser = consume OCurly "::Expected a block (opening curly bracket '{')" parser in
+  let parser = consume OCurly "Expected a block (opening curly bracket '{')" parser in
   let rec aux acc parser =
     let tk = (peek parser) in 
     match tk.typeof with
     | CCurly -> (acc, forward parser)
-    | EOF -> raise (ParseError ("::Expected a block limit (closing curly bracket '}')", tk)) 
+    | EOF -> raise (ParseError ("Expected a block limit (closing curly bracket '}')", tk)) 
     | _ -> let (stmt, parser) = statement parser in aux (stmt::acc) parser
   in let (acc, parser) = aux [] parser in
   (Block (List.rev acc), parser)

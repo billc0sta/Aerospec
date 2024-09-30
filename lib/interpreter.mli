@@ -11,4 +11,4 @@ val make: Parser.statement list -> t
 val run: t -> unit
 val truth: value -> bool
 val evaluate: Parser.expr -> t -> value
-val stringify_value: Parser.expr -> string 
+val stringify_value: value -> string 

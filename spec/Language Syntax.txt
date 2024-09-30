@@ -4,9 +4,10 @@ program          = (statement | comment)*
 statement        = ifstmt | loop | print | input | block | return | break | continue | exprstmt
 ifstmt           = '??' expression statement ('::' statement)?
 expression       = assignexpr
-assignexpr       = ifexpr (('=' | ":=") ifexpr)*
+assignexpr       = ident (('=' | ":=") ifexpr)* | ifexpr 
 ifexpr           = logic ('?' ifexpr ':' ifexpr)?
-logic            = equality (("||" | "&&") equality)*
+logic_or         = equality ( "||" equality)*
+logic_and        = equality ( "&&" equality)*
 equality         = relation (("==" | "!=") relation)*
 relation         = basic ((">" | "<" | ">=" | "<=") basic)*
 basic            = factor (("+" | "-") factor)*

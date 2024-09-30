@@ -8,11 +8,11 @@ let rec print_lexed l =
 let rec print_parsed l = 
 	let rec aux stmt =
 		match stmt with
-		| Parser.Print expr -> print_string "print "; Parser.print_expr expr; print_string "\n";
-		| Parser.Exprstmt expr -> Parser.print_expr expr; print_string "\n"
+		| Parser.Print expr -> print_string "print "; Parser._print_expr expr; print_string "\n";
+		| Parser.Exprstmt expr -> Parser._print_expr expr; print_string "\n"
 		| Parser.IfStmt (expr, whentrue, whenfalse) -> 
 			print_string "if "; 
-			Parser.print_expr expr; 
+			Parser._print_expr expr; 
 			print_string " do \n"; 
 			aux whentrue;
 			print_string "if_end\n";
@@ -24,12 +24,12 @@ let rec print_parsed l =
 		| Parser.Block block -> print_parsed block;
 		| Parser.LoopStmt (cond, block) -> 
 			print_string "loop ";
-			Parser.print_expr cond;
+			Parser._print_expr cond;
 			print_string " do \n";
 			aux block;
 			print_string "loop_end";
-		| Parser.Break -> print_string "break\n"
-		| Parser.Continue -> print_string "continue\n"
+		| Parser.Break _ -> print_string "break\n"
+		| Parser.Continue _ -> print_string "continue\n"
 		;
 	in
 	match l with
@@ -58,17 +58,20 @@ let print_error from message (token: Lexer.token) program =
 	print_string ("  "^line^"\n");
 	print_string ("  "^message^"\n---------------------------")
 
+
 let program = 
 "
-first = 0
-second = 1
->> (first < 100) {
-	?? first = 0 {**} 
-}
+@\"\\nprogram:\\n\"
+first := 0 second = 1
+>> (first < 1000) {
+	temp   = first + second
+	second = first
+	first  = temp
+	@temp @\"\\n\"	
+} 
 "
 
 let execute program debugging =
-
 	let lexer = Lexer.make program in
 	try 
 		let lexed = Lexer.lex lexer in
@@ -79,20 +82,12 @@ let execute program debugging =
 		if debugging then begin
 			print_parsed parsed;
 		end ;
-	let analyzer = Analyzer.make parsed in
-	try 
-		Analyzer.analyze analyzer;
 	let intp = Interpreter.make parsed in
 	try 
 		Interpreter.run intp
 	with
 	| Interpreter.RuntimeError (message, token) ->
 		print_error "Runtime Error" message token program
-	with
-	| Analyzer.AnalyzeError (message, token) ->
-		print_error "Semantic Error" message token program
-	| Analyzer.AnalyzeWarning (message, token) ->
-		print_error "Semantic Warning" message token program
 	with
 	| Parser.ParseError (message, token) -> 
 		print_error "Syntax Error" message token program

@@ -124,31 +124,37 @@ let float_literal lexer =
 let string_literal lexer =
 	let rec count acc escaped lexer =
 		match peek lexer with
-		| '"' -> if escaped then aux (acc+1) false (forward lexer) else (acc, lexer) 
-		| '\\' -> aux (acc+1) (not escaped) (forward lexer) 
+		| '"' -> if escaped then count (acc+1) false (forward lexer) else (acc, lexer) 
+		| '\\' -> count (acc+1) (not escaped) (forward lexer) 
 		| c when c = (Char.chr 0) -> 
-			raise (LexError("::Non-terminated string", {value=""; typeof=StringLiteral; pos=lexer.pos; line=lexer.line}))
-		| _ -> aux (acc+1) false (forward lexer)
-
+			raise (LexError("Non-terminated string", {value=""; typeof=StringLiteral; pos=lexer.pos; line=lexer.line}))
+		| _ -> count (acc+1) false (forward lexer)
 	in let (length, lexer) = count 0 false lexer in
+	if length = 0 then ("", lexer) else 
 	let bytes = Bytes.create length in
 	let rec blit wp rp escaped =
 		if rp >= length then wp else
 		let c = lexer.raw.[rp+(lexer.pos-length)] in 
 		match c with
-		| '\\' -> if escaped then set bytes wp c; blit (wp+1) (rp+1) false else blit wp (rp+1) true
-		| 'b' -> let c = if escaped then (Char.chr 10) else 'b' in set bytes wp c; blit (wp+1) (rp+1) false
-		| 't' -> let c = if escaped then (Char.chr 11) else 't' in set bytes wp c; blit (wp+1) (rp+1) false
-		| 'n' -> let c = if escaped then (Char.chr 12) else 'n' in set bytes wp c; blit (wp+1) (rp+1) false
-		| 'v' -> let c = if escaped then (Char.chr 13) else 'v' in set bytes wp c; blit (wp+1) (rp+1) false
-		| 'f' -> let c = if escaped then (Char.chr 14) else 'f' in set bytes wp c; blit (wp+1) (rp+1) false 
-		| 'r' -> let c = if escaped then (Char.chr 15) else 'r' in set bytes wp c; blit (wp+1) (rp+1) false
-		| _ -> set bytes wp c; blit (wp+1) (rp+1) false
+		| '\\' -> if escaped then (Bytes.set bytes wp c; blit (wp+1) (rp+1) false) else (blit wp (rp+1) true)
+		| 'b' -> let c = if escaped then (Char.chr 8) else 'b' in
+		         Bytes.set bytes wp c; blit (wp+1) (rp+1) false
+		| 't' -> let c = if escaped then (Char.chr 9) else 't' in
+		         Bytes.set bytes wp c; blit (wp+1) (rp+1) false
+		| 'n' -> let c = if escaped then (Char.chr 10) else 'n' in
+		         Bytes.set bytes wp c; blit (wp+1) (rp+1) false
+		| 'v' -> let c = if escaped then (Char.chr 11) else 'v' in
+		         Bytes.set bytes wp c; blit (wp+1) (rp+1) false
+		| 'f' -> let c = if escaped then (Char.chr 12) else 'f' in
+		         Bytes.set bytes wp c; blit (wp+1) (rp+1) false
+		| 'r' -> let c = if escaped then (Char.chr 13) else 'r' in
+		         Bytes.set bytes wp c; blit (wp+1) (rp+1) false
+		| _ -> Bytes.set bytes wp c; blit (wp+1) (rp+1) false
 	in 
 	let written = blit 0 0 false in
-	let str = Bytes.sub_string bytes (lexer.pos - length) written
-	in (str, lexer)
-
+	let str = Bytes.sub_string bytes 0 written
+	in (str, forward lexer)
+ 
 let builder f lexer = 
 	let rec aux acc lexer =
 		let c = peek lexer in
@@ -190,7 +196,7 @@ let next_token lexer =
 	| '-' -> begin let lexer = forward lexer in match peek lexer with '>' -> (Arrow, forward lexer) | _ -> (Minus, lexer) end
 	| '>' -> begin let lexer = forward lexer in match peek lexer with '>' -> (Right, forward lexer) | '=' -> (GreatEqual, forward lexer) | _ -> (Greater, lexer) end
 	| '<' -> begin let lexer = forward lexer in match peek lexer with '<' -> (Left, forward lexer) | '=' -> (GreatEqual, forward lexer) | _ -> (Lesser, lexer) end
-	| ':' -> begin let lexer = forward lexer in match peek lexer with '=' -> (ConEqual, forward lexer) | ':' -> (TwoQuestion, forward lexer) | _ -> (Colon, lexer) end
+	| ':' -> begin let lexer = forward lexer in match peek lexer with '=' -> (ConEqual, forward lexer) | ':' -> (TwoColon, forward lexer) | _ -> (Colon, lexer) end
 	| '!' -> begin let lexer = forward lexer in match peek lexer with '=' -> (ExcEqual, forward lexer) | _ -> (Exclamation, lexer) end
 	| c when c = (Char.chr 0) -> (EOF, lexer)
 	| c when is_num c -> (FloatLiteral, lexer)
@@ -211,7 +217,7 @@ let lex lexer =
 		let (tk, lexer) = next_token lexer in
 		match tk.typeof with
 		| EOF -> tk::acc
-		| Unknown -> raise (LexError ("::Unrecognized token '"^tk.value^"'", tk))
+		| Unknown -> raise (LexError ("Unrecognized token '"^tk.value^"'", tk))
 		| TwoSlash -> aux acc lexer
 		| _ -> aux (tk::acc) lexer
 	in List.rev (aux [] lexer)

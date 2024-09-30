@@ -13,8 +13,8 @@ type statement =
   | IfStmt of expr * statement * statement option
   | LoopStmt of expr * statement
   | Block of statement list
-  | Break
-  | Continue
+  | Break of Lexer.token
+  | Continue of Lexer.token
 
 type t = {
   raw: Lexer.token list;

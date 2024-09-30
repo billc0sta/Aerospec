@@ -7,7 +7,7 @@ type value =
 exception RuntimeError of string * Lexer.token
 
 module Environment = struct
-	type t = {values: (string, (value * bool)) Hashtbl.t; parent: environment option;}
+	type t = {values: (string, (value * bool)) Hashtbl.t; parent: t option;}
 	let make () = {values=(Hashtbl.create 16); parent=None}
 	let find ident env = Hashtbl.find_opt env.values ident
 	let add ident value env = Hashtbl.add env.values ident value
@@ -22,7 +22,7 @@ module Environment = struct
 		| Some env -> env
 end 
 
-type t = {env: environment; raw: statement list;}
+type t = {env: Environment.t; raw: statement list;}
 
 let make raw = {env=(Environment.make ()); raw}
 
@@ -39,8 +39,8 @@ let nameof = function
 let stringify_value = function
 	| String str -> str
 	| Float fl -> let str = string_of_float fl in
-								if String.ends_with ~suffix:"." 
-								then String.sub str (String.length str - 1)
+								if String.ends_with ~suffix:"." str
+								then String.sub str 0 (String.length str - 1)
 								else str 
 	| Bool b -> if b then "true" else "false"
 
@@ -56,7 +56,7 @@ let rec evaluate expr inp =
 
 and evaluate_binary expr1 expr2 op inp =
 	let raise_error =  (fun ev1 ev2 -> raise (RuntimeError 
-		("::Cannot apply operator '"^Lexer.nameof op.typeof^"' to values of types ('"^nameof ev1^"' and '"^nameof ev2^"')", op))) in
+		("Cannot apply operator '"^Lexer.nameof op.typeof^"' to values of types ('"^nameof ev1^"' and '"^nameof ev2^"')", op))) in
 	let ev_both = (fun expr1 expr2 -> (evaluate expr1 inp, evaluate expr2 inp)) in
 	let simple_binary = (fun expr1 expr2 op -> let (ev1, ev2) = ev_both expr1 expr2 in
 		match (ev1, ev2) with Float fl1, Float fl2 -> (op fl1 fl2) | _ -> raise_error ev1 ev2)
@@ -100,7 +100,7 @@ and evaluate_binary expr1 expr2 op inp =
 
 and evaluate_unary op expr inp =
 	let raise_error = (fun ev -> raise (RuntimeError 
-		("::Cannot apply operator '"^Lexer.nameof op.typeof^"' to values of type '"^nameof ev^"'", op))) in
+		("Cannot apply operator '"^Lexer.nameof op.typeof^"' to values of type '"^nameof ev^"'", op))) in
 	let ev = evaluate expr inp in
 	match op.typeof with
 	| Exclamation -> Bool (not (truth ev))
@@ -114,7 +114,7 @@ and evaluate_ident tk inp =
 		| None -> 
 			begin
 				match env.parent with
-				| None -> raise (RuntimeError ("::Unbinded variable '"^tk.value^"' was referenced", tk)) 
+				| None -> raise (RuntimeError ("Unbinded variable '"^tk.value^"' was referenced", tk)) 
 				| Some env -> aux env
 			end
 		| Some (value, _) -> value
@@ -138,7 +138,7 @@ and assignment target expr token inp =
 	match (Environment.find name inp.env) with
 	| None -> Environment.add name (value, mut) inp.env; value
 	| Some (_, mut) -> 
-		if not mut then raise (RuntimeError ("::Cannot re-assign to a constant", token))
+		if not mut then raise (RuntimeError ("Cannot re-assign to a constant", token))
 		else Environment.replace name (value, mut) inp.env; value
 
 let print_stmt expr inp = 
@@ -152,7 +152,8 @@ let rec exec_stmt stmt inp =
 	| IfStmt (cond, whentrue, whenfalse) -> if_stmt cond whentrue whenfalse inp
 	| Block stmts -> block_stmt stmts inp
 	| LoopStmt (cond, stmt) -> loop_stmt cond stmt inp
-	| Break | Continue -> assert false; (*Break and Continue are checked at analyzing-time*)
+	| Break tk -> raise (RuntimeError ("Break statement (**) outside of loop", tk))
+	| Continue tk -> raise (RuntimeError ("Continue statement (<<) outside of loop", tk))
 
 and block_stmt stmts inp =
 	let rec aux stmts inp =
@@ -171,21 +172,22 @@ and if_stmt cond whentrue whenfalse inp =
 and loop_stmt cond stmt inp =
 	let rec execute_body block inp =
 		match block with
-		| [] -> (false, inp)
+		| [] -> (true, inp)
 		| x::xs -> begin
 			match x with 
-			| Break -> (false, inp)
-			| Continue -> (true, inp)
+			| Break _ -> (false, inp)
+			| Continue _ -> (true, inp)
 			| _ ->  let inp = exec_stmt x inp in execute_body xs inp
 		end
 	in
 	let rec aux inp =
 		if (truth (evaluate cond inp)) then
-			let (continue, inp) = match stmt with
-				| Block block -> execute_body block inp
-				| _ -> execute_body [stmt] inp
-			in if continue then aux inp else inp
+		let (continue, inp) =
+			match stmt with Block block -> execute_body block inp | _ -> execute_body [stmt] inp in
+			if continue then aux inp else inp
 		else inp
 	in aux inp
 
 let run inp = ignore (exec_stmt (Block inp.raw) inp)
+
+let _ = (Environment.parent_of, Environment.child_of)
