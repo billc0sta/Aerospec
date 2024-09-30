@@ -5,6 +5,7 @@ type value =
 | Float of float
 | String of string
 | Bool of bool
+| Lambda of string list * Parser.statement
 
 val make: Parser.statement list -> t
 

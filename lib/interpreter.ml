@@ -3,6 +3,7 @@ type value =
 | Float of float
 | String of string
 | Bool of bool
+| Lambda of string list * statement
 
 exception RuntimeError of string * Lexer.token
 
@@ -29,12 +30,14 @@ let make raw = {env=(Environment.make ()); raw}
 let truth = function
 	| Float f -> f <> 0.0
 	| String str -> String.length str > 0
-	| Bool b -> b 
+	| Bool b -> b
+	| Lambda _ -> true 
 
 let nameof = function
 	| String _ -> "string"
 	| Float  _ -> "float"
 	| Bool _ -> "bool"
+	| Lambda _ -> "lambda"
 
 let stringify_value = function
 	| String str -> str
@@ -43,6 +46,10 @@ let stringify_value = function
 								then String.sub str 0 (String.length str - 1)
 								else str 
 	| Bool b -> if b then "true" else "false"
+	| Lambda (params, _) -> 
+		("<function ( "^
+			(List.fold_left (fun acc param -> (acc ^ param ^ " ")) "" params)
+			^")>")
 
 let rec evaluate expr inp =
 	match expr with
@@ -53,6 +60,31 @@ let rec evaluate expr inp =
 	| Grouping expr -> evaluate expr inp
 	| IdentExpr tk -> evaluate_ident tk inp
 	| IfExpr (cond, whentrue, whenfalse) -> evaluate_ifexpr cond whentrue whenfalse inp
+	| FunCall (target, arglist) -> evaluate_funcall target arglist inp
+	| LambdaExpr (exprs, body) -> evaluate_lambda exprs body inp
+
+and evaluate_lambda exprs body inp = 
+	let rec aux acc exprs =
+		match exprs with
+		| [] -> (acc)
+		| x::xs -> begin 
+			match x with
+			| IdentExpr tk -> aux (tk.value::acc) xs
+			| _ -> assert false;
+		end
+	in
+	let params = List.rev (aux [] exprs) in
+	Lambda (params, body)
+
+and evaluate_funcall target arglist inp =
+	let lambda = evaluate target inp in
+	match lambda with
+	| Lambda (params, body) -> begin
+		let param_len = List.length params in
+		let arg_len   = List.length arglist in
+		if param_len <> arg_len then
+			raise (RuntimeError ("The number of arguments do not match the number of parameters", ))
+	end
 
 and evaluate_binary expr1 expr2 op inp =
 	let raise_error =  (fun ev1 ev2 -> raise (RuntimeError 

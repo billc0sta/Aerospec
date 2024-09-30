@@ -13,7 +13,7 @@ relation         = basic ((">" | "<" | ">=" | "<=") basic)*
 basic            = factor (("+" | "-") factor)*
 factor           = unary (("*" | "/" | "%") unary)*
 unary            = ("!" | "+" | "-" | "#") unary | postary
-postary          = postary ((arguments) | (indexing)) | primary
+postary          = primary ((arguments) | (indexing))*
 arguments        = '(' (expression (',' expression)*)? ')'
 indexing         = '[' (expression | (arr-range)) (',' (expression | arr-range))? ']'
 arr-range        = (expression)? ':' (expression)?
@@ -29,7 +29,7 @@ range-op         = '>' | '>=' | '<' | '<='
 string           = '"' (writable)* '"'
 writable         = ' ' -> '~'
 grouping         = '(' expression ')'
-lambda           = "(" ident ("," ident)* ")" block
+lambda           = "->" "(" ident ("," ident)* ")" block
 builder          = '[' (range)? ';' (expression)? ';' expression ']'
 prototype        = '{' (ident ('=' | ':=') expression)* '}'
 loop             = ">>" expression statement

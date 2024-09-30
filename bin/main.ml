@@ -62,13 +62,9 @@ let print_error from message (token: Lexer.token) program =
 let program = 
 "
 @\"\\nprogram:\\n\"
-first := 0 second = 1
->> (first < 1000) {
-	temp   = first + second
-	second = first
-	first  = temp
-	@temp @\"\\n\"	
-} 
+
+fib:=(n){}
+first=0second=1>>(first<1000){temp=first+second second=first first=temp@temp@\"\\n\"}
 "
 
 let execute program debugging =

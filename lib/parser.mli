@@ -6,8 +6,10 @@ type expr =
   | Grouping of expr
   | IdentExpr of Lexer.token
   | IfExpr of expr * expr * expr
+  | FunCall of expr * expr list
+  | LambdaExpr of expr list * statement
 
-type statement = 
+and statement = 
   | Print of expr
   | Exprstmt of expr
   | IfStmt of expr * statement * statement option
