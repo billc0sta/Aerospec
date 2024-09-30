@@ -8,8 +8,8 @@ type expr =
   | Grouping of expr
   | IdentExpr of token
   | IfExpr of expr * expr * expr
-  | FunCall of expr * expr list 
-  | LambdaExpr of expr list * statement
+  | FunCall of expr * expr list * token
+  | LambdaExpr of expr list * statement * token
 
 and statement = 
   | Print of expr
@@ -68,16 +68,16 @@ let rec _print_expr expr =
     _print_expr whenfalse  
   | StringLit str -> print_string str;
   | IdentExpr tk -> print_string tk.value
-  | FunCall (expr, arglist) -> 
+  | FunCall (expr, arglist, _) -> 
     print_string "(funcall ";
-    print_expr expr;
+    _print_expr expr;
     print_string "(arguments";
     List.iter _print_expr arglist;
     print_string ")";
-  | LambdaExpr (params, _) ->
+  | LambdaExpr (params, _, _) ->
     print_string "(lambda (parameters";
     List.iter _print_expr params;
-    print_string "))";
+    print_string "))"
 
 let rec expression parser = assignexpr parser
 
@@ -122,7 +122,7 @@ and unary parser =
   let tk = peek parser in
   match tk.typeof with
   | Exclamation | Plus | Minus | Hash -> 
-  	let (expr, parser) = unary (forward parser) in
+    let (expr, parser) = unary (forward parser) in
     (Unary (tk, expr), parser)
   | _ -> postary parser
 
@@ -139,7 +139,7 @@ and postary parser =
     | _ -> (expr, parser) 
       (* will add arrays indexing here later *)
   in
-  let expr = primary parser in
+  let (expr, parser) = primary parser in
   aux expr parser
 
 and funcall expr parser = 
@@ -147,7 +147,7 @@ and funcall expr parser =
     let tk = peek parser in
     match tk.typeof with
     | CParen -> (acc, forward parser)
-    | EOF -> raise (ParserError ("Expected a Closing Parenthesis ')'", tk))
+    | EOF -> raise (ParseError ("Expected a Closing Parenthesis ')'", tk))
     | _ -> begin 
       let (expr, parser) = expression parser in
       let tk = (peek parser) in 
@@ -155,12 +155,12 @@ and funcall expr parser =
         match tk.typeof with 
         | Comma -> forward parser 
         | CParen -> parser 
-        | _ -> (ParseError ("Expected a Comma ','", tk)) in 
+        | _ -> raise (ParseError ("Expected a Comma ','", tk)) in 
       aux (expr::acc) parser
     end 
   in 
   let (l, parser) = aux [] parser in
-  (FunCall (expr, List.rev l), parser)
+  (FunCall (expr, List.rev l, peek parser), parser)
 
 and primary parser =
   let tk = peek parser in
@@ -177,20 +177,24 @@ and lambda parser =
   let tk = peek parser in
   let block_follows = match tk.typeof with OCurly -> true | _ -> false in
   match length with
-  | 0 -> 
+  | 0 -> begin
     if not block_follows 
       then raise (ParseError ("Expected an expression", tk)) 
     else
-      let (body, parser) = block_stmt parser in 
-      (Lambda (params, body), parser)
-  | 1 -> 
+    let (body, parser) = block_stmt parser in 
+    (LambdaExpr (params, body, tk), parser) 
+  end
+  | 1 -> begin
     let is_ident = match List.hd params with IdentExpr _ -> true | _ -> false in 
     if is_ident && block_follows then
       let (body, parser) = block_stmt parser in
-      (Lambda (params, body), parser)
+      (LambdaExpr (params, body, tk), parser)
     else
       (Grouping (List.hd params), parser)
+  end 
   | len when len > 255 -> raise (ParseError ("No more than 255 parameters are allowed", tk))
+  | _ -> let (body, parser) = block_stmt parser in 
+        (LambdaExpr (params, body, tk), parser) 
 
 and parameters parser =
   let rec aux acc parser =
@@ -213,11 +217,6 @@ and parameters parser =
     end
   in let (params, parser) = aux [] parser in (List.rev params, parser)
 
-and grouping parser =
-  let (expr, parser) = expression parser in
-  let parser = consume CParen "Expected a Closing Parenthesis ')'" parser in
-  (Grouping expr, parser)
-
 and build_binary ops f parser =
   let (expr, parser) = f parser in 
   let rec aux expr parser =
@@ -230,10 +229,7 @@ and build_binary ops f parser =
       (expr, parser)
   in aux expr parser
 
-let print_stmt parser = 
-  let (expr, parser) = expression parser in (Print expr, parser)
-
-let rec statement parser =
+and statement parser =
   let tk = peek parser in
     match tk.typeof with
     | EOF -> raise (ParseError ("Expected a statement", tk))
@@ -273,6 +269,9 @@ and if_stmt parser =
     (IfStmt (cond, whentrue, (Some whenfalse)), parser)
   else 
     (IfStmt (cond, whentrue, None), parser)
+
+and print_stmt parser = 
+  let (expr, parser) = expression parser in (Print expr, parser)
 
 let parse parser =
   let rec aux acc parser =

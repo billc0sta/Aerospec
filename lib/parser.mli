@@ -6,8 +6,8 @@ type expr =
   | Grouping of expr
   | IdentExpr of Lexer.token
   | IfExpr of expr * expr * expr
-  | FunCall of expr * expr list
-  | LambdaExpr of expr list * statement
+  | FunCall of expr * expr list * Lexer.token
+  | LambdaExpr of expr list * statement * Lexer.token
 
 and statement = 
   | Print of expr

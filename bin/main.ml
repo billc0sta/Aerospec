@@ -51,20 +51,20 @@ let print_error from message (token: Lexer.token) program =
 		match token.typeof with 
 		| EOF -> "End Of File" 
 		| _ -> let (start_pos, end_pos) = get_line token.pos token.pos 
-					 in String.sub program (start_pos) (end_pos - start_pos)
+					 in String.sub program (start_pos+1) (end_pos - start_pos - 2)
 	end in
-	print_string ("---"^from^" ->\n");
+	print_string ("\n::"^from^" \n");
 	print_string ("  at line: "^string_of_int (token.line)^"\n");
-	print_string ("  "^line^"\n");
+	print_string ("  here --> \"" ^line^"\"\n");
 	print_string ("  "^message^"\n---------------------------")
 
 
 let program = 
 "
 @\"\\nprogram:\\n\"
-
-fib:=(n){}
-first=0second=1>>(first<1000){temp=first+second second=first first=temp@temp@\"\\n\"}
+first  = 0
+second = 0
+>> (first < 1000) first = first + 1
 "
 
 let execute program debugging =

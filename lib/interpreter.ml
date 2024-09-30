@@ -22,7 +22,7 @@ module Environment = struct
 		| None -> raise (Invalid_argument "Environment.parent_of")
 		| Some env -> env
 end 
-
+let _ = Environment.parent_of 
 type t = {env: Environment.t; raw: statement list;}
 
 let make raw = {env=(Environment.make ()); raw}
@@ -60,10 +60,10 @@ let rec evaluate expr inp =
 	| Grouping expr -> evaluate expr inp
 	| IdentExpr tk -> evaluate_ident tk inp
 	| IfExpr (cond, whentrue, whenfalse) -> evaluate_ifexpr cond whentrue whenfalse inp
-	| FunCall (target, arglist) -> evaluate_funcall target arglist inp
-	| LambdaExpr (exprs, body) -> evaluate_lambda exprs body inp
+	| FunCall (target, arglist, tk) -> evaluate_funcall target arglist tk inp
+	| LambdaExpr (exprs, body, _) -> evaluate_lambda exprs body
 
-and evaluate_lambda exprs body inp = 
+and evaluate_lambda exprs body = 
 	let rec aux acc exprs =
 		match exprs with
 		| [] -> (acc)
@@ -76,15 +76,25 @@ and evaluate_lambda exprs body inp =
 	let params = List.rev (aux [] exprs) in
 	Lambda (params, body)
 
-and evaluate_funcall target arglist inp =
+and evaluate_funcall target arglist tk inp =
 	let lambda = evaluate target inp in
 	match lambda with
 	| Lambda (params, body) -> begin
 		let param_len = List.length params in
 		let arg_len   = List.length arglist in
 		if param_len <> arg_len then
-			raise (RuntimeError ("The number of arguments do not match the number of parameters", ))
+			raise (RuntimeError ("The number of arguments do not match the number of parameters", tk))
+		else 
+			let inp = {inp with env=Environment.child_of inp.env} in
+				List.iter2 (fun arg param -> 
+					let value = evaluate arg inp in
+					Environment.add param (value, true) inp.env
+				) arglist params;
+			match body with
+			| Block block -> ignore (block_stmt block inp); (Float 0.0)
+			| _ -> assert false;
 	end
+	| _ -> assert false;
 
 and evaluate_binary expr1 expr2 op inp =
 	let raise_error =  (fun ev1 ev2 -> raise (RuntimeError 
@@ -173,11 +183,11 @@ and assignment target expr token inp =
 		if not mut then raise (RuntimeError ("Cannot re-assign to a constant", token))
 		else Environment.replace name (value, mut) inp.env; value
 
-let print_stmt expr inp = 
+and print_stmt expr inp = 
 	let valof = evaluate expr inp in
 	print_string (stringify_value valof); inp
 
-let rec exec_stmt stmt inp =
+and exec_stmt stmt inp =
 	match stmt with
 	| Print expr -> print_stmt expr inp
 	| Exprstmt expr -> ignore (evaluate expr inp); inp
@@ -221,5 +231,3 @@ and loop_stmt cond stmt inp =
 	in aux inp
 
 let run inp = ignore (exec_stmt (Block inp.raw) inp)
-
-let _ = (Environment.parent_of, Environment.child_of)
