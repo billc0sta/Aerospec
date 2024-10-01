@@ -1,65 +1,24 @@
 open Parser
-type value = 
-| Float of float
-| String of string
-| Bool of bool
-| Lambda of string list * statement
-| Nil
+open Value
 
 exception RuntimeError of string * Lexer.token
 
-module Environment = struct
-	type t = {values: (string, (value * bool)) Hashtbl.t; parent: t option;}
-	let make () = {values=(Hashtbl.create 16); parent=None}
-	let find ident env = Hashtbl.find_opt env.values ident
-	let add ident value env = Hashtbl.add env.values ident value
-	let replace ident value env = Hashtbl.replace env.values ident value
-	
-	let child_of env =
-		{(make ()) with parent=(Some env)}
-
-	let parent_of env =
-		match env.parent with
-		| None -> raise (Invalid_argument "Environment.parent_of")
-		| Some env -> env
-end
-
-let _ = Environment.parent_of 
 type state = {return_expr: expr option; returned: bool; breaked: bool; continued: bool; call_depth: int; loop_depth: int}
 type t = {env: Environment.t; raw: statement list; state: state}
 
+let add_natives env =
+	Environment.add "print" (NatFunc (256, ["params..."], Natives.print), true) env; 
+	Environment.add "input" (NatFunc (0, [], Natives.input), true) env; 
+	Environment.add "clock" (NatFunc (0, [], Natives.clock), true) env
+
 let make raw = 
-	{raw; env=(Environment.make ());
+	let inp = {raw; env=(Environment.make ());
 	state={return_expr=None; returned=false;
 	breaked=false; continued=false;
-	call_depth=0; loop_depth=0}}
-
-let truth = function
-	| Float f -> f <> 0.0
-	| String str -> String.length str > 0
-	| Bool b -> b
-	| Lambda _ -> true 
-	| Nil -> false
-
-let nameof = function
-	| String _ -> "string"
-	| Float  _ -> "float"
-	| Bool _ -> "bool"
-	| Lambda _ -> "lambda"
-	| Nil -> "nil"
-
-let stringify_value = function
-	| String str -> str
-	| Float fl -> let str = string_of_float fl in
-								if String.ends_with ~suffix:"." str
-								then String.sub str 0 (String.length str - 1)
-								else str 
-	| Bool b -> if b then "true" else "false"
-	| Lambda (params, _) -> 
-		("<function ( "^
-			(List.fold_left (fun acc param -> (acc ^ param ^ " ")) "" params)
-			^")>")
-	| Nil -> "nil"
+	call_depth=0; loop_depth=0}} in
+	
+	add_natives inp.env;
+	inp
 
 let rec evaluate expr inp =
 	match expr with
@@ -84,33 +43,44 @@ and evaluate_lambda exprs body =
 		end
 	in
 	let params = List.rev (aux [] exprs) in
-	Lambda (params, body)
+	Func (params, body)
 
 and evaluate_funcall target arglist tk inp =
 	let lambda = evaluate target inp in
 	match lambda with
-	| Lambda (params, body) -> begin
-		let param_len = List.length params in
-		let arg_len   = List.length arglist in
-		if param_len <> arg_len then
-			raise (RuntimeError ("The number of arguments do not match the number of parameters", tk))
-		else 
-			let inp = 
-			{inp with env=Environment.child_of inp.env; state={inp.state with call_depth=inp.state.call_depth+1; loop_depth=0}} in
-				List.iter2 (fun arg param -> 
-					let value = evaluate arg inp in
-					Environment.add param (value, true) inp.env
-				) arglist params;
-			match body with
-			| Block block -> begin 
-				let inp = block_stmt block inp in
-				match inp.state.return_expr with
-				| Some expr -> evaluate expr inp
-				| None -> Nil
-			end 
-			| _ -> assert false;
-	end
+	| Func (params, body) -> evaluate_func arglist params body tk inp
+	| NatFunc (paramc, _, func) -> evaluate_natfunc paramc arglist func tk inp
 	| _ -> assert false;
+
+and evaluate_func arglist params body tk inp =
+	let param_len = List.length params in
+	let arg_len   = List.length arglist in
+	if param_len <> arg_len then
+		raise (RuntimeError ("The number of arguments do not match the number of parameters", tk))
+	else 
+		let inp = 
+		{inp with env=Environment.child_of inp.env; state={inp.state with call_depth=inp.state.call_depth+1; loop_depth=0}} in
+			List.iter2 (fun arg param -> 
+				let value = evaluate arg inp in
+				Environment.add param (value, true) inp.env
+			) arglist params;
+		match body with
+		| Block block -> begin 
+			let inp = block_stmt block inp in
+			match inp.state.return_expr with
+			| Some expr -> evaluate expr inp
+			| None -> Nil
+		end 
+		| _ -> assert false;
+
+and evaluate_natfunc paramc arglist func tk inp =
+	let arg_len   = List.length arglist in
+	let param_len = paramc in
+	if param_len <> 256 && param_len <> arg_len then
+		raise (RuntimeError ("The number of arguments do not match the number of parameters", tk))
+	else
+		let val_list = List.map (fun expr -> evaluate expr inp) arglist in
+		func val_list
 
 and evaluate_binary expr1 expr2 op inp =
 	let raise_error =  (fun ev1 ev2 -> raise (RuntimeError 
@@ -200,13 +170,8 @@ and assignment target expr token inp =
 		if not mut then raise (RuntimeError ("Cannot re-assign to a constant", token))
 		else Environment.replace name (value, mut) inp.env; value
 
-and print_stmt expr inp = 
-	let valof = evaluate expr inp in
-	print_string (stringify_value valof); inp
-
 and exec_stmt stmt inp =
 		match stmt with
-	| Print expr -> print_stmt expr inp
 	| Exprstmt expr -> ignore (evaluate expr inp); inp
 	| IfStmt (cond, whentrue, whenfalse) -> if_stmt cond whentrue whenfalse inp
 	| Block stmts -> block_stmt stmts inp

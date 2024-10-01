@@ -8,7 +8,6 @@ let rec print_lexed l =
 let rec print_parsed l = 
 	let rec aux stmt =
 		match stmt with
-		| Parser.Print expr -> print_string "print "; Parser._print_expr expr; print_string "\n";
 		| Parser.Exprstmt expr -> Parser._print_expr expr; print_string "\n"
 		| Parser.IfStmt (expr, whentrue, whenfalse) -> 
 			print_string "if "; 
@@ -62,8 +61,7 @@ let print_error from message (token: Lexer.token) program =
 
 let program = 
 "
-fact := (n) { -> n == 1 ? 1 : n * fact(n-1) }
-@~(fact(10)) == \"float\"
+print(\"Hello, World!\\n\")
 "
 
 let execute program debugging =

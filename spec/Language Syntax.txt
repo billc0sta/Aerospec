@@ -12,7 +12,7 @@ equality         = relation (("==" | "!=") relation)*
 relation         = basic ((">" | "<" | ">=" | "<=") basic)*
 basic            = factor (("+" | "-") factor)*
 factor           = unary (("*" | "/" | "%") unary)*
-unary            = ("!" | "+" | "-" | "#") unary | postary
+unary            = ("!" | "+" | "-" | "#" | "~") unary | postary
 postary          = primary ((arguments) | (indexing))*
 arguments        = '(' (expression (',' expression)*)? ')'
 indexing         = '[' (expression | (arr-range)) (',' (expression | arr-range))? ']'

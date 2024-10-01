@@ -10,7 +10,6 @@ type expr =
   | LambdaExpr of expr list * statement * Lexer.token
 
 and statement = 
-  | Print of expr
   | Exprstmt of expr
   | IfStmt of expr * statement * statement option
   | LoopStmt of expr * statement

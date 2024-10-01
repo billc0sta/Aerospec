@@ -12,7 +12,6 @@ type expr =
   | LambdaExpr of expr list * statement * token
 
 and statement = 
-  | Print of expr
   | Exprstmt of expr
   | IfStmt of expr * statement * statement option
   | LoopStmt of expr * statement
@@ -236,7 +235,6 @@ and statement parser =
   let tk = peek parser in
     match tk.typeof with
     | EOF -> raise (ParseError ("Expected a statement", tk))
-    | At -> print_stmt (forward parser)
     | Right -> loop_stmt (forward parser)
     | OCurly -> block_stmt parser
     | TwoQuestion -> if_stmt (forward parser)
@@ -273,9 +271,6 @@ and if_stmt parser =
     (IfStmt (cond, whentrue, (Some whenfalse)), parser)
   else 
     (IfStmt (cond, whentrue, None), parser)
-
-and print_stmt parser = 
-  let (expr, parser) = expression parser in (Print expr, parser)
 
 let parse parser =
   let rec aux acc parser =
