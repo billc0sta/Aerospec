@@ -30,6 +30,7 @@ let rec print_parsed l =
 			print_string "loop_end";
 		| Parser.Break _ -> print_string "break\n"
 		| Parser.Continue _ -> print_string "continue\n"
+		| Parser.Return (expr, _) -> print_string "return "; Parser._print_expr expr; print_string "\n";
 		;
 	in
 	match l with
@@ -53,18 +54,16 @@ let print_error from message (token: Lexer.token) program =
 		| _ -> let (start_pos, end_pos) = get_line token.pos token.pos 
 					 in String.sub program (start_pos+1) (end_pos - start_pos - 2)
 	end in
-	print_string ("\n::"^from^" \n");
+	print_string ("\n::"^from^"\n");
 	print_string ("  at line: "^string_of_int (token.line)^"\n");
-	print_string ("  here --> \"" ^line^"\"\n");
+	print_string ("  here --> "^line^"\n");
 	print_string ("  "^message^"\n---------------------------")
 
 
 let program = 
 "
-@\"\\nprogram:\\n\"
-first  = 0
-second = 0
->> (first < 1000) first = first + 1
+fact := (n) { -> n == 1 ? 1 : n * fact(n-1)  }
+@fact(10)
 "
 
 let execute program debugging =

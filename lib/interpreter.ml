@@ -4,6 +4,7 @@ type value =
 | String of string
 | Bool of bool
 | Lambda of string list * statement
+| Nil
 
 exception RuntimeError of string * Lexer.token
 
@@ -21,23 +22,31 @@ module Environment = struct
 		match env.parent with
 		| None -> raise (Invalid_argument "Environment.parent_of")
 		| Some env -> env
-end 
-let _ = Environment.parent_of 
-type t = {env: Environment.t; raw: statement list;}
+end
 
-let make raw = {env=(Environment.make ()); raw}
+let _ = Environment.parent_of 
+type state = {return_expr: expr option; returned: bool; breaked: bool; continued: bool; call_depth: int; loop_depth: int}
+type t = {env: Environment.t; raw: statement list; state: state}
+
+let make raw = 
+	{raw; env=(Environment.make ());
+	state={return_expr=None; returned=false;
+	breaked=false; continued=false;
+	call_depth=0; loop_depth=0}}
 
 let truth = function
 	| Float f -> f <> 0.0
 	| String str -> String.length str > 0
 	| Bool b -> b
 	| Lambda _ -> true 
+	| Nil -> false
 
 let nameof = function
 	| String _ -> "string"
 	| Float  _ -> "float"
 	| Bool _ -> "bool"
 	| Lambda _ -> "lambda"
+	| Nil -> "Nil"
 
 let stringify_value = function
 	| String str -> str
@@ -50,6 +59,7 @@ let stringify_value = function
 		("<function ( "^
 			(List.fold_left (fun acc param -> (acc ^ param ^ " ")) "" params)
 			^")>")
+	| Nil -> "Nil"
 
 let rec evaluate expr inp =
 	match expr with
@@ -85,13 +95,19 @@ and evaluate_funcall target arglist tk inp =
 		if param_len <> arg_len then
 			raise (RuntimeError ("The number of arguments do not match the number of parameters", tk))
 		else 
-			let inp = {inp with env=Environment.child_of inp.env} in
+			let inp = 
+			{inp with env=Environment.child_of inp.env; state={inp.state with call_depth=inp.state.call_depth+1; loop_depth=0}} in
 				List.iter2 (fun arg param -> 
 					let value = evaluate arg inp in
 					Environment.add param (value, true) inp.env
 				) arglist params;
 			match body with
-			| Block block -> ignore (block_stmt block inp); (Float 0.0)
+			| Block block -> begin 
+				let inp = block_stmt block inp in
+				match inp.state.return_expr with
+				| Some expr -> evaluate expr inp
+				| None -> Nil
+			end 
 			| _ -> assert false;
 	end
 	| _ -> assert false;
@@ -188,20 +204,38 @@ and print_stmt expr inp =
 	print_string (stringify_value valof); inp
 
 and exec_stmt stmt inp =
-	match stmt with
+		match stmt with
 	| Print expr -> print_stmt expr inp
 	| Exprstmt expr -> ignore (evaluate expr inp); inp
 	| IfStmt (cond, whentrue, whenfalse) -> if_stmt cond whentrue whenfalse inp
 	| Block stmts -> block_stmt stmts inp
 	| LoopStmt (cond, stmt) -> loop_stmt cond stmt inp
-	| Break tk -> raise (RuntimeError ("Break statement (**) outside of loop", tk))
-	| Continue tk -> raise (RuntimeError ("Continue statement (<<) outside of loop", tk))
+	| Break tk -> break_stmt tk inp
+	| Continue tk -> continue_stmt tk inp
+	| Return (expr, tk) -> return_stmt expr tk inp
+
+and break_stmt tk inp =
+		if inp.state.loop_depth = 0 then raise (RuntimeError ("Break statement ('**') outside of loop", tk))
+		else {inp with state={inp.state with breaked = true}}
+
+and continue_stmt tk inp =
+		if inp.state.loop_depth = 0 then raise (RuntimeError ("Continue statement ('<<') outside of loop", tk))
+		else {inp with state={inp.state with continued = true}}
+
+and return_stmt expr tk inp =
+		if inp.state.call_depth = 0 then raise (RuntimeError ("Return statement ('->') outside of function", tk))
+		else {inp with state={inp.state with returned = true; return_expr = Some expr}}
 
 and block_stmt stmts inp =
 	let rec aux stmts inp =
 		match stmts with
 		| [] -> inp
-		| x::xs -> let inp = exec_stmt x inp in aux xs inp
+		| x::xs -> begin
+			let inp = exec_stmt x inp in
+			if inp.state.returned || inp.state.continued || inp.state.breaked 
+			then inp
+			else aux xs inp
+		end
 	in aux stmts inp
 
 and if_stmt cond whentrue whenfalse inp =
@@ -212,22 +246,13 @@ and if_stmt cond whentrue whenfalse inp =
 		| Some block -> exec_stmt block inp
 
 and loop_stmt cond stmt inp =
-	let rec execute_body block inp =
-		match block with
-		| [] -> (true, inp)
-		| x::xs -> begin
-			match x with 
-			| Break _ -> (false, inp)
-			| Continue _ -> (true, inp)
-			| _ ->  let inp = exec_stmt x inp in execute_body xs inp
-		end
-	in
 	let rec aux inp =
-		if (truth (evaluate cond inp)) then
-		let (continue, inp) =
-			match stmt with Block block -> execute_body block inp | _ -> execute_body [stmt] inp in
-			if continue then aux inp else inp
+		let inp = {inp with state={inp.state with loop_depth=inp.state.loop_depth+1}} in
+		if truth (evaluate cond inp) then
+			let inp = exec_stmt stmt inp in
+			if inp.state.breaked then inp
+			else aux inp
 		else inp
-	in aux inp
+	in aux inp 
 
 let run inp = ignore (exec_stmt (Block inp.raw) inp)

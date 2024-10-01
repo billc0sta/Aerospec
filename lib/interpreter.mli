@@ -6,6 +6,7 @@ type value =
 | String of string
 | Bool of bool
 | Lambda of string list * Parser.statement
+| Nil
 
 val make: Parser.statement list -> t
 

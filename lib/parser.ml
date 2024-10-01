@@ -19,6 +19,7 @@ and statement =
   | Block of statement list
   | Break of token
   | Continue of token
+  | Return of expr * token 
 
 type t = {
   raw: token list;
@@ -69,14 +70,15 @@ let rec _print_expr expr =
   | StringLit str -> print_string str;
   | IdentExpr tk -> print_string tk.value
   | FunCall (expr, arglist, _) -> 
-    print_string "(funcall ";
+    print_string "(funcall (name ";
     _print_expr expr;
-    print_string "(arguments";
-    List.iter _print_expr arglist;
     print_string ")";
+    print_string "(arguments";
+    List.iter (fun expr -> print_string " "; _print_expr expr) arglist;
+    print_string "))";
   | LambdaExpr (params, _, _) ->
     print_string "(lambda (parameters";
-    List.iter _print_expr params;
+    List.iter (fun expr -> print_string " "; _print_expr expr) params;
     print_string "))"
 
 let rec expression parser = assignexpr parser
@@ -143,6 +145,7 @@ and postary parser =
   aux expr parser
 
 and funcall expr parser = 
+  let tk = peek parser in
   let rec aux acc parser =
     let tk = peek parser in
     match tk.typeof with
@@ -160,7 +163,7 @@ and funcall expr parser =
     end 
   in 
   let (l, parser) = aux [] parser in
-  (FunCall (expr, List.rev l, peek parser), parser)
+  (FunCall (expr, List.rev l, tk), parser)
 
 and primary parser =
   let tk = peek parser in
@@ -213,7 +216,7 @@ and parameters parser =
         | _ -> raise (ParseError ("Expected a Closing Parenthesis ')'", tk))
         in aux (expr::acc) parser 
       end
-      | _ -> (acc, consume CParen "Expected a Closing Parenthesis ')'" parser)
+      | _ -> (expr::acc, consume CParen "Expected a Closing Parenthesis ')'" parser)
     end
   in let (params, parser) = aux [] parser in (List.rev params, parser)
 
@@ -239,6 +242,7 @@ and statement parser =
     | TwoQuestion -> if_stmt (forward parser)
     | TwoStar -> (Break tk, forward parser)
     | Left -> (Continue tk, forward parser)
+    | Arrow -> let (expr, parser) = expression (forward parser) in (Return (expr, tk), parser)
     | _  -> expr_stmt parser
 
 and loop_stmt parser =

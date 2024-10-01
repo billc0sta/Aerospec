@@ -17,6 +17,7 @@ and statement =
   | Block of statement list
   | Break of Lexer.token
   | Continue of Lexer.token
+  | Return of expr * Lexer.token 
 
 type t = {
   raw: Lexer.token list;
