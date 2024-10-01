@@ -123,7 +123,7 @@ and factor parser = build_binary [Slash; Star; Modulo] unary parser
 and unary parser =
   let tk = peek parser in
   match tk.typeof with
-  | Exclamation | Plus | Minus | Hash -> 
+  | Exclamation | Plus | Minus | Hash | Tilde -> 
     let (expr, parser) = unary (forward parser) in
     (Unary (tk, expr), parser)
   | _ -> postary parser

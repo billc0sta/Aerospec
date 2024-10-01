@@ -46,7 +46,7 @@ let nameof = function
 	| Float  _ -> "float"
 	| Bool _ -> "bool"
 	| Lambda _ -> "lambda"
-	| Nil -> "Nil"
+	| Nil -> "nil"
 
 let stringify_value = function
 	| String str -> str
@@ -59,7 +59,7 @@ let stringify_value = function
 		("<function ( "^
 			(List.fold_left (fun acc param -> (acc ^ param ^ " ")) "" params)
 			^")>")
-	| Nil -> "Nil"
+	| Nil -> "nil"
 
 let rec evaluate expr inp =
 	match expr with
@@ -164,6 +164,7 @@ and evaluate_unary op expr inp =
 	| Exclamation -> Bool (not (truth ev))
 	| Plus -> begin match ev with Float fl -> Float fl | _ -> raise_error ev end
 	| Minus -> begin match ev with Float fl -> Float (fl*.(-1.)) | _ -> raise_error ev end
+	| Tilde -> String (nameof ev) 
 	| _ -> assert false;
 
 and evaluate_ident tk inp =

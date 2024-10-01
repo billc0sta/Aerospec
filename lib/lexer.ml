@@ -41,6 +41,7 @@ type tokentype =
 | TwoStar
 | TwoQuestion
 | TwoColon
+| Tilde
 
 
 type token = {value: string; line: int; pos: int; typeof: tokentype}
@@ -91,6 +92,7 @@ let nameof = function
 	| TwoStar -> "**"
 	| TwoQuestion -> "??"
 	| TwoColon -> "::"
+	| Tilde -> "~"
 	
 let make raw = {raw; pos=0; line=1}
 
@@ -187,6 +189,7 @@ let next_token lexer =
 	| '}' -> (CCurly, forward lexer)
 	| '$' -> (Dollar, forward lexer)
 	| '"' -> (StringLiteral, forward lexer)
+	| '~' -> (Tilde, forward lexer)
 	| '?' -> begin let lexer = forward lexer in match peek lexer with '?' -> (TwoQuestion, forward lexer) | _ -> (Question, lexer) end
 	| '*' -> begin let lexer = forward lexer in match peek lexer with '*' -> (TwoStar, forward lexer) | _ -> (Star, lexer) end
 	| '&' -> begin let lexer = forward lexer in match peek lexer with '&' -> (Ampersands, forward lexer) | _ -> (Unknown, lexer) end

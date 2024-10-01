@@ -41,6 +41,7 @@ type tokentype =
 | TwoStar
 | TwoQuestion
 | TwoColon
+| Tilde
 
 type token = {value: string; line: int; pos: int; typeof: tokentype}
 type t = {raw: string; pos: int; line: int;}

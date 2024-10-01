@@ -62,8 +62,8 @@ let print_error from message (token: Lexer.token) program =
 
 let program = 
 "
-fact := (n) { -> n == 1 ? 1 : n * fact(n-1)  }
-@fact(10)
+fact := (n) { -> n == 1 ? 1 : n * fact(n-1) }
+@~(fact(10)) == \"float\"
 "
 
 let execute program debugging =
