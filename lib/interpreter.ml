@@ -192,6 +192,7 @@ and exec_stmt stmt inp =
 	| LoopStmt (cond, stmt) -> loop_stmt cond stmt inp
 	| Break tk -> break_stmt tk inp
 	| Continue tk -> continue_stmt tk inp
+	| NoOp _ -> inp
 	| Return (expr, tk) -> return_stmt expr tk inp
 
 and break_stmt tk inp =

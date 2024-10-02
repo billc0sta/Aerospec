@@ -10,6 +10,7 @@ type expr =
   | IfExpr of expr * expr * expr
   | FunCall of expr * expr list * token
   | LambdaExpr of expr list * statement * token
+  | ArrExpr of expr list * token
 
 and statement = 
   | Exprstmt of expr
@@ -18,7 +19,8 @@ and statement =
   | Block of statement list
   | Break of token
   | Continue of token
-  | Return of expr * token 
+  | NoOp of token
+  | Return of expr * token
 
 type t = {
   raw: token list;
@@ -38,6 +40,11 @@ let forward parser =
 
 let consume typeof error parser =
 	if (peek parser).typeof = typeof then forward parser else raise (ParseError (error, peek parser))
+
+let rec ungroup expr =
+  match expr with
+  | Grouping expr -> ungroup expr
+  | _ -> expr
 
 (*test*)
 let rec _print_expr expr =
@@ -137,7 +144,7 @@ and postary parser =
     let tk = peek parser in
     match tk.typeof with
     | OParen -> begin
-      match expr with
+      match ungroup expr with
       | IdentExpr _ | FunCall _ | LambdaExpr _ ->
       let (expr, parser) = funcall expr (forward parser) in aux expr parser
       | _ -> raise (ParseError ("This value is not callable", tk))
@@ -175,10 +182,29 @@ and primary parser =
   | FloatLiteral -> (FloatLit (float_of_string tk.value), forward parser)
   | StringLiteral -> (StringLit tk.value, forward parser)
   | Ident -> (IdentExpr (tk, false), forward parser)
-  | OParen -> lambda (forward parser)
+  | OParen -> lambda_expr (forward parser)
+  | OSquare -> array_expr (forward parser)
   | _ -> raise (ParseError ("Expected an expression", tk))
 
-and lambda parser =
+and array_expr parser =
+  let rec aux exprs parser =
+    let tk = peek parser in
+    match tk.typeof with
+    | CSquare -> (exprs, forward parser)
+    | _ -> begin
+      let (expr, parser) = expression parser in
+      let tk = peek parser in
+      match tk.typeof with
+      | CSquare -> aux (expr::exprs) parser
+      | Comma -> aux (expr::exprs) (forward parser)
+      | _ -> raise (ParseError ("Expected a Comma ','", tk))
+    end
+
+  let tk = peek parser in
+  in let (exprs, parser) = aux [] parser in
+  (ArrExpr (List.rev exprs, tk), parser)
+
+and lambda_expr parser =
   let (params, parser) = parameters parser in
   let length = List.length params in
   let tk = peek parser in
@@ -246,6 +272,7 @@ and statement parser =
     | TwoStar -> (Break tk, forward parser)
     | Left -> (Continue tk, forward parser)
     | Arrow -> let (expr, parser) = expression (forward parser) in (Return (expr, tk), parser)
+    | Semicolon -> ((NoOp tk), (forward parser))
     | _  -> expr_stmt parser
 
 and loop_stmt parser =

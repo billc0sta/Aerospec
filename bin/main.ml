@@ -29,6 +29,7 @@ let rec print_parsed l =
 			print_string "loop_end";
 		| Parser.Break _ -> print_string "break\n"
 		| Parser.Continue _ -> print_string "continue\n"
+		| Parser.NoOp _ -> print_string "no op\n"
 		| Parser.Return (expr, _) -> print_string "return "; Parser._print_expr expr; print_string "\n";
 		;
 	in
@@ -61,10 +62,7 @@ let print_error from message (token: Lexer.token) program =
 
 let program = 
 "
-a = 10
-f := () {$a = 100}
-f()
-print(a)
+>> 1 {print(\"Hello, World\\n\")}
 "
 
 let execute program debugging =

@@ -5,6 +5,7 @@ type t =
 | Bool of bool
 | Func of string list * statement
 | NatFunc of int * string list * (t list -> t)
+| ArrExpr of value Resizable.t
 | Nil
 
 let truth = function

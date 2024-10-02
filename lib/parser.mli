@@ -8,6 +8,7 @@ type expr =
   | IfExpr of expr * expr * expr
   | FunCall of expr * expr list * Lexer.token
   | LambdaExpr of expr list * statement * Lexer.token
+  | ArrExpr of expr list * Lexer.token
 
 and statement = 
   | Exprstmt of expr
@@ -16,6 +17,7 @@ and statement =
   | Block of statement list
   | Break of Lexer.token
   | Continue of Lexer.token
+  | NoOp of Lexer.token
   | Return of expr * Lexer.token 
 
 type t = {
