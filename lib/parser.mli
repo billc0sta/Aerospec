@@ -4,7 +4,7 @@ type expr =
   | Binary of expr * Lexer.token * expr
   | Unary of Lexer.token * expr
   | Grouping of expr
-  | IdentExpr of Lexer.token
+  | IdentExpr of Lexer.token * bool
   | IfExpr of expr * expr * expr
   | FunCall of expr * expr list * Lexer.token
   | LambdaExpr of expr list * statement * Lexer.token

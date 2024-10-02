@@ -6,7 +6,7 @@ type expr =
   | Binary of expr * token * expr
   | Unary of token * expr
   | Grouping of expr
-  | IdentExpr of token
+  | IdentExpr of token * bool
   | IfExpr of expr * expr * expr
   | FunCall of expr * expr list * token
   | LambdaExpr of expr list * statement * token
@@ -67,7 +67,7 @@ let rec _print_expr expr =
     print_string " then "; _print_expr whentrue; print_string " else ";
     _print_expr whenfalse  
   | StringLit str -> print_string str;
-  | IdentExpr tk -> print_string tk.value
+  | IdentExpr (tk, global) -> if global then print_string "global "; print_string tk.value
   | FunCall (expr, arglist, _) -> 
     print_string "(funcall (name ";
     _print_expr expr;
@@ -91,7 +91,12 @@ and assignexpr parser =
     begin
       let parser = forward parser in
       match expr with
-      | IdentExpr _ -> let (expr2, parser) = ifexpr parser in aux (Binary (expr, tk, expr2)) parser
+      | IdentExpr _ -> 
+        let (expr2, parser) = ifexpr parser in 
+        aux (Binary (expr, tk, expr2)) parser
+      | Unary ({typeof=Dollar; _}, IdentExpr (name, _)) -> 
+        let (expr2, parser) = ifexpr parser in 
+        aux (Binary (IdentExpr (name, true), tk, expr2)) parser
       | _ -> raise (ParseError ("Cannot assign to an expression", tk))
     end
     | _ -> (expr, parser)
@@ -122,7 +127,7 @@ and factor parser = build_binary [Slash; Star; Modulo] unary parser
 and unary parser =
   let tk = peek parser in
   match tk.typeof with
-  | Exclamation | Plus | Minus | Hash | Tilde -> 
+  | Exclamation | Plus | Minus | Hash | Tilde | At | Dollar -> 
     let (expr, parser) = unary (forward parser) in
     (Unary (tk, expr), parser)
   | _ -> postary parser
@@ -169,7 +174,7 @@ and primary parser =
   match tk.typeof with
   | FloatLiteral -> (FloatLit (float_of_string tk.value), forward parser)
   | StringLiteral -> (StringLit tk.value, forward parser)
-  | Ident -> (IdentExpr tk, forward parser)
+  | Ident -> (IdentExpr (tk, false), forward parser)
   | OParen -> lambda (forward parser)
   | _ -> raise (ParseError ("Expected an expression", tk))
 

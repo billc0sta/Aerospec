@@ -1,10 +1,10 @@
 # Language Syntax
 
 program          = (statement | comment)*
-statement        = ifstmt | loop | print | input | block | return | break | continue | exprstmt
+statement        = ifstmt | loop | block | return | break | continue | exprstmt
 ifstmt           = '??' expression statement ('::' statement)?
 expression       = assignexpr
-assignexpr       = ident (('=' | ":=") ifexpr)* | ifexpr 
+assignexpr       = ('$')? ident (('=' | ":=") ifexpr)* | ifexpr 
 ifexpr           = logic ('?' ifexpr ':' ifexpr)?
 logic_or         = equality ( "||" equality)*
 logic_and        = equality ( "&&" equality)*

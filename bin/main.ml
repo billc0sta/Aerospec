@@ -61,7 +61,10 @@ let print_error from message (token: Lexer.token) program =
 
 let program = 
 "
-print(\"Hello, World!\\n\")
+a = 10
+f := () {$a = 100}
+f()
+print(a)
 "
 
 let execute program debugging =

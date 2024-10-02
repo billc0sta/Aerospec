@@ -27,7 +27,7 @@ let rec evaluate expr inp =
 	| Binary (expr1, op, expr2) -> evaluate_binary expr1 expr2 op inp
 	| Unary (op, expr) -> evaluate_unary op expr inp 
 	| Grouping expr -> evaluate expr inp
-	| IdentExpr tk -> evaluate_ident tk inp
+	| IdentExpr (tk, global) -> evaluate_ident tk global inp
 	| IfExpr (cond, whentrue, whenfalse) -> evaluate_ifexpr cond whentrue whenfalse inp
 	| FunCall (target, arglist, tk) -> evaluate_funcall target arglist tk inp
 	| LambdaExpr (exprs, body, _) -> evaluate_lambda exprs body
@@ -38,7 +38,9 @@ and evaluate_lambda exprs body =
 		| [] -> (acc)
 		| x::xs -> begin 
 			match x with
-			| IdentExpr tk -> aux (tk.value::acc) xs
+			| IdentExpr (tk, global) -> 
+				if global then raise (RuntimeError ("invalid parameter", tk))
+				else aux (tk.value::acc) xs
 			| _ -> assert false;
 		end
 	in
@@ -134,20 +136,28 @@ and evaluate_unary op expr inp =
 	| Exclamation -> Bool (not (truth ev))
 	| Plus -> begin match ev with Float fl -> Float fl | _ -> raise_error ev end
 	| Minus -> begin match ev with Float fl -> Float (fl*.(-1.)) | _ -> raise_error ev end
-	| Tilde -> String (nameof ev) 
+	| Tilde -> String (nameof ev)
+	| At -> String (Value.stringify ev)
 	| _ -> assert false;
 
-and evaluate_ident tk inp =
-	let rec aux env = 	 
+and evaluate_ident tk global inp =
+	let rec aux env =
 		match Environment.find tk.value env with
 		| None -> 
 			begin
-				match env.parent with
-				| None -> raise (RuntimeError ("Unbinded variable '"^tk.value^"' was referenced", tk)) 
-				| Some env -> aux env
+				let env = 
+				try Environment.parent_of env 
+				with Invalid_argument _ -> raise (RuntimeError ("Unbinded variable '"^tk.value^"' was referenced", tk)) 
+				in aux env
 			end
 		| Some (value, _) -> value
-	in aux inp.env
+
+	in let env = if global then 
+		try Environment.parent_of inp.env
+		with Invalid_argument _ ->
+			raise (RuntimeError ("Global variable '"^tk.value^"' was referenced in global scope", tk))
+		else inp.env in
+	aux env
 
 and evaluate_ifexpr cond whentrue whenfalse inp =
 	let ev = evaluate cond inp in
@@ -161,14 +171,18 @@ and assignment target expr token inp =
 		| ConEqual -> false
 		| _ -> assert false;
 	in
-	let name = match target with | IdentExpr tk -> tk.value | _ -> assert false; in
+	let (name, global) = match target with | IdentExpr (tk, global) -> (tk.value, global) | _ -> assert false; in
 	let value = evaluate expr inp in
-	
-	match (Environment.find name inp.env) with
-	| None -> Environment.add name (value, mut) inp.env; value
+	let env = if global then
+		try Environment.parent_of inp.env
+		with Invalid_argument _ -> 
+			raise (RuntimeError ("Global variable '"^token.value^"' was referenced in global scope", token))
+		else inp.env in
+	match (Environment.find name env) with
+	| None -> Environment.add name (value, mut) env; value
 	| Some (_, mut) -> 
 		if not mut then raise (RuntimeError ("Cannot re-assign to a constant", token))
-		else Environment.replace name (value, mut) inp.env; value
+		else Environment.replace name (value, mut) env; value
 
 and exec_stmt stmt inp =
 		match stmt with
