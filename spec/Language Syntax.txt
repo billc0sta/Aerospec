@@ -1,7 +1,7 @@
 # Language Syntax
 
 program          = (statement | comment)*
-statement        = ifstmt | loop | block | return | break | continue | exprstmt
+statement        = ifstmt | loop | block | return | break | continue | exprstmt | no-op
 ifstmt           = '??' expression statement ('::' statement)?
 expression       = assignexpr
 assignexpr       = ('$')? ident (('=' | ":=") ifexpr)* | ifexpr 
@@ -29,7 +29,7 @@ range-op         = '>' | '>=' | '<' | '<='
 string           = '"' (writable)* '"'
 writable         = ' ' -> '~'
 grouping         = '(' expression ')'
-lambda           = "->" "(" ident ("," ident)* ")" block
+lambda           = "(" ident ("," ident)* ")" block
 builder          = '[' (range)? ';' (expression)? ';' expression ']'
 prototype        = '{' (ident ('=' | ':=') expression)* '}'
 loop             = ">>" expression statement
@@ -40,4 +40,5 @@ exprstmt         = expression
 return           = "->" (expression)?
 break            = "**"
 continue         = "<<"
+no-op            = ';'
 comment          = "//" writable*

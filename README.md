@@ -6,21 +6,15 @@ It's designed specifically to solve algorithm problems, so it contains a lot of 
 It supports functional, imperative, and prototype-based OOP styles, although the OOP might be a little quirky (but not useless).  
 The language contains no keywords and has a small standard library for various tasks.
 
----
-
 ## Literals
 
 - **Integer**: `12345`  
 - **Float**: `123.45`  
 - **String**: `"Hello, World!"`
 
----
-
 ## Types
 
 The language is dynamically and strongly typed; it doesn't allow weird implicit conversions.
-
----
 
 ## Numerics
 
@@ -28,14 +22,10 @@ Although integer literals exist, all numeric values in the language are computed
 The language includes the traditional trap values of signed `NaN` and `Inf`.  
 Most operators in the language are specific to numeric values, e.g., (`-`, `*`, `/`). Notice that the plus operator is not included because it performs concatenation on other sequence types.
 
----
-
 ## Strings
 
 Strings are indexable, mutable, and resizable. They can contain newlines and support escaped characters and values (e.g., `\n`, `\34`).  
 The plus operator `+` concatenates two strings into a new one. Equality and comparison operators (`==`, `>`...) are permitted on strings and are based on lexicographical order.
-
----
 
 ## Lambdas
 
@@ -43,8 +33,6 @@ Functions in **Symbolic** are just variables or constants with lambda values; th
 An example of a definition: `ident := (x, y) { -> x + y }`, which is called traditionally as `ident(x, y)`.  
 Functions are treated as first-class citizens, meaning they can be passed to other functions, stored in arrays or variables, and support closures.  
 Functions in objects (methods) have access to object fields through the dot pointer, e.g., `.field = value`. Objects will be explained further later.
-
----
 
 ## Objects
 
@@ -54,8 +42,6 @@ Functions have access to the object fields through the dot `.` operator, e.g., `
 Objects can add new fields (or attributes) after creation: `obj.new_field = value`.  
 If `new_field` was not initially defined, it comes into existence upon assignment. New functions can be added and operate on new fields.  
 The operator `:=` defines a constant field that cannot be changed by the object user, while `=` defines a regular variable field. More on assignment operators later.
-
----
 
 ## Arrays
 
@@ -73,8 +59,6 @@ Example: `arr[1:10, 0:5]` selects elements from range `1` through `9` and from s
 This also works for indexing one element:  
 Example: `arr[0, 1, 2]` selects index `1` from index `0`, and then index `2` from `[0][1]`.
 
----
-
 ### More examples on indexing, ranging, and selection:
 
 - `arr[x:y]` — select elements from `x` to `y` (non-inclusive)
@@ -84,8 +68,6 @@ Example: `arr[0, 1, 2]` selects index `1` from index `0`, and then index `2` fro
 - `arr[:, z]` — from each element of `arr`, select index `z`
 - `arr[x:y, z]` — from each element in range `x` to `y`, select index `z`
 - `arr[x:y, z:f]` — from each element in range `x` to `y`, select the range from `z` to `f`
-
----
 
 ## Booleans
 
@@ -102,8 +84,6 @@ To obtain the truthiness of a value, use `!!value`.
 5. Truthiness of a single value follows Python's rules: empty strings, arrays, objects, `0`, and `nil` evaluate to `false`; everything else evaluates to `true`.
 6. Objects are hashmaps and compared field by field, producing `true` only if all fields match exactly.
 7. Functions (or lambdas) are only true when compared with themselves, false when compared with any other function.
-
----
 
 ## Builders
 
