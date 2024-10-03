@@ -86,6 +86,10 @@ let rec _print_expr expr =
     print_string "(lambda (parameters";
     List.iter (fun expr -> print_string " "; _print_expr expr) params;
     print_string "))"
+  | ArrExpr (exprs, _) ->
+    print_string "[";
+    List.iter (fun expr -> print_string " "; _print_expr expr) exprs;
+    print_string " ]"
 
 let rec expression parser = assignexpr parser
 
@@ -199,9 +203,9 @@ and array_expr parser =
       | Comma -> aux (expr::exprs) (forward parser)
       | _ -> raise (ParseError ("Expected a Comma ','", tk))
     end
-
+  in
   let tk = peek parser in
-  in let (exprs, parser) = aux [] parser in
+  let (exprs, parser) = aux [] parser in
   (ArrExpr (List.rev exprs, tk), parser)
 
 and lambda_expr parser =

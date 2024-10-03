@@ -5,7 +5,7 @@ let print values =
 	Nil
 
 let input _ = 
-	String (read_line ())
+	make_rez_string (read_line ())
 
 let clock _ = 
 	Float (Sys.time ()) 

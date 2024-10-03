@@ -62,7 +62,8 @@ let print_error from message (token: Lexer.token) program =
 
 let program = 
 "
->> 1 {print(\"Hello, World\\n\")}
+a = [1, 2, 3]
+print(a)
 "
 
 let execute program debugging =

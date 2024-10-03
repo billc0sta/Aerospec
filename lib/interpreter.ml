@@ -16,14 +16,13 @@ let make raw =
 	state={return_expr=None; returned=false;
 	breaked=false; continued=false;
 	call_depth=0; loop_depth=0}} in
-	
 	add_natives inp.env;
 	inp
 
 let rec evaluate expr inp =
 	match expr with
 	| FloatLit fl -> Float fl
-	| StringLit str -> String str
+	| StringLit str -> make_rez_string str 
 	| Binary (expr1, op, expr2) -> evaluate_binary expr1 expr2 op inp
 	| Unary (op, expr) -> evaluate_unary op expr inp 
 	| Grouping expr -> evaluate expr inp
@@ -31,6 +30,12 @@ let rec evaluate expr inp =
 	| IfExpr (cond, whentrue, whenfalse) -> evaluate_ifexpr cond whentrue whenfalse inp
 	| FunCall (target, arglist, tk) -> evaluate_funcall target arglist tk inp
 	| LambdaExpr (exprs, body, _) -> evaluate_lambda exprs body
+	| ArrExpr (exprs, _) -> evaluate_arr exprs inp
+
+and evaluate_arr exprs inp = 
+	let arr = Resizable.make () in
+	List.iter (fun expr -> Resizable.append arr (evaluate expr inp)) exprs;
+	(Arr arr)
 
 and evaluate_lambda exprs body = 
 	let rec aux acc exprs =
@@ -96,7 +101,8 @@ and evaluate_binary expr1 expr2 op inp =
 		let (ev1, ev2) = ev_both expr1 expr2 in
 		match (ev1, ev2) with
 		| Float fl1, Float fl2 -> Float (fl1 +. fl2)
-		| String str1, String str2 -> String (str1 ^ str2)
+		| String str1, String str2 -> String (Resizable.merge str1 str2)
+		| Arr arr1, Arr arr2 -> Arr (Resizable.merge arr1 arr2)
 		| _ -> raise_error ev1 ev2
 		end
 	| EqualEqual -> begin
@@ -105,6 +111,7 @@ and evaluate_binary expr1 expr2 op inp =
 		| String str1, String str2 -> Bool (str1 = str2)
 		| Float fl1, Float fl2 -> Bool (fl1 = fl2)
 		| Bool b1, Bool b2 -> Bool (b1 = b2)
+		| Arr arr1, Arr arr2 -> Bool (arr1.arr = arr2.arr) 
 		| _ -> raise_error ev1 ev2 
 	end 
 	| ExcEqual -> begin
@@ -113,6 +120,7 @@ and evaluate_binary expr1 expr2 op inp =
 		| String str1, String str2 -> Bool (str1 <> str2)
 		| Float fl1, Float fl2 -> Bool (fl1 <> fl2)
 		| Bool b1, Bool b2 -> Bool (b1 <> b2)
+		| Arr arr1, Arr arr2 -> Bool (arr1 <> arr2) 
 		| _ -> raise_error ev1 ev2
 	end
 	| Minus -> Float (simple_binary expr1 expr2 (-.))
@@ -136,8 +144,8 @@ and evaluate_unary op expr inp =
 	| Exclamation -> Bool (not (truth ev))
 	| Plus -> begin match ev with Float fl -> Float fl | _ -> raise_error ev end
 	| Minus -> begin match ev with Float fl -> Float (fl*.(-1.)) | _ -> raise_error ev end
-	| Tilde -> String (nameof ev)
-	| At -> String (Value.stringify ev)
+	| Tilde -> (Value.make_rez_string (nameof ev))
+	| At -> (Value.make_rez_string (Value.stringify ev))
 	| _ -> assert false;
 
 and evaluate_ident tk global inp =
