@@ -11,6 +11,7 @@ type expr =
   | FunCall of expr * expr list * token
   | LambdaExpr of expr list * statement * token
   | ArrExpr of expr list * token
+  | Subscript of expr * expr * token
 
 and statement = 
   | Exprstmt of expr
@@ -90,6 +91,12 @@ let rec _print_expr expr =
     print_string "[";
     List.iter (fun expr -> print_string " "; _print_expr expr) exprs;
     print_string " ]"
+  | Subscript (expr, subexpr, _) ->
+    _print_expr expr;
+    print_string "(subscript [";
+    _print_expr subexpr;
+    print_string "])"
+
 
 let rec expression parser = assignexpr parser
 
@@ -153,11 +160,37 @@ and postary parser =
       let (expr, parser) = funcall expr (forward parser) in aux expr parser
       | _ -> raise (ParseError ("This value is not callable", tk))
     end
+    | OSquare -> begin 
+      let (expr, parser) = subscript expr (forward parser) in aux expr parser
+    end
     | _ -> (expr, parser) 
-      (* will add arrays indexing here later *)
   in
   let (expr, parser) = primary parser in
   aux expr parser
+
+and subscript expr parser =
+  let rec validate_expr expr =
+    match expr with
+    | IdentExpr _ | StringLit _ | ArrExpr _ | Subscript _ -> true
+    | Binary (expr1, {typeof=Plus; _}, expr2) -> validate_expr expr1 && validate_expr expr2
+    | _ -> false 
+  in
+  let rec validate_subexpr subexpr =
+    match subexpr with
+    | IdentExpr _ | FloatLit _ -> true
+    | Binary (expr1, _, expr2) -> validate_subexpr expr1 && validate_subexpr expr2
+    | _ -> false 
+  in
+  let tk = peek parser in
+  if not (validate_expr expr) then
+    raise (ParseError ("This expression is not subscriptable", tk))
+  else 
+  let (subexpr, parser) = expression parser in
+  if not (validate_subexpr subexpr) then 
+    raise (ParseError ("Cannot subscript with this expression", tk))
+  else
+  let parser = consume CSquare "Expected a Closing Square Bracket ']'" parser in
+  (Subscript (expr, subexpr, tk), parser)
 
 and funcall expr parser = 
   let tk = peek parser in

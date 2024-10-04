@@ -31,6 +31,26 @@ let rec evaluate expr inp =
 	| FunCall (target, arglist, tk) -> evaluate_funcall target arglist tk inp
 	| LambdaExpr (exprs, body, _) -> evaluate_lambda exprs body
 	| ArrExpr (exprs, _) -> evaluate_arr exprs inp
+	| Subscript (expr, subexpr, tk) -> evaluate_subscript expr subexpr tk inp
+
+and evaluate_subscript expr subexpr tk inp =
+	let sub_ev = evaluate subexpr inp in
+	let subscript = 
+		match sub_ev with Float fl -> fl | _ -> raise (RuntimeError (("Cannot subscript with value of type '"^nameof sub_ev^"'"), tk)) in
+	if Float.trunc subscript <> subscript then
+		raise (RuntimeError ("Cannot subscript with floating-point number", tk))
+	else 
+		let expr_ev = evaluate expr inp in
+		match expr_ev with
+		| Arr rez -> begin
+			try Resizable.get rez (int_of_float subscript)
+			with Invalid_argument _ -> raise (RuntimeError ("Accessing array out of bounds", tk))
+		end
+		| String rez -> begin
+			try make_rez_string (Char.escaped (Resizable.get rez (int_of_float subscript)))
+			with Invalid_argument _ -> raise (RuntimeError ("Accessing out of bounds", tk))
+		end
+		| _ -> raise (RuntimeError (("Value of type '"^nameof expr_ev^"' is not subscriptable"), tk))
 
 and evaluate_arr exprs inp = 
 	let arr = Resizable.make () in

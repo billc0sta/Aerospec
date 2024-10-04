@@ -43,7 +43,7 @@ let rec stringify = function
 			^")>")
 	| Nil -> "nil"
 	| NatFunc (_, params, _) -> 
-		("<native function ( "^
+		("<native ( "^
 			(List.fold_left (fun acc param -> (acc ^ param ^ " ")) "" params)
 			^")>")
 	| Arr arr -> 

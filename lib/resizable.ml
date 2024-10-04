@@ -33,7 +33,7 @@ let extend rez rez2 =
 	let comb_cap = rez.size + rez2.size in
 	let rez_cap = Array.length rez.arr in
 	if rez_cap < comb_cap then resize rez (max (rez_cap * 2) comb_cap) default;
-	for i=0 to rez2.size do
+	for i=0 to rez2.size - 1 do
 		rez.arr.(i+rez.size) <- rez2.arr.(i)
 	done;
 	rez.size <- rez.size + rez2.size
@@ -43,10 +43,10 @@ let merge rez1 rez2 =
 	if rez1.size = 0 && rez2.size = 0 then new_rez else
 	let default = if rez1.size = 0 then rez2.arr.(0) else rez1.arr.(0) in
 	resize new_rez (rez1.size+rez2.size) default;
-	for i=0 to rez1.size do
+	for i=0 to rez1.size - 1 do
 		append new_rez rez1.arr.(i) 
 	done;
-	for i=0 to rez2.size do
+	for i=0 to rez2.size - 1 do
 		append new_rez rez2.arr.(i) 
 	done;
 	new_rez

@@ -9,6 +9,7 @@ type expr =
   | FunCall of expr * expr list * Lexer.token
   | LambdaExpr of expr list * statement * Lexer.token
   | ArrExpr of expr list * Lexer.token
+  | Subscript of expr * expr * Lexer.token
 
 and statement = 
   | Exprstmt of expr

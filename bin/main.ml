@@ -56,14 +56,13 @@ let print_error from message (token: Lexer.token) program =
 	end in
 	print_string ("\n::"^from^"\n");
 	print_string ("  at line: "^string_of_int (token.line)^"\n");
-	print_string ("  here --> "^line^"\n");
+	print_string ("  here --\" "^line^" \"-- \n");
 	print_string ("  "^message^"\n---------------------------")
 
 
 let program = 
 "
-a = [1, 2, 3]
-print(a)
+print(print)
 "
 
 let execute program debugging =
@@ -90,4 +89,4 @@ let execute program debugging =
 	| Lexer.LexError (message, token) ->
 		print_error "Syntax Error" message token program
 
-let () = execute program true
+let () = execute program false
