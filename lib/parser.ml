@@ -48,7 +48,40 @@ let rec ungroup expr =
   | _ -> expr
 
 (*test*)
-let rec _print_expr expr =
+let rec _print_parsed l = 
+  let rec aux stmt =
+    match stmt with
+    | Exprstmt expr -> _print_expr expr; print_string "\n"
+    | IfStmt (expr, whentrue, whenfalse) -> 
+      print_string "if "; 
+      _print_expr expr; 
+      print_string " do \n"; 
+      aux whentrue;
+      print_string "if_end\n";
+      begin
+      match whenfalse with
+      | None -> ()
+      | Some block -> print_string "else do \n"; aux block
+      end
+    | Block block -> _print_parsed block;
+    | LoopStmt (cond, block) -> 
+      print_string "loop ";
+      _print_expr cond;
+      print_string " do \n";
+      aux block;
+      print_string "loop_end";
+    | Break _ -> print_string "break\n"
+    | Continue _ -> print_string "continue\n"
+    | NoOp _ -> print_string "no op\n"
+    | Return (expr, _) -> print_string "return "; _print_expr expr; print_string "\n";
+    ;
+  in
+  match l with
+  | [] -> ()
+  | x::xs -> aux x; _print_parsed xs
+
+(*test*)
+and _print_expr expr =
   match expr with
   | FloatLit fl ->
       let str = string_of_float fl in
@@ -83,9 +116,15 @@ let rec _print_expr expr =
     print_string "(arguments";
     List.iter (fun expr -> print_string " "; _print_expr expr) arglist;
     print_string "))";
-  | LambdaExpr (params, _, _) ->
+  | LambdaExpr (params, body, _) ->
     print_string "(lambda (parameters";
     List.iter (fun expr -> print_string " "; _print_expr expr) params;
+    print_string ") (body ";
+    begin
+    match body with
+    | Block stmts -> _print_parsed stmts;
+    | _ -> assert false;
+    end;
     print_string "))"
   | ArrExpr (exprs, _) ->
     print_string "[";

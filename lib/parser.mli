@@ -32,4 +32,4 @@ exception ParseError of string * Lexer.token
 val make: Lexer.token list -> t
 val expression: t -> expr * t
 val parse: t -> statement list
-val _print_expr: expr -> unit
+val _print_parsed: statement list -> unit
