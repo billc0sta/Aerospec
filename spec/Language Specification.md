@@ -65,7 +65,6 @@ Arrays are central to the language, with much built-in syntax specifically for t
 They support complex ranging as well as a constructor called a builder (a slightly more powerful list comprehension).  
 Array expression syntax: `[1, 2, 3, 4, 5]`. obtaining the size of a sequence (string or array) can be done using len(): `len(arr)` is the size of array `arr`.  
 Indexes are zero-based and bounds-checked; there is no relative (negative) indexing.  
-Arrays work similarly to C indexing.
 Example: `arr[1]` selects the element at index 1.  
 Ranges allow selecting multiple elements without using loops. They work similarly to Python ranges.  
 Example: `arr[1:10]` selects elements from index `1` through index `9`. is non-inclusive
@@ -74,13 +73,8 @@ both start and end can be omitted: `arr[:]` returns the whole array
 ### More examples on indexing, ranging, and selection:
 
 - `arr[x:y]` — select elements from `x` to `y` (non-inclusive)
-- `arr[x:]` — select elements from `x` to `#arr` (end omitted)
-- `arr[:y]` — select elements from `0` to `#arr` (beginning omitted)
-- `arr[x, y, :z]` — select index `x`, then index `y` from `[x]`, and from `[x][y]`, select the range from `0` to `z`
-- `arr[:, z]` — from each element of `arr`, select index `z`
-- `arr[x:y, z]` — from each element in range `x` to `y`, select index `z`
-- `arr[x:y, z:f]` — from each element in range `x` to `y`, select the range from `z` to `f`
-
+- `arr[x:]` — select elements from `x` to `len(arr)` (end omitted)
+- `arr[:y]` — select elements from `0` to `y` (start omitted)
 ---
 
 ## Booleans
