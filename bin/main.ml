@@ -30,30 +30,47 @@ let print_error from message (token: Lexer.token) program =
 
 let program =
 "
-	arr = [1, 2, 3, 4, 5, 6]
-	print(\"printing\\n\")
-	print(\"expected: [1, 2, 3, 4, 5, 6]\\n\")
-	print(\"output: \", arr, \"\\n\\n\")
+mandelbrot := (cx, cy, max_iter) {
+    zx = zy = iter = 0
+    >> (zx * zx + zy * zy <= 4 && iter < max_iter) {
+        xtemp = zx * zx - zy * zy + cx
+        zy = 2 * zx * zy + cy
+        zx = xtemp
+        iter = iter + 1
+    }
+    -> iter
+}
 
-	print(\"indexing - 1\\n\")
-	print(\"expected: 2\\n\")
-	print(\"output: \", arr[1], \"\\n\\n\")
+generate_mandelbrot := (width, height, max_iter, x_min, x_max, y_min, y_max) {
+    x_range := (x_max - x_min) / width
+    y_range := (y_max - y_min) / height
+    i = 0
+    >> (i < height) {
+        j = 0
+        >> (j < width) {
+            cx = x_min + j * x_range
+            cy = y_min + i * y_range
+            iter = mandelbrot(cx, cy, max_iter)
+            
+            ?? (iter == max_iter) print(\"*\")
+            :: print(\" \")
 
-	print(\"ranging - arr[:] begin and end omitted\\n\")
-	print(\"expected: [1, 2, 3, 4, 5, 6]\\n\")
-	print(\"output: \", arr[:], \"\\n\\n\")
+            j = j + 1
+        }
+        print(\"\n\")
+        i = i + 1
+    }
+}
 
-	print(\"ranging - arr[1:] end omitted\\n\")
-	print(\"expected: [2, 3, 4, 5, 6]\\n\")
-	print(\"output: \", arr[1:], \"\\n\\n\")
+width := 80
+height := 40
+max_iter := 100
+x_min := -2.5
+x_max := 1
+y_min := -1
+y_max := 1
 
-	print(\"ranging - arr[:3] begin omitted\\n\")
-	print(\"expected: [1, 2, 3]\\n\")
-	print(\"output: \", arr[:3], \"\\n\\n\")
-
-	print(\"len()\\n\")
-	print(\"expected: 6\\n\")
-	print(\"output: \", len(arr), \"\\n\")
+generate_mandelbrot(width, height, max_iter, x_min, x_max, y_min, y_max)
 "
 
 let execute program debugging =
