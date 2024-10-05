@@ -1,10 +1,9 @@
 # Aerospec
 
 **Aerospec** is a full-fledged dynamic imperative programming language with functional traits.  
-The language goal is for its code to be concise and short, without losing its readability.  
 It's designed specifically to solve algorithm problems, so it contains a lot of built-in golfing and declarative utilities.  
-It supports functional, imperative, and prototype-based OOP styles, although the OOP might be a little quirky (but not useless).  
-The language contains no keywords and has a small standard library for various tasks.
+It supports functional, imperative, and prototype-based OOP styles, though the OOP might be a little quirky (but not useless).  
+The language contains no keywords and has a small standard library for essential tasks.
 
 ---
 
@@ -39,7 +38,7 @@ The plus operator `+` concatenates two strings into a new one. Equality and comp
 
 ## Lambdas
 
-Functions in **Symbolic** are just variables or constants with lambda values; there is no distinction.  
+Functions in Aerospec are just variables or constants with lambda values; there is no distinction.  
 An example of a definition: `ident := (x, y) { -> x + y }`, which is called traditionally as `ident(x, y)`.  
 Functions are treated as first-class citizens, meaning they can be passed to other functions, stored in arrays or variables, and support closures.  
 Functions in objects (methods) have access to object fields through the dot pointer, e.g., `.field = value`. Objects will be explained further later.
@@ -47,6 +46,8 @@ Functions in objects (methods) have access to object fields through the dot poin
 ---
 
 ## Objects
+
+Note: Not yet implemented
 
 Objects are the fundamental building blocks of OOP in the language, similar to JavaScript objects.  
 Fields are defined as follows: `{field1="" field2=1234 ...}`. Fields can contain any value with any type, including functions.  
@@ -61,17 +62,14 @@ The operator `:=` defines a constant field that cannot be changed by the object 
 
 Arrays are n-dimensional, homogeneous, and resizable.  
 Arrays are central to the language, with much built-in syntax specifically for their usage.  
-They support complex ranging and selection, as well as a constructor called a builder (a slightly more powerful list comprehension).  
-Array expression syntax: `[1, 2, 3, 4, 5]`. A specific operator for obtaining the size of an array is `#` (pronounced as "size of"): `#arr` is the size of array `arr`.  
+They support complex ranging as well as a constructor called a builder (a slightly more powerful list comprehension).  
+Array expression syntax: `[1, 2, 3, 4, 5]`. obtaining the size of a sequence (string or array) can be done using len(): `len(arr)` is the size of array `arr`.  
 Indexes are zero-based and bounds-checked; there is no relative (negative) indexing.  
-Arrays work similarly to C indexing (without the segfaults).  
+Arrays work similarly to C indexing.
 Example: `arr[1]` selects the element at index 1.  
 Ranges allow selecting multiple elements without using loops. They work similarly to Python ranges.  
-Example: `arr[1:10]` selects elements from index `1` through index `9`.  
-Selections only work on multi-dimensional arrays, where it selects a specific index or range from each subarray.  
-Example: `arr[1:10, 0:5]` selects elements from range `1` through `9` and from subarrays from range `0` through `4`.  
-This also works for indexing one element:  
-Example: `arr[0, 1, 2]` selects index `1` from index `0`, and then index `2` from `[0][1]`.
+Example: `arr[1:10]` selects elements from index `1` through index `9`. is non-inclusive
+both start and end can be omitted: `arr[:]` returns the whole array
 
 ### More examples on indexing, ranging, and selection:
 
@@ -93,9 +91,9 @@ To obtain the truthiness of a value, use `!!value`.
 
 ### Evaluation rules:
 
-1. All equality and comparison operators result in a boolean.
+1. Equality and comparison operators result in a boolean.
 2. Any type can be compared using the equality operators.
-3. Comparing two different types raises a type error (not silently true or false).
+3. Comparing two different types raises a type error (not silently true nor false).
 4. Strings are compared lexicographically.
 5. Truthiness of a single value follows Python's rules: empty strings, arrays, objects, `0`, and `nil` evaluate to `false`; everything else evaluates to `true`.
 6. Objects are hashmaps and compared field by field, producing `true` only if all fields match exactly.
@@ -104,6 +102,8 @@ To obtain the truthiness of a value, use `!!value`.
 ---
 
 ## Builders
+
+Note: Not yet implemented
 
 Builders are a declarative way to construct arrays, very similar to Python's list comprehensions.  
 The syntax is `[range; condition; expression]`.  
