@@ -139,6 +139,10 @@ and _print_expr expr =
 
 let rec expression parser = assignexpr parser
 
+(* (((zx=zy)=iter)=0) *)
+(* (zx=(zy=(iter=0))) *)
+(* (zx=(zy=(iter=0))) *)
+
 and assignexpr parser = 
   let (expr, parser) = ifexpr parser in
   let rec aux expr parser = 
@@ -149,10 +153,10 @@ and assignexpr parser =
       let parser = forward parser in
       match expr with
       | IdentExpr _ -> 
-        let (expr2, parser) = ifexpr parser in 
+        let (expr2, parser) = assignexpr parser in 
         aux (Binary (expr, tk, expr2)) parser
       | Unary ({typeof=Dollar; _}, IdentExpr (name, _)) -> 
-        let (expr2, parser) = ifexpr parser in 
+        let (expr2, parser) = assignexpr parser in 
         aux (Binary (IdentExpr (name, true), tk, expr2)) parser
       | _ -> raise (ParseError ("Cannot assign to an expression", tk))
     end

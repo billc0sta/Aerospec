@@ -4,10 +4,10 @@ program          = (statement | comment)*
 statement        = ifstmt | loop | block | return | break | continue | exprstmt | no-op
 ifstmt           = '??' expression statement ('::' statement)?
 expression       = assignexpr
-assignexpr       = ('$')? ident (('=' | ":=") ifexpr)* | ifexpr 
+assignexpr       = ('$')? ident (('=' | ":=") assignexpr)? | ifexpr 
 ifexpr           = logic ('?' ifexpr ':' ifexpr)?
-logic_or         = equality ( "||" equality)*
-logic_and        = equality ( "&&" equality)*
+logic_or         = equality ("||" equality)*
+logic_and        = equality ("&&" equality)*
 equality         = relation (("==" | "!=") relation)*
 relation         = basic ((">" | "<" | ">=" | "<=") basic)*
 basic            = factor (("+" | "-") factor)*
@@ -34,8 +34,6 @@ builder          = '[' (range)? ';' (expression)? ';' expression ']'
 prototype        = '{' (ident ('=' | ':=') expression)* '}'
 loop             = ">>" expression statement
 block            = '{' (statement)* '}'
-print            = '@' expression
-input            = '$'
 exprstmt         = expression
 return           = "->" expression
 break            = "**"

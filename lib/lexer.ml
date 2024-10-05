@@ -198,7 +198,7 @@ let next_token lexer =
 	| '/' -> begin let lexer = forward lexer in match peek lexer with '/' -> (TwoSlash, forward lexer) | _ -> (Slash, lexer) end
 	| '-' -> begin let lexer = forward lexer in match peek lexer with '>' -> (Arrow, forward lexer) | _ -> (Minus, lexer) end
 	| '>' -> begin let lexer = forward lexer in match peek lexer with '>' -> (Right, forward lexer) | '=' -> (GreatEqual, forward lexer) | _ -> (Greater, lexer) end
-	| '<' -> begin let lexer = forward lexer in match peek lexer with '<' -> (Left, forward lexer) | '=' -> (GreatEqual, forward lexer) | _ -> (Lesser, lexer) end
+	| '<' -> begin let lexer = forward lexer in match peek lexer with '<' -> (Left, forward lexer) | '=' -> (LessEqual, forward lexer) | _ -> (Lesser, lexer) end
 	| ':' -> begin let lexer = forward lexer in match peek lexer with '=' -> (ConEqual, forward lexer) | ':' -> (TwoColon, forward lexer) | _ -> (Colon, lexer) end
 	| '!' -> begin let lexer = forward lexer in match peek lexer with '=' -> (ExcEqual, forward lexer) | _ -> (Exclamation, lexer) end
 	| c when c = (Char.chr 0) -> (EOF, lexer)

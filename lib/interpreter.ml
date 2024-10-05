@@ -9,7 +9,8 @@ type t = {env: Environment.t; raw: statement list; state: state}
 let add_natives env =
 	Environment.add "print" (NatFunc (256, ["params..."], Natives.print), true) env; 
 	Environment.add "input" (NatFunc (0, [], Natives.input), true) env; 
-	Environment.add "clock" (NatFunc (0, [], Natives.clock), true) env
+	Environment.add "clock" (NatFunc (0, [], Natives.clock), true) env;
+	Environment.add "len" (NatFunc (1, ["sequence"], Natives.len), true) env
 
 let make raw = 
 	let inp = {raw; env=(Environment.make ());
@@ -107,7 +108,10 @@ and evaluate_natfunc paramc arglist func tk inp =
 		raise (RuntimeError ("The number of arguments do not match the number of parameters", tk))
 	else
 		let val_list = List.map (fun expr -> evaluate expr inp) arglist in
-		func val_list
+		let value = try
+			func val_list
+		with Invalid_argument message -> raise (RuntimeError (message, tk))
+		in value
 
 and evaluate_binary expr1 expr2 op inp =
 	let raise_error =  (fun ev1 ev2 -> raise (RuntimeError 
@@ -255,11 +259,12 @@ and if_stmt cond whentrue whenfalse inp =
 		| Some block -> exec_stmt block inp
 
 and loop_stmt cond stmt inp =
+	let inp = {inp with state={inp.state with loop_depth=inp.state.loop_depth+1}} in
 	let rec aux inp =
-		let inp = {inp with state={inp.state with loop_depth=inp.state.loop_depth+1}} in
 		if truth (evaluate cond inp) then
 			let inp = exec_stmt stmt inp in
-			if inp.state.breaked then inp
+			if inp.state.breaked then {inp with state={inp.state with breaked=false}}
+			else if inp.state.continued then aux {inp with state={inp.state with continued=false}}
 			else aux inp
 		else inp
 	in aux inp 
