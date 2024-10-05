@@ -1,7 +1,8 @@
 # Aerospec
 
 a full-fledged dynamic imperative programming language with functional traits.  
-documents will be available soon, for now, here's how you can implement Mandelbrot set in Aerospec  
+documents will be available soon, for now, there's only minimal specification [spec/Language Specification.md](here).  
+here's how you can implement Mandelbrot set in Aerospec  
 ```Aerospec
 mandelbrot := (cx, cy, max_iter) {
     zx = zy = iter = 0
