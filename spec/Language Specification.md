@@ -1,6 +1,6 @@
-# Symbolic
+# Aerospec
 
-**Symbolic** is a full-fledged dynamic imperative programming language with functional traits.  
+**Aerospec** is a full-fledged dynamic imperative programming language with functional traits.  
 The language goal is for its code to be concise and short, without losing its readability.  
 It's designed specifically to solve algorithm problems, so it contains a lot of built-in golfing and declarative utilities.  
 It supports functional, imperative, and prototype-based OOP styles, although the OOP might be a little quirky (but not useless).  

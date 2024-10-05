@@ -9,7 +9,7 @@ let resize rez size default =
 
 let append rez elem =
 	if rez.size = Array.length rez.arr 
-		then resize rez (max 1 (rez.size*2)) elem;
+		then resize rez (max 8 (rez.size*2)) elem;
 	rez.arr.(rez.size) <- elem;
 	rez.size <- rez.size + 1
 	
@@ -18,7 +18,7 @@ let insert rez index elem =
 		raise (Invalid_argument "Resizable.insert")
 	else
 	if rez.size = Array.length rez.arr 
-		then resize rez (max 1 (rez.size*2)) elem;
+		then resize rez (max 8 (rez.size*2)) elem;
 	let rec aux i prev =
 		if i > rez.size then () else
 		let newel = rez.arr.(i) in
@@ -87,3 +87,16 @@ let get rez index =
 	if index < 0 || index >= rez.size then
 	raise (Invalid_argument "Resizable.get: index out of bounds") 
 	else rez.arr.(index) 
+
+let range rez beginning ending =
+	if beginning < 0 || beginning >= len rez || 
+		 ending < 0 || ending > len rez ||
+		 ending < beginning then
+		raise (Invalid_argument "Resizable.range: index out of bounds")
+	else
+	let new_rez = make () in
+	resize new_rez (ending - beginning) rez.arr.(0);
+	new_rez.size <- ending - beginning;
+	for i = beginning to ending - 1 do
+		new_rez.arr.(i-beginning) <- rez.arr.(i);
+	done; new_rez 

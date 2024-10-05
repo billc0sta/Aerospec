@@ -10,9 +10,9 @@ let input _ =
 let clock _ = 
 	Float (Sys.time ()) 
 
-let len sequence =
-	let seq = List.hd sequence in
+let len params =
+	let seq = List.hd params in
 	match seq with
 	| String rez -> Float (float_of_int (Resizable.len rez)) 
 	| Arr rez -> Float (float_of_int (Resizable.len rez))
-	| _ -> raise (Invalid_argument "non-sequence value was passed to len()") 
+	| _ -> raise (Invalid_argument "non-sequence value was passed to len()")

@@ -11,7 +11,7 @@ type expr =
   | FunCall of expr * expr list * token
   | LambdaExpr of expr list * statement * token
   | ArrExpr of expr list * token
-  | Subscript of expr * expr * token
+  | Subscript of expr * (expr * expr option) * token
 
 and statement = 
   | Exprstmt of expr
@@ -133,15 +133,14 @@ and _print_expr expr =
   | Subscript (expr, subexpr, _) ->
     _print_expr expr;
     print_string "(subscript [";
-    _print_expr subexpr;
+    _print_expr (fst subexpr);
+    match (snd subexpr) with
+    | None -> ()
+    | Some expr -> print_string ":"; _print_expr expr;
     print_string "])"
 
 
 let rec expression parser = assignexpr parser
-
-(* (((zx=zy)=iter)=0) *)
-(* (zx=(zy=(iter=0))) *)
-(* (zx=(zy=(iter=0))) *)
 
 and assignexpr parser = 
   let (expr, parser) = ifexpr parser in
@@ -151,7 +150,7 @@ and assignexpr parser =
     | Equal | ConEqual -> 
     begin
       let parser = forward parser in
-      match expr with
+      match ungroup expr with
       | IdentExpr _ -> 
         let (expr2, parser) = assignexpr parser in 
         aux (Binary (expr, tk, expr2)) parser
@@ -228,8 +227,27 @@ and subscript expr parser =
   if not (validate_expr expr) then
     raise (ParseError ("This expression is not subscriptable", tk))
   else 
-  let (subexpr, parser) = expression parser in
-  if not (validate_subexpr subexpr) then 
+
+  let (subexpr, parser) =
+    let (beginning, parser) = 
+    match tk.typeof with
+    | Colon -> (FloatLit (Float.neg_infinity), parser)
+    | _ -> expression parser in
+    let (endof, parser) =
+    match (peek parser).typeof with
+    | Colon -> begin
+      let parser = forward parser in
+      match (peek parser).typeof with
+      | CSquare -> (Some (FloatLit (Float.infinity)), parser)
+      | _ -> let (expr, parser) = expression parser in (Some expr, parser)
+    end
+    | _ -> (None, parser)
+    in ((beginning, endof), parser)
+  in
+  let valid_subexpr = (validate_subexpr (fst subexpr) &&
+    match (snd subexpr) with None -> true | Some expr -> validate_subexpr expr)
+  in
+  if not valid_subexpr then 
     raise (ParseError ("Cannot subscript with this expression", tk))
   else
   let parser = consume CSquare "Expected a Closing Square Bracket ']'" parser in

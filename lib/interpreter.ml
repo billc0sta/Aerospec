@@ -35,23 +35,58 @@ let rec evaluate expr inp =
 	| Subscript (expr, subexpr, tk) -> evaluate_subscript expr subexpr tk inp
 
 and evaluate_subscript expr subexpr tk inp =
-	let sub_ev = evaluate subexpr inp in
-	let subscript = 
-		match sub_ev with Float fl -> fl | _ -> raise (RuntimeError (("Cannot subscript with value of type '"^nameof sub_ev^"'"), tk)) in
-	if Float.trunc subscript <> subscript then
-		raise (RuntimeError ("Cannot subscript with floating-point number", tk))
-	else 
-		let expr_ev = evaluate expr inp in
-		match expr_ev with
+
+	let ev_subexpr expr =
+		let ev = evaluate expr inp in
+		match ev with 
+		| Float fl -> begin
+			if Float.trunc fl <> fl then
+				raise (RuntimeError ("Cannot subscript with floating-point number", tk))
+			else if fl < 0.0 && fl <> Float.neg_infinity then
+				raise (RuntimeError ("Cannot subscript with a negative number", tk))
+			else fl 
+		end 
+		| _ -> raise (RuntimeError (("Cannot subscript with value of type '"^nameof ev^"'"), tk))
+		in
+
+	match subexpr with
+	| (expr1, Some expr2) -> begin
+		let beginning = ev_subexpr expr1 in
+		let ending    = ev_subexpr expr2 in
+		let ev = evaluate expr inp in
+		match ev with
 		| Arr rez -> begin
-			try Resizable.get rez (int_of_float subscript)
+			let beginning = if beginning = Float.neg_infinity then 0 else int_of_float beginning in
+			let ending    = if ending = Float.infinity then Resizable.len rez else int_of_float ending in
+			
+			try Arr (Resizable.range rez beginning ending)
 			with Invalid_argument _ -> raise (RuntimeError ("Accessing array out of bounds", tk))
 		end
 		| String rez -> begin
-			try make_rez_string (Char.escaped (Resizable.get rez (int_of_float subscript)))
-			with Invalid_argument _ -> raise (RuntimeError ("Accessing out of bounds", tk))
+			let beginning = if beginning = Float.neg_infinity then 0 else int_of_float beginning in
+			let ending    = if ending = Float.infinity then Resizable.len rez else int_of_float ending in
+			
+			try String (Resizable.range rez beginning ending)
+			with Invalid_argument _ -> raise (RuntimeError ("Accessing string out of bounds", tk))
 		end
-		| _ -> raise (RuntimeError (("Value of type '"^nameof expr_ev^"' is not subscriptable"), tk))
+		| _ -> raise (RuntimeError (("Value of type '"^nameof ev^"' is not subscriptable"), tk))
+	end
+
+	| (subexpr, None) -> begin
+		let subscript = (ev_subexpr subexpr) in
+		let subscript = if subscript = Float.neg_infinity then 0 else int_of_float subscript in
+		let ev = evaluate expr inp in
+		match ev with
+		| Arr rez -> begin
+			try Resizable.get rez subscript
+			with Invalid_argument _ -> raise (RuntimeError ("Accessing array out of bounds", tk))
+		end
+		| String rez -> begin
+			try make_rez_string (Char.escaped (Resizable.get rez subscript))
+			with Invalid_argument _ -> raise (RuntimeError ("Accessing string out of bounds", tk))
+		end
+		| _ -> raise (RuntimeError (("Value of type '"^nameof ev^"' is not subscriptable"), tk))
+	end
 
 and evaluate_arr exprs inp = 
 	let arr = Resizable.make () in

@@ -30,10 +30,31 @@ let print_error from message (token: Lexer.token) program =
 
 let program =
 "
->> 1 **
-print(\"Hello, World!\")
-"
+	arr = [1, 2, 3, 4, 5, 6]
+	print(\"printing\\n\")
+	print(\"expected: [1, 2, 3, 4, 5, 6]\\n\")
+	print(\"output: \", arr, \"\\n\\n\")
 
+	print(\"indexing - 1\\n\")
+	print(\"expected: 2\\n\")
+	print(\"output: \", arr[1], \"\\n\\n\")
+
+	print(\"ranging - arr[:] begin and end omitted\\n\")
+	print(\"expected: [1, 2, 3, 4, 5, 6]\\n\")
+	print(\"output: \", arr[:], \"\\n\\n\")
+
+	print(\"ranging - arr[1:] end omitted\\n\")
+	print(\"expected: [2, 3, 4, 5, 6]\\n\")
+	print(\"output: \", arr[1:], \"\\n\\n\")
+
+	print(\"ranging - arr[:3] begin omitted\\n\")
+	print(\"expected: [1, 2, 3]\\n\")
+	print(\"output: \", arr[:3], \"\\n\\n\")
+
+	print(\"len()\\n\")
+	print(\"expected: 6\\n\")
+	print(\"output: \", len(arr), \"\\n\")
+"
 
 let execute program debugging =
 	let lexer = Lexer.make program in
@@ -59,13 +80,12 @@ let execute program debugging =
 	| Lexer.LexError (message, token) ->
 		print_error "Syntax Error" message token program
 
-let () = execute program true
+let () = execute program false
 
 (* TODO-list:
-1. make test suite
-2. add array ranging
-3. add ranging
-4. add builders
-5. add sequence native functions
-6. add pipeline operator '|>'
+1. add index assignment
+2. add ranging
+3. add builders
+4. add sequence native functions
+5. add pipeline operator '|>'
 *)

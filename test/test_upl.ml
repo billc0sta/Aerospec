@@ -11,7 +11,6 @@ let test_no_failure name program =
 	let interpreter = Interpreter.make parsed in
 	Interpreter.run interpreter
 
-
 let () = 
 	test_no_failure "if statements"
 	"
@@ -191,18 +190,29 @@ let () =
 
 	test_no_failure "arrays"
 	"
-	arr = [1, 2, 3]
+	arr = [1, 2, 3, 4, 5, 6]
 	print(\"printing\\n\")
-	print(\"expected: [1, 2, 3]\\n\")
+	print(\"expected: [1, 2, 3, 4, 5, 6]\\n\")
 	print(\"output: \", arr, \"\\n\\n\")
 
-	arr = [1, 2, 3]
 	print(\"indexing - 1\\n\")
 	print(\"expected: 2\\n\")
-	print(\"output: \", arr[1], \"\\n\")
+	print(\"output: \", arr[1], \"\\n\\n\")
+
+	print(\"ranging - arr[:] begin and end omitted\\n\")
+	print(\"expected: [1, 2, 3, 4, 5, 6]\\n\")
+	print(\"output: \", arr[:], \"\\n\\n\")
+
+	print(\"ranging - arr[1:] end omitted\\n\")
+	print(\"expected: [2, 3, 4, 5, 6]\\n\")
+	print(\"output: \", arr[1:], \"\\n\\n\")
+
+	print(\"ranging - arr[:3] begin omitted\\n\")
+	print(\"expected: [1, 2, 3]\\n\")
+	print(\"output: \", arr[:3], \"\\n\\n\")
 
 	print(\"len()\\n\")
-	print(\"expected: 3\\n\")
+	print(\"expected: 6\\n\")
 	print(\"output: \", len(arr), \"\\n\")
 	";
 
@@ -232,5 +242,5 @@ let () =
 
 	print(\"one argument - recurses upon parameter until reaches 10\\n\")
 	print(\"expected: 10\\n\")
-	print(\"output: \", recursive(0), \"\\n")
+	print(\"output: \", recursive(0), \"\\n\")
 	"
