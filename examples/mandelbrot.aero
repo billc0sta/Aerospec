@@ -1,8 +1,3 @@
-# Aerospec
-
-a full-fledged dynamic imperative programming language with functional traits.  
-documents will be available soon, for now, here's how you can implement Mandelbrot set in Aerospec  
-```Aerospec
 mandelbrot := (cx, cy, max_iter) {
     zx = zy = iter = 0
     >> (zx * zx + zy * zy <= 4 && iter < max_iter) {
@@ -44,9 +39,3 @@ y_min := -1
 y_max := 1
 
 generate_mandelbrot(width, height, max_iter, x_min, x_max, y_min, y_max)
-```
-
-to run programs use: 
-```
-./_build/default/bin/main.exe program.aero
-```
