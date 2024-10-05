@@ -25,7 +25,7 @@ The language is dynamically and strongly typed; it doesn't allow weird implicit 
 
 Although integer literals exist, all numeric values in the language are computed as double-precision floats.  
 The language includes the traditional trap values of signed `NaN` and `Inf`.  
-Most operators in the language are specific to numeric values, e.g., (`-`, `*`, `/`). Notice that the plus operator is not included because it performs concatenation on other sequence types.
+Most operators in the language are specific to numeric values, e.g., (`-`, `*`, `/`). the plus operator is not specific to numerics since it performs concatenation on sequence types.
 
 ---
 
