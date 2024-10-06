@@ -211,6 +211,11 @@ let () =
 	print(\"expected: [1, 2, 3]\\n\")
 	print(\"output: \", arr[:3], \"\\n\\n\")
 
+	arr[3] = 100
+	print(\"index assigning - arr[3] = 100\\n\")
+	print(\"expected: [1, 2, 3, 100, 5, 6]\\n\")
+	print(\"output: \", arr, \"\\n\\n\")
+
 	print(\"len()\\n\")
 	print(\"expected: 6\\n\")
 	print(\"output: \", len(arr), \"\\n\")

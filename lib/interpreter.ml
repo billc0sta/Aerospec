@@ -34,25 +34,24 @@ let rec evaluate expr inp =
 	| ArrExpr (exprs, _) -> evaluate_arr exprs inp
 	| Subscript (expr, subexpr, tk) -> evaluate_subscript expr subexpr tk inp
 
+and ev_subexpr expr tk inp =
+	let ev = evaluate expr inp in
+	match ev with 
+	| Float fl -> begin
+		if Float.trunc fl <> fl then
+			raise (RuntimeError ("Cannot subscript with floating-point number", tk))
+		else if fl < 0.0 && fl <> Float.neg_infinity then
+			raise (RuntimeError ("Cannot subscript with a negative number", tk))
+		else fl 
+	end 
+	| _ -> raise (RuntimeError (("Cannot subscript with value of type '"^nameof ev^"'"), tk))
+	
 and evaluate_subscript expr subexpr tk inp =
-
-	let ev_subexpr expr =
-		let ev = evaluate expr inp in
-		match ev with 
-		| Float fl -> begin
-			if Float.trunc fl <> fl then
-				raise (RuntimeError ("Cannot subscript with floating-point number", tk))
-			else if fl < 0.0 && fl <> Float.neg_infinity then
-				raise (RuntimeError ("Cannot subscript with a negative number", tk))
-			else fl 
-		end 
-		| _ -> raise (RuntimeError (("Cannot subscript with value of type '"^nameof ev^"'"), tk))
-		in
 
 	match subexpr with
 	| (expr1, Some expr2) -> begin
-		let beginning = ev_subexpr expr1 in
-		let ending    = ev_subexpr expr2 in
+		let beginning = ev_subexpr expr1 tk inp in
+		let ending    = ev_subexpr expr2 tk inp in
 		let ev = evaluate expr inp in
 		match ev with
 		| Arr rez -> begin
@@ -73,7 +72,7 @@ and evaluate_subscript expr subexpr tk inp =
 	end
 
 	| (subexpr, None) -> begin
-		let subscript = (ev_subexpr subexpr) in
+		let subscript = (ev_subexpr subexpr tk inp) in
 		let subscript = if subscript = Float.neg_infinity then 0 else int_of_float subscript in
 		let ev = evaluate expr inp in
 		match ev with
@@ -238,18 +237,83 @@ and assignment target expr token inp =
 		| ConEqual -> false
 		| _ -> assert false;
 	in
-	let (name, global) = match target with | IdentExpr (tk, global) -> (tk.value, global) | _ -> assert false; in
-	let value = evaluate expr inp in
+ 	match target with 
+	| IdentExpr _ -> assign_ident mut expr target inp
+	| Subscript (target, (index, None), tk) -> 
+		if mut then raise (RuntimeError ("Cannot constant-assign an index", tk))
+		else assign_subscript expr target index inp
+	| _ -> assert false
+
+and assign_subscript expr target index inp =
+  let (name, global, token) =
+    match target with
+    | IdentExpr(tk, global) -> (tk.value, global, tk)
+    | _ -> assert false
+  in
+  let env = 
+    if global then
+      try Environment.parent_of inp.env
+      with Invalid_argument _ ->
+        raise (RuntimeError ("Global variable '" ^ token.value ^ "' was referenced in global scope", token))
+    else inp.env
+  in
+  match (Environment.find name env) with
+  | None -> raise (RuntimeError ("Unbound variable '" ^ token.value ^ "' was referenced", token))
+  | Some (arr, mut) ->
+    if not mut then raise (RuntimeError ("Cannot re-assign to a constant", token))
+    else
+      match arr with
+      | Arr rez ->
+        let index = int_of_float (ev_subexpr index token inp) in
+        let value = evaluate expr inp in
+        begin
+          try Resizable.putat rez index value; value
+          with Invalid_argument _ ->
+            raise (RuntimeError ("Accessing array out of bounds", token))
+        end
+      | String rez ->
+        let index = int_of_float (ev_subexpr index token inp) in
+        let value = evaluate expr inp in
+        begin
+          match value with
+          | String chr ->
+            let length = Resizable.len chr in
+            if length <> 1 then
+              raise (RuntimeError ("Assigning invalid character count value to a string index", token))
+            else
+            	begin
+              try Resizable.putat rez index (Resizable.get chr 0); value
+              with Invalid_argument _ ->
+                raise (RuntimeError ("Accessing array out of bounds", token))
+          		end
+          | _ ->
+            raise (RuntimeError ("Cannot assign to a string index with value of type '" ^ nameof value ^ "'", token))
+        end
+      | _ -> raise (RuntimeError (("Value of type '"^nameof arr^"' is not subscriptable"), token))
+
+and assign_ident ismut expr ident inp =
+	let (name, global, token) = 
+	match ident with
+	| IdentExpr(tk, global) -> (tk.value, global, tk)
+	| _ -> assert false;
+	in 
 	let env = if global then
 		try Environment.parent_of inp.env
 		with Invalid_argument _ -> 
 			raise (RuntimeError ("Global variable '"^token.value^"' was referenced in global scope", token))
-		else inp.env in
+		else inp.env 
+	in
 	match (Environment.find name env) with
-	| None -> Environment.add name (value, mut) env; value
-	| Some (_, mut) -> 
+	| None -> begin
+		let value = evaluate expr inp in
+		Environment.add name (value, ismut) env; value
+	end
+	| Some (_, mut) -> begin 
 		if not mut then raise (RuntimeError ("Cannot re-assign to a constant", token))
-		else Environment.replace name (value, mut) env; value
+		else 
+		let value = evaluate expr inp in
+		Environment.replace name (value, ismut) env; value
+	end
 
 and exec_stmt stmt inp =
 		match stmt with

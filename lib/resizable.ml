@@ -85,8 +85,13 @@ let len rez = rez.size
 
 let get rez index = 
 	if index < 0 || index >= rez.size then
+	raise (Invalid_argument "Resizable.get: index out of bounds")
+	else rez.arr.(index)
+
+let putat rez index elem =
+	if index < 0 || index >= rez.size then
 	raise (Invalid_argument "Resizable.get: index out of bounds") 
-	else rez.arr.(index) 
+	else rez.arr.(index) <- elem
 
 let range rez beginning ending =
 	if beginning < 0 || beginning >= len rez || 

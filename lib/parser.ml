@@ -138,7 +138,7 @@ and _print_expr expr =
     | None -> ()
     | Some expr -> print_string ":"; _print_expr expr;
     print_string "])"
-
+    
 
 let rec expression parser = assignexpr parser
 
@@ -151,6 +151,16 @@ and assignexpr parser =
     begin
       let parser = forward parser in
       match ungroup expr with
+      | Subscript (target, (index, None), tk) -> begin
+        match ungroup target with
+        | IdentExpr _ -> 
+          let (expr2, parser) = assignexpr parser in 
+          aux (Binary (expr, tk, expr2)) parser
+        | Unary ({typeof=Dollar; _}, IdentExpr (name, _)) -> 
+          let (expr2, parser) = assignexpr parser in 
+          aux (Binary (Subscript (IdentExpr (name, true), (index, None), tk), tk, expr2)) parser
+        | _ -> raise (ParseError ("Cannot assign to an expression", tk))
+      end
       | IdentExpr _ -> 
         let (expr2, parser) = assignexpr parser in 
         aux (Binary (expr, tk, expr2)) parser

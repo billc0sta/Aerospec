@@ -15,4 +15,4 @@ let len params =
 	match seq with
 	| String rez -> Float (float_of_int (Resizable.len rez)) 
 	| Arr rez -> Float (float_of_int (Resizable.len rez))
-	| _ -> raise (Invalid_argument "non-sequence value was passed to len()")
+	| _ -> raise (Invalid_argument "non-sequence value was passed to len")
