@@ -7,10 +7,19 @@ type state = {return_expr: expr option; returned: bool; breaked: bool; continued
 type t = {env: Environment.t; raw: statement list; state: state}
 
 let add_natives env =
-	Environment.add "print" (NatFunc (256, ["params..."], Natives.print), true) env; 
+	Environment.add "print" (NatFunc (256+1, ["params..."], Natives.print), true) env;
 	Environment.add "input" (NatFunc (0, [], Natives.input), true) env; 
 	Environment.add "clock" (NatFunc (0, [], Natives.clock), true) env;
-	Environment.add "len" (NatFunc (1, ["sequence"], Natives.len), true) env
+	Environment.add "len" (NatFunc (1, ["sequence"], Natives.len), true) env;
+	Environment.add "append" (NatFunc (256+2, ["sequence"; "elements..."], Natives.append), true) env;
+	Environment.add "insert" (NatFunc (3, ["sequence"; "index"; "elem"], Natives.insert), true) env;
+	Environment.add "extend" (NatFunc (256+2, ["sequence"; "sequences..."], Natives.extend), true) env;
+	Environment.add "merge" (NatFunc (256+2, ["sequence"; "sequences..."], Natives.merge), true) env;
+	Environment.add "index" (NatFunc (2, ["sequence"; "element"], Natives.index), true) env;
+	Environment.add "pop" (NatFunc (256+2, ["sequence"; "indices..."], Natives.pop), true) env;
+	Environment.add "remove" (NatFunc (256+2, ["sequence"; "elements..."], Natives.remove), true) env;
+	Environment.add "clear" (NatFunc (1, ["sequence"], Natives.clear), true) env;
+	Environment.add "count" (NatFunc (2, ["sequence"; "element"], Natives.count), true) env
 
 let make raw = 
 	let inp = {raw; env=(Environment.make ());
@@ -138,7 +147,7 @@ and evaluate_func arglist params body tk inp =
 and evaluate_natfunc paramc arglist func tk inp =
 	let arg_len   = List.length arglist in
 	let param_len = paramc in
-	if param_len <> 256 && param_len <> arg_len then
+	if not (param_len = arg_len || param_len >= 256 && arg_len >= (param_len - 256)) then
 		raise (RuntimeError ("The number of arguments do not match the number of parameters", tk))
 	else
 		let val_list = List.map (fun expr -> evaluate expr inp) arglist in

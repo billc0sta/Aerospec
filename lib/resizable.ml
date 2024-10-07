@@ -65,11 +65,12 @@ let pop rez index =
 	else 
 	for i=index to rez.size - 1 do
 		rez.arr.(i) <- rez.arr.(i+1);
-	done
+	done;
+	rez.size <- rez.size - 1
 
 let remove rez elem =
 	let i = index rez elem in
-	if i  = -1 then () else
+	if  i = -1 then () else
 	pop rez i
 
 let clear rez = rez.size <- 0
@@ -105,3 +106,8 @@ let range rez beginning ending =
 	for i = beginning to ending - 1 do
 		new_rez.arr.(i-beginning) <- rez.arr.(i);
 	done; new_rez 
+
+let iter f rez =
+	for i = 0 to (len rez - 1) do
+		f (get rez i);
+	done
