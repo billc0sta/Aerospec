@@ -20,12 +20,12 @@ let print_error from message (token: Lexer.token) program =
 		match token.typeof with 
 		| EOF -> "End Of File" 
 		| _ -> let (start_pos, end_pos) = get_line token.pos token.pos 
-					 in String.sub program (start_pos+1) (end_pos - start_pos)
+					 in String.sub program (start_pos + 1) (end_pos - start_pos - 2)
 	end in
 	print_string ("\n::"^from^"\n");
 	print_string ("  at line: "^string_of_int (token.line)^"\n");
 	print_string ("  here --\" "^line^" \"-- \n");
-	print_string ("  "^message^"\n---------------------------")
+	print_string ("  "^message^".\n---------------------------")
 
 let read_whole_file filename =
   let ch = open_in_bin filename in
@@ -60,7 +60,7 @@ let () = if Array.length Sys.argv < 2 then
 else
 	try 
   let program = read_whole_file Sys.argv.(1) in
-  execute program false
+  execute program true
 	with Sys_error _ -> print_string "Aerospec: No such file"
 
 

@@ -134,9 +134,9 @@ and _print_expr expr =
     _print_expr expr;
     print_string "(subscript [";
     _print_expr (fst subexpr);
-    match (snd subexpr) with
+    let () = match (snd subexpr) with
     | None -> ()
-    | Some expr -> print_string ":"; _print_expr expr;
+    | Some expr -> print_string ":"; _print_expr expr in
     print_string "])"
     
 
@@ -150,23 +150,10 @@ and assignexpr parser =
     | Equal | ConEqual -> 
     begin
       let parser = forward parser in
-      match ungroup expr with
-      | Subscript (target, (index, None), tk) -> begin
-        match ungroup target with
-        | IdentExpr _ -> 
-          let (expr2, parser) = assignexpr parser in 
-          aux (Binary (expr, tk, expr2)) parser
-        | Unary ({typeof=Dollar; _}, IdentExpr (name, _)) -> 
-          let (expr2, parser) = assignexpr parser in 
-          aux (Binary (Subscript (IdentExpr (name, true), (index, None), tk), tk, expr2)) parser
-        | _ -> raise (ParseError ("Cannot assign to an expression", tk))
-      end
-      | IdentExpr _ -> 
+      match expr with 
+      | Subscript (IdentExpr _, _, _) | IdentExpr _ -> 
         let (expr2, parser) = assignexpr parser in 
         aux (Binary (expr, tk, expr2)) parser
-      | Unary ({typeof=Dollar; _}, IdentExpr (name, _)) -> 
-        let (expr2, parser) = assignexpr parser in 
-        aux (Binary (IdentExpr (name, true), tk, expr2)) parser
       | _ -> raise (ParseError ("Cannot assign to an expression", tk))
     end
     | _ -> (expr, parser)
@@ -197,8 +184,8 @@ and factor parser = build_binary [Slash; Star; Modulo] unary parser
 and unary parser =
   let tk = peek parser in
   match tk.typeof with
-  | Exclamation | Plus | Minus | Hash | Tilde | At | Dollar -> 
-    let (expr, parser) = unary (forward parser) in
+  | Exclamation | Plus | Minus | Hash | Tilde | At -> 
+    let (expr, parser) = postary (forward parser) in
     (Unary (tk, expr), parser)
   | _ -> postary parser
 
@@ -260,7 +247,7 @@ and subscript expr parser =
   if not valid_subexpr then 
     raise (ParseError ("Cannot subscript with this expression", tk))
   else
-  let parser = consume CSquare "Expected a Closing Square Bracket ']'" parser in
+  let parser = consume CSquare "Expected a Closing Square Bracket here? ']'" parser in
   (Subscript (expr, subexpr, tk), parser)
 
 and funcall expr parser = 
@@ -292,6 +279,13 @@ and primary parser =
   | Ident -> (IdentExpr (tk, false), forward parser)
   | OParen -> lambda_expr (forward parser)
   | OSquare -> array_expr (forward parser)
+  | Dollar -> begin
+    let parser = forward parser in
+    let token = peek parser in
+    match token.typeof with
+    | Ident -> (IdentExpr (token, true), forward parser)
+    | _ -> raise (ParseError ("Expected an identifier", tk))
+  end
   | _ -> raise (ParseError ("Expected an expression", tk))
 
 and array_expr parser =

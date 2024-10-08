@@ -249,7 +249,7 @@ and assignment target expr token inp =
  	match target with 
 	| IdentExpr _ -> assign_ident mut expr target inp
 	| Subscript (target, (index, None), tk) -> 
-		if mut then raise (RuntimeError ("Cannot constant-assign an index", tk))
+		if not mut then raise (RuntimeError ("Cannot constant-assign an index", tk))
 		else assign_subscript expr target index inp
 	| _ -> assert false
 

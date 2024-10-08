@@ -17,7 +17,7 @@ postary          = primary ((arguments) | (indexing))*
 arguments        = '(' (expression (',' expression)*)? ')'
 indexing         = '[' (expression | (arr-range)) (',' (expression | arr-range))? ']'
 arr-range        = (expression)? ':' (expression)?
-primary          = ident | float | string | array | prototype | grouping | lambda | builder
+primary          = ident | float | string | array | prototype | grouping | lambda | builder | global
 ident            = (alphabet | '_') (alphabet | '_' | digit)*
 alphabet         = ('a'->'z' | 'A->Z')
 digit            = '0'->'9'
@@ -31,6 +31,7 @@ writable         = ' ' -> '~'
 grouping         = '(' expression ')'
 lambda           = "(" ident ("," ident)* ")" block
 builder          = '[' (range)? ';' (expression)? ';' expression ']'
+global           = '$' ident
 prototype        = '{' (ident ('=' | ':=') expression)* '}'
 loop             = ">>" expression statement
 block            = '{' (statement)* '}'
