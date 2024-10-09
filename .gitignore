@@ -6,3 +6,5 @@ _build
 ./lib/dune
 ./bin/dune
 to_do.txt
+build.bat
+exec.bat

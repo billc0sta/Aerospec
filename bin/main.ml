@@ -8,8 +8,8 @@ let rec print_lexed l =
 let print_error from message (token: Lexer.token) program =
 
 	let rec get_line start_pos end_pos =
-	  let nstart_pos = if program.[start_pos] = '\n' || start_pos - 1 < 0 then start_pos else start_pos - 1 in
-	  let nend_pos = if program.[end_pos] = '\n' || end_pos + 1 >= String.length program then end_pos else end_pos + 1 in
+	  let nstart_pos = if start_pos - 1 < 0 || program.[start_pos-1] = '\n' then start_pos else start_pos - 1 in
+	  let nend_pos = if end_pos + 1 >= String.length program || program.[end_pos+1] = '\n' then end_pos else end_pos + 1 in
 	  if nstart_pos = start_pos && nend_pos = end_pos then
 	    (nstart_pos, nend_pos)
 	  else
@@ -20,7 +20,7 @@ let print_error from message (token: Lexer.token) program =
 		match token.typeof with 
 		| EOF -> "End Of File" 
 		| _ -> let (start_pos, end_pos) = get_line token.pos token.pos 
-					 in String.sub program (start_pos + 1) (end_pos - start_pos - 2)
+					 in String.sub program (start_pos) (end_pos - start_pos)
 	end in
 	print_string ("\n::"^from^"\n");
 	print_string ("  at line: "^string_of_int (token.line)^"\n");
@@ -65,9 +65,9 @@ else
 
 
 (* TODO-list:
-1. add index assignment
-2. add ranging
-3. add builders
-4. add sequence native functions
-5. add pipeline operator '|>'
+1. add ranging
+2. add builders
+3. add sequence native functions
+4. add objects
+5. add importing
 *)

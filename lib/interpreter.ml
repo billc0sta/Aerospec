@@ -151,10 +151,8 @@ and evaluate_natfunc paramc arglist func tk inp =
 		raise (RuntimeError ("The number of arguments do not match the number of parameters", tk))
 	else
 		let val_list = List.map (fun expr -> evaluate expr inp) arglist in
-		let value = try
-			func val_list
+		try func val_list
 		with Invalid_argument message -> raise (RuntimeError (message, tk))
-		in value
 
 and evaluate_binary expr1 expr2 op inp =
 	let raise_error =  (fun ev1 ev2 -> raise (RuntimeError 
