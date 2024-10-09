@@ -132,8 +132,7 @@ let string_literal lexer =
 			raise (LexError("Non-terminated string", {value=""; typeof=StringLiteral; pos=lexer.pos; line=lexer.line}))
 		| _ -> count (acc+1) false (forward lexer)
 	in let (length, lexer) = count 0 false lexer in
-	print_string "out of count";
-	if length = 0 then ("", lexer) else 
+	if length = 0 then ("", forward lexer) else 
 	let bytes = Bytes.create length in
 	let rec blit wp rp escaped =
 		if rp >= length then wp else

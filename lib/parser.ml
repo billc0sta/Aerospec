@@ -107,7 +107,7 @@ and _print_expr expr =
     print_string "if "; _print_expr cond;
     print_string " then "; _print_expr whentrue; print_string " else ";
     _print_expr whenfalse  
-  | StringLit str -> print_string str;
+  | StringLit str -> print_string ("\""^str^"\"");
   | IdentExpr (tk, global) -> if global then print_string "global "; print_string tk.value
   | FunCall (expr, arglist, _) -> 
     print_string "(funcall (name ";
