@@ -18,7 +18,7 @@ postary          = primary ((arguments) | (indexing))*
 arguments        = '(' (expression (',' expression)*)? ')'
 indexing         = '[' (expression | (arr-range)) (',' (expression | arr-range))? ']'
 arr-range        = (expression)? ':' (expression)?
-primary          = ident | float | string | array | prototype | grouping | lambda | builder | global
+primary          = ident | float | string | array | prototype | grouping | lambda | builder | global | nil
 ident            = (alphabet | '_') (alphabet | '_' | digit)*
 alphabet         = ('a'->'z' | 'A->Z')
 digit            = '0'->'9'
@@ -32,6 +32,7 @@ lambda           = "(" ident ("," ident)* ")" block
 builder          = '[' (range)? ';' (expression)? ';' expression ']'
 global           = '$' ident
 prototype        = '{' (ident ('=' | ':=') expression)* '}'
+nil              = '_'
 loop             = ">>" expression statement
 block            = '{' (statement)* '}'
 exprstmt         = expression

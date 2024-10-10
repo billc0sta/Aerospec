@@ -11,6 +11,7 @@ type expr =
   | ArrExpr of expr list * Lexer.token
   | Subscript of expr * (expr * expr option) * Lexer.token
   | Range of expr * Lexer.token * expr * Lexer.token * expr
+  | NilExpr
 
 and statement = 
   | Exprstmt of expr

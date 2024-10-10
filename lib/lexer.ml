@@ -42,6 +42,7 @@ type tokentype =
 | TwoQuestion
 | TwoColon
 | Tilde
+| Underscore
 
 
 type token = {value: string; line: int; pos: int; typeof: tokentype}
@@ -93,6 +94,7 @@ let nameof = function
 	| TwoQuestion -> "??"
 	| TwoColon -> "::"
 	| Tilde -> "~"
+	| Underscore -> "_"
 	
 let make raw = {raw; pos=0; line=1}
 
@@ -212,6 +214,9 @@ let next_token lexer =
 	| Ident    -> ident lexer
 	| TwoSlash -> comment lexer
 	| _        -> (nameof typeof, lexer)
+	in
+	let (typeof, value) = 
+		match typeof with Ident -> if value = "_" then (Underscore, "") else (typeof, value) | _ -> (typeof, value)
 	in
 	({pos=lexer.pos;line=lexer.line;value;typeof}, lexer)
 

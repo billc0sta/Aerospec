@@ -13,6 +13,7 @@ type expr =
   | ArrExpr of expr list * token
   | Subscript of expr * (expr * expr option) * token
   | Range of expr * token * expr * token * expr
+  | NilExpr
 
 and statement = 
   | Exprstmt of expr
@@ -58,12 +59,12 @@ let rec _print_parsed l =
       _print_expr expr; 
       print_string " do \n"; 
       aux whentrue;
-      print_string "if_end\n";
       begin
       match whenfalse with
       | None -> ()
       | Some block -> print_string "else do \n"; aux block
-      end
+      end;
+      print_string "if_end\n"
     | Block block -> _print_parsed block;
     | LoopStmt (cond, block) -> 
       print_string "loop ";
@@ -147,6 +148,8 @@ and _print_expr expr =
     print_string (nameof tk2.typeof);
     _print_expr expr2;
     print_string ")"
+  | NilExpr ->
+  print_string "nil"
     
 let rec expression parser = assignexpr parser
 
@@ -306,6 +309,7 @@ and primary parser =
     | Ident -> (IdentExpr (token, true), forward parser)
     | _ -> raise (ParseError ("Expected an identifier", tk))
   end
+  | Underscore -> (NilExpr, forward parser)
   | _ -> raise (ParseError ("Expected an expression", tk))
 
 and array_expr parser =

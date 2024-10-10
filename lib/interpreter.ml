@@ -43,6 +43,7 @@ let rec evaluate expr inp =
 	| ArrExpr (exprs, _) -> evaluate_arr exprs inp
 	| Subscript (expr, subexpr, tk) -> evaluate_subscript expr subexpr tk inp
 	| Range (_, tk, _, _, _) -> raise (RuntimeError ("Cannot evaluate range expression in this context", tk))
+	| NilExpr -> Nil
 
 and ev_subexpr expr tk inp =
 	let ev = evaluate expr inp in
@@ -414,7 +415,6 @@ and start_range range inp =
 			raise (RuntimeError (("Cannot use value of type '"^Value.nameof ev^"' in range expression"), tk1))
 	in
 
-	(* 9>=i>=10 *)
 	let (beg, dir) = 
 		match tk1.typeof with
 		| Greater    -> ((ev_expr expr1)-1, -1)
