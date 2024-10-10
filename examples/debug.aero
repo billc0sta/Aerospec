@@ -1,1 +1,1 @@
-?? _ print("hello") :: print("bye")
+print(_&&1)

@@ -198,8 +198,12 @@ and evaluate_binary expr1 expr2 op inp =
 	| Lesser -> Bool (simple_binary expr1 expr2 (<))
 	| GreatEqual -> Bool (simple_binary expr1 expr2 (>=))
 	| LessEqual -> Bool (simple_binary expr1 expr2 (<=))
-	| Ampersands -> Bool (truth(evaluate expr1 inp) && truth(evaluate expr2 inp))
-	| Columns -> Bool (truth(evaluate expr1 inp) || truth(evaluate expr2 inp))
+	| Ampersands -> 
+		let ev1 = evaluate expr1 inp in
+		if truth ev1 then evaluate expr2 inp else ev1
+	| Columns -> 
+		let ev1 = evaluate expr1 inp in
+		if truth ev1 then ev1 else evaluate expr2 inp
 	| Equal | ConEqual -> assignment expr1 expr2 op inp
 	| _ -> assert false
 
