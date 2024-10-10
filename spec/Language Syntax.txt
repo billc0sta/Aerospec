@@ -9,7 +9,8 @@ ifexpr           = logic ('?' ifexpr ':' ifexpr)?
 logic_or         = equality ("||" equality)*
 logic_and        = equality ("&&" equality)*
 equality         = relation (("==" | "!=") relation)*
-relation         = basic ((">" | "<" | ">=" | "<=") basic)*
+relation         = basic (rel-op (basic | ident rel-op basic))?
+rel-op           = '>' | '>=' | '<' | '<='
 basic            = factor (("+" | "-") factor)*
 factor           = unary (("*" | "/" | "%") unary)*
 unary            = ("!" | "+" | "-" | "#" | "~") unary | postary
@@ -24,8 +25,6 @@ digit            = '0'->'9'
 float            = number ('.' number)?
 number           = (digit)+
 array            = '[' (expression (',' expression)*)? ']'
-range            = expression range-op ident range-op expression
-range-op         = '>' | '>=' | '<' | '<='
 string           = '"' (writable)* '"'
 writable         = ' ' -> '~'
 grouping         = '(' expression ')'

@@ -42,6 +42,7 @@ let rec evaluate expr inp =
 	| LambdaExpr (exprs, body, _) -> evaluate_lambda exprs body
 	| ArrExpr (exprs, _) -> evaluate_arr exprs inp
 	| Subscript (expr, subexpr, tk) -> evaluate_subscript expr subexpr tk inp
+	| Range (_, tk, _, _, _) -> raise (RuntimeError ("Cannot evaluate range expression in this context", tk))
 
 and ev_subexpr expr tk inp =
 	let ev = evaluate expr inp in
@@ -359,13 +360,34 @@ and block_stmt stmts inp =
 
 and if_stmt cond whentrue whenfalse inp =
 	if truth (evaluate cond inp) then exec_stmt whentrue inp 
-	else
-		match whenfalse with
-		| None -> inp
-		| Some block -> exec_stmt block inp
+	else match whenfalse with
+	| None -> inp
+	| Some block -> exec_stmt block inp
 
 and loop_stmt cond stmt inp =
 	let inp = {inp with state={inp.state with loop_depth=inp.state.loop_depth+1}} in
+	match cond with
+	| Range _ -> range_loop cond stmt inp
+	| _ -> normal_loop cond stmt inp
+    
+and range_loop range stmt inp =
+	let (cond, name, beg, dir) = start_range range inp in
+	let (beg, dir) = (float_of_int beg, float_of_int dir) in
+	let rec aux iter inp =
+		if truth (evaluate cond inp) then
+			let inp = exec_stmt stmt inp in
+			let iter = iter+.dir in
+			Environment.replace name (Float (iter), true) inp.env;
+			if inp.state.breaked then {inp with state={inp.state with breaked=false}}
+			else if inp.state.continued then aux iter {inp with state={inp.state with continued=false}}
+			else aux iter inp
+		else inp
+	in 
+	let inp = aux beg inp in
+	Environment.remove name inp.env;
+	inp
+
+and normal_loop cond stmt inp =
 	let rec aux inp =
 		if truth (evaluate cond inp) then
 			let inp = exec_stmt stmt inp in
@@ -373,6 +395,47 @@ and loop_stmt cond stmt inp =
 			else if inp.state.continued then aux {inp with state={inp.state with continued=false}}
 			else aux inp
 		else inp
-	in aux inp 
+	in aux inp
+
+and start_range range inp =
+
+	let (expr1, tk1, ident, tk2, expr2) = match range with
+	| Range (expr1, tk1, ident, tk2, expr2) -> (expr1, tk1, ident, tk2, expr2) 
+	| _ -> assert false;
+	in
+
+	let ev_expr expr = 
+		match evaluate expr inp with
+		| Float fl -> 
+			if Float.trunc fl <> fl 
+			then raise (RuntimeError ("Cannot use floating-point number in range expression", tk1))
+			else int_of_float fl
+		| ev ->  
+			raise (RuntimeError (("Cannot use value of type '"^Value.nameof ev^"' in range expression"), tk1))
+	in
+
+	(* 9>=i>=10 *)
+	let (beg, dir) = 
+		match tk1.typeof with
+		| Greater    -> ((ev_expr expr1)-1, -1)
+		| GreatEqual -> ((ev_expr expr1),   -1)
+		| Lesser     -> ((ev_expr expr1)+1,  1)
+		| LessEqual  -> ((ev_expr expr1),    1)
+		| _ -> assert false;
+	in
+	let endof =
+		match tk2.typeof with
+		| Greater | Lesser | LessEqual | GreatEqual -> (ev_expr expr2)
+		| _ -> assert false;
+	in
+	let () = if dir = 1 && not (beg < endof) then
+		raise (RuntimeError ("Beginning should be less than ending of range expression", tk1))
+		else if dir = -1 && not (beg > endof) then
+		raise (RuntimeError ("Beginning should be greter than ending of range expression", tk1))
+		else ()
+	in
+	let name = match ident with IdentExpr (tk, _) -> tk.value | _ -> assert false; in
+	Environment.add name (Float (float_of_int beg), true) inp.env;
+	(Binary (ident, tk2, FloatLit (float_of_int endof)), name, beg, dir)
 
 let run inp = ignore (exec_stmt (Block inp.raw) inp)

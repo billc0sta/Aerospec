@@ -12,6 +12,7 @@ type expr =
   | LambdaExpr of expr list * statement * token
   | ArrExpr of expr list * token
   | Subscript of expr * (expr * expr option) * token
+  | Range of expr * token * expr * token * expr
 
 and statement = 
   | Exprstmt of expr
@@ -138,8 +139,15 @@ and _print_expr expr =
     | None -> ()
     | Some expr -> print_string ":"; _print_expr expr in
     print_string "])"
+  | Range (expr1, tk1, ident, tk2, expr2) ->
+    print_string "(range ";
+    _print_expr expr1;
+    print_string (nameof tk1.typeof);
+    _print_expr ident;
+    print_string (nameof tk2.typeof);
+    _print_expr expr2;
+    print_string ")"
     
-
 let rec expression parser = assignexpr parser
 
 and assignexpr parser = 
@@ -175,7 +183,41 @@ and logical_and parser = build_binary [Ampersands] equality parser
 
 and equality parser = build_binary [EqualEqual; ExcEqual] relational parser
 
-and relational parser = build_binary [Greater; GreatEqual; Lesser; LessEqual] basic parser
+and relational parser = 
+  let (expr, parser) = basic parser in
+  let tk1 = peek parser in
+  match tk1.typeof with
+  | Greater | GreatEqual | Lesser | LessEqual -> 
+  begin
+    let (expr2, parser) = basic (forward parser) in
+    let tk2 = peek parser in
+    match tk2.typeof with
+    | Greater | GreatEqual | Lesser | LessEqual ->
+    begin
+      let ident = match expr2 with
+      | IdentExpr (_, global) -> 
+        if global then raise (ParseError ("Global identifier cannot be used in this context", tk1))
+        else expr2
+      | _ -> raise (ParseError ("Expected an identifier", tk1))
+      in
+      let () = match (tk1.typeof, tk2.typeof) with
+        | (Lesser, Lesser)
+        | (LessEqual, Lesser)
+        | (Lesser, LessEqual)
+        | (LessEqual, LessEqual)
+        | (Greater, Greater)
+        | (Greater, GreatEqual)
+        | (GreatEqual, Greater)
+        | (GreatEqual, GreatEqual) -> ()
+        | _ -> 
+          raise (ParseError (("operators '"^Lexer.nameof tk1.typeof^"' and '"^Lexer.nameof tk2.typeof^"' cannot be in the same range expression"), tk1))
+      in
+      let (expr3, parser) = basic (forward parser) in
+      (Range (expr, tk1, ident, tk2, expr3), parser)
+    end
+    | _ -> (Binary (expr, tk1, expr2), parser)
+  end
+  | _ -> (expr, parser)
 
 and basic parser = build_binary [Plus; Minus] factor parser
 
@@ -208,23 +250,7 @@ and postary parser =
   aux expr parser
 
 and subscript expr parser =
-  let rec validate_expr expr =
-    match expr with
-    | IdentExpr _ | StringLit _ | ArrExpr _ | Subscript _ -> true
-    | Binary (expr1, {typeof=Plus; _}, expr2) -> validate_expr expr1 && validate_expr expr2
-    | _ -> false 
-  in
-  let rec validate_subexpr subexpr =
-    match subexpr with
-    | IdentExpr _ | FloatLit _ -> true
-    | Binary (expr1, _, expr2) -> validate_subexpr expr1 && validate_subexpr expr2
-    | _ -> false 
-  in
   let tk = peek parser in
-  if not (validate_expr expr) then
-    raise (ParseError ("This expression is not subscriptable", tk))
-  else 
-
   let (subexpr, parser) =
     let (beginning, parser) = 
     match tk.typeof with
@@ -241,12 +267,6 @@ and subscript expr parser =
     | _ -> (None, parser)
     in ((beginning, endof), parser)
   in
-  let valid_subexpr = (validate_subexpr (fst subexpr) &&
-    match (snd subexpr) with None -> true | Some expr -> validate_subexpr expr)
-  in
-  if not valid_subexpr then 
-    raise (ParseError ("Cannot subscript with this expression", tk))
-  else
   let parser = consume CSquare "Expected a Closing Square Bracket here? ']'" parser in
   (Subscript (expr, subexpr, tk), parser)
 
@@ -380,7 +400,7 @@ and statement parser =
 and loop_stmt parser =
   let (cond, parser)  = expression parser in
   let (block, parser) = statement parser in
-  (LoopStmt (cond, block), parser)
+  (LoopStmt (ungroup cond, block), parser)
 
 and expr_stmt parser = 
   let (expr, parser) = expression parser in

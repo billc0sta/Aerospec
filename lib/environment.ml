@@ -6,6 +6,8 @@ let find ident env = Hashtbl.find_opt env.values ident
 
 let add ident value env = Hashtbl.add env.values ident value
 
+let remove ident env = Hashtbl.remove env.values ident
+
 let replace ident value env = Hashtbl.replace env.values ident value
 
 let child_of env =

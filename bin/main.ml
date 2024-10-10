@@ -20,7 +20,7 @@ let print_error from message (token: Lexer.token) program =
 		match token.typeof with 
 		| EOF -> "End Of File" 
 		| _ -> let (start_pos, end_pos) = get_line token.pos token.pos 
-					 in String.sub program (start_pos) (end_pos - start_pos)
+					 in String.sub program (start_pos) (end_pos - start_pos + 1)
 	end in
 	print_string ("\n::"^from^"\n");
 	print_string ("  at line: "^string_of_int (token.line)^"\n");

@@ -10,6 +10,7 @@ type expr =
   | LambdaExpr of expr list * statement * Lexer.token
   | ArrExpr of expr list * Lexer.token
   | Subscript of expr * (expr * expr option) * Lexer.token
+  | Range of expr * Lexer.token * expr * Lexer.token * expr
 
 and statement = 
   | Exprstmt of expr
