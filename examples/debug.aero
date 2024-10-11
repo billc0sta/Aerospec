@@ -1,10 +1,9 @@
-outer := () {
-	x = 1
-	inner := () {
-		-> x
-	}
-	-> inner
+mult := (x, y) {-> x * y}
+create_mult := (x) {
+  -> (y) {
+    -> mult(x, y)
+  }
 }
 
-print(outer())
-print(outer()())
+mult_by_5 := create_mult(5)
+print(mult_by_5(10)) // 50

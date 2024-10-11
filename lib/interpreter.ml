@@ -121,9 +121,9 @@ and evaluate_lambda exprs body inp =
 and evaluate_funcall target arglist tk inp =
 	let lambda = evaluate target inp in
 	match lambda with
-	| Func (env, params, body) -> evaluate_func env arglist params body tk inp
+	| Func (env, params, body)  -> evaluate_func env arglist params body tk inp
 	| NatFunc (paramc, _, func) -> evaluate_natfunc paramc arglist func tk inp
-	| _ -> assert false;
+	| _ -> raise (RuntimeError (("Cannot call a value of type '"^nameof lambda^"'"), tk));
 
 and evaluate_func env arglist params body tk inp =
 	let param_len = List.length params in
@@ -131,17 +131,17 @@ and evaluate_func env arglist params body tk inp =
 	if param_len <> arg_len then
 		raise (RuntimeError ("The number of arguments do not match the number of parameters", tk))
 	else 
-		let inp = 
+		let ninp = 
 		{inp with env=Environment.child_of env; state={inp.state with call_depth=inp.state.call_depth+1; loop_depth=0}} in
-			List.iter2 (fun arg param -> 
+		let () = List.iter2 (fun arg param -> 
 				let value = evaluate arg inp in
-				Environment.add param (value, true) inp.env
-			) arglist params;
+				Environment.add param (value, true) ninp.env
+			) arglist params in
 		match body with
 		| Block block -> begin 
-			let inp = block_stmt block inp in
-			match inp.state.return_expr with
-			| Some expr -> evaluate expr inp
+			let ninp = block_stmt block ninp in
+			match ninp.state.return_expr with
+			| Some expr -> evaluate expr ninp
 			| None -> Nil
 		end 
 		| _ -> assert false;

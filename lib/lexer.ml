@@ -171,7 +171,7 @@ let builder f lexer =
 
 let ident = builder (fun c -> is_alnum c || c = '_')
 
-let comment = builder (fun c -> c <> '\n')
+let comment = builder (fun c -> c <> '\n' && c <> Char.chr 0)
 	
 let next_token lexer =
 	let lexer = skip_space lexer in
