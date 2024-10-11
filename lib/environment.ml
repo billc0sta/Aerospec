@@ -1,4 +1,4 @@
-type t = {values: (string, (Value.t * bool)) Hashtbl.t; parent: t option;}
+type ('a, 'b) t = {values: ('a, 'b) Hashtbl.t; parent: ('a, 'b) t option;}
 
 let make () = {values=(Hashtbl.create 16); parent=None}
 

@@ -3,7 +3,7 @@ type t =
 | Float of float
 | String of char Resizable.t 
 | Bool of bool
-| Func of string list * statement
+| Func of (string, (t * bool)) Environment.t * string list * statement
 | NatFunc of int * string list * (t list -> t)
 | Arr of t Resizable.t
 | Nil
@@ -37,7 +37,7 @@ let rec stringify = function
 								then String.sub str 0 (String.length str - 1)
 								else str 
 	| Bool b -> if b then "true" else "false"
-	| Func (params, _) -> 
+	| Func (_, params, _) -> 
 		("<function ( "^
 			(List.fold_left (fun acc param -> (acc ^ param ^ " ")) "" params)
 			^")>")

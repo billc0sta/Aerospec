@@ -1,1 +1,10 @@
-print(_&&1)
+outer := () {
+	x = 1
+	inner := () {
+		-> x
+	}
+	-> inner
+}
+
+print(outer())
+print(outer()())

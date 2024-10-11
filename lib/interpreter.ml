@@ -4,7 +4,7 @@ open Value
 exception RuntimeError of string * Lexer.token
 
 type state = {return_expr: expr option; returned: bool; breaked: bool; continued: bool; call_depth: int; loop_depth: int}
-type t = {env: Environment.t; raw: statement list; state: state}
+type t = {env: (string, (Value.t * bool)) Environment.t; raw: statement list; state: state}
 
 let add_natives env =
 	Environment.add "print" (NatFunc (256+1, ["params..."], Natives.print), true) env;
@@ -39,7 +39,7 @@ let rec evaluate expr inp =
 	| IdentExpr (tk, global) -> evaluate_ident tk global inp
 	| IfExpr (cond, whentrue, whenfalse) -> evaluate_ifexpr cond whentrue whenfalse inp
 	| FunCall (target, arglist, tk) -> evaluate_funcall target arglist tk inp
-	| LambdaExpr (exprs, body, _) -> evaluate_lambda exprs body
+	| LambdaExpr (exprs, body, _) -> evaluate_lambda exprs body inp
 	| ArrExpr (exprs, _) -> evaluate_arr exprs inp
 	| Subscript (expr, subexpr, tk) -> evaluate_subscript expr subexpr tk inp
 	| Range (_, tk, _, _, _) -> raise (RuntimeError ("Cannot evaluate range expression in this context", tk))
@@ -103,7 +103,7 @@ and evaluate_arr exprs inp =
 	List.iter (fun expr -> Resizable.append arr (evaluate expr inp)) exprs;
 	(Arr arr)
 
-and evaluate_lambda exprs body = 
+and evaluate_lambda exprs body inp = 
 	let rec aux acc exprs =
 		match exprs with
 		| [] -> (acc)
@@ -116,23 +116,23 @@ and evaluate_lambda exprs body =
 		end
 	in
 	let params = List.rev (aux [] exprs) in
-	Func (params, body)
+	Func (inp.env, params, body)
 
 and evaluate_funcall target arglist tk inp =
 	let lambda = evaluate target inp in
 	match lambda with
-	| Func (params, body) -> evaluate_func arglist params body tk inp
+	| Func (env, params, body) -> evaluate_func env arglist params body tk inp
 	| NatFunc (paramc, _, func) -> evaluate_natfunc paramc arglist func tk inp
 	| _ -> assert false;
 
-and evaluate_func arglist params body tk inp =
+and evaluate_func env arglist params body tk inp =
 	let param_len = List.length params in
 	let arg_len   = List.length arglist in
 	if param_len <> arg_len then
 		raise (RuntimeError ("The number of arguments do not match the number of parameters", tk))
 	else 
 		let inp = 
-		{inp with env=Environment.child_of inp.env; state={inp.state with call_depth=inp.state.call_depth+1; loop_depth=0}} in
+		{inp with env=Environment.child_of env; state={inp.state with call_depth=inp.state.call_depth+1; loop_depth=0}} in
 			List.iter2 (fun arg param -> 
 				let value = evaluate arg inp in
 				Environment.add param (value, true) inp.env
