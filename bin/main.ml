@@ -60,7 +60,7 @@ let () = if Array.length Sys.argv < 2 then
 else
 	try 
   let program = read_whole_file Sys.argv.(1) in
-  execute program true
+  execute program false
 	with Sys_error _ -> print_string "Aerospec: No such file"
 
 
