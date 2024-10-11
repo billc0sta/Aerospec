@@ -1,9 +1,18 @@
-mult := (x, y) {-> x * y}
-create_mult := (x) {
-  -> (y) {
-    -> mult(x, y)
+person = {
+  name = ""
+  age  = 0
+
+  init := (name, age) {
+    $age  = age
+    $name = name
+  }
+
+  pp := () {
+    print("My name is ", $name, " and I'm ", $age, " years old.\n")
   }
 }
 
-mult_by_5 := create_mult(5)
-print(mult_by_5(10)) // 50
+me = person()
+me.init("Alice", 999)
+me.pp()
+person.pp()

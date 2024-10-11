@@ -4,7 +4,7 @@ program          = (statement | comment)*
 statement        = ifstmt | loop | block | return | break | continue | exprstmt | no-op
 ifstmt           = '??' expression statement ('::' statement)?
 expression       = assignexpr
-assignexpr       = ('$')? ident (('=' | ":=") assignexpr)? | ifexpr 
+assignexpr       = ('$')? expression (('=' | ":=") assignexpr)? | ifexpr 
 ifexpr           = logic ('?' ifexpr ':' ifexpr)?
 logic_or         = equality ("||" equality)*
 logic_and        = equality ("&&" equality)*
@@ -14,11 +14,11 @@ rel-op           = '>' | '>=' | '<' | '<='
 basic            = factor (("+" | "-") factor)*
 factor           = unary (("*" | "/" | "%") unary)*
 unary            = ("!" | "+" | "-" | "#" | "~") unary | postary
-postary          = primary ((arguments) | (indexing))*
+postary          = primary (arguments | indexing | '.' ident)*
 arguments        = '(' (expression (',' expression)*)? ')'
 indexing         = '[' (expression | (arr-range)) (',' (expression | arr-range))? ']'
 arr-range        = (expression)? ':' (expression)?
-primary          = ident | float | string | array | prototype | grouping | lambda | builder | global | nil
+primary          = ident | float | string | array | object | grouping | lambda | builder | global | nil
 ident            = (alphabet | '_') (alphabet | '_' | digit)*
 alphabet         = ('a'->'z' | 'A->Z')
 digit            = '0'->'9'
@@ -31,9 +31,9 @@ grouping         = '(' expression ')'
 lambda           = "(" ident ("," ident)* ")" block
 builder          = '[' (range)? ';' (expression)? ';' expression ']'
 global           = '$' ident
-prototype        = '{' (ident ('=' | ':=') expression)* '}'
 nil              = '_'
 loop             = ">>" expression statement
+prototype        = block
 block            = '{' (statement)* '}'
 exprstmt         = expression
 return           = "->" expression

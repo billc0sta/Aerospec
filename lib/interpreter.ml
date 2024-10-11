@@ -43,7 +43,34 @@ let rec evaluate expr inp =
 	| ArrExpr (exprs, _) -> evaluate_arr exprs inp
 	| Subscript (expr, subexpr, tk) -> evaluate_subscript expr subexpr tk inp
 	| Range (_, tk, _, _, _) -> raise (RuntimeError ("Cannot evaluate range expression in this context", tk))
+	| ObjectExpr stmts -> evaluate_object stmts inp
+	| PropertyExpr (expr, ident) -> evaluate_propery expr ident inp
 	| NilExpr -> Nil
+
+and evaluate_propery expr ident inp =
+	let tk = match ident with IdentExpr (tk, _) -> tk | _ -> assert false; in
+	let eval = evaluate expr inp in
+	let env = 
+	match eval with
+	| Object env -> env
+	| _ -> raise (RuntimeError (("Value of type '"^nameof eval^"' has no properties"), tk))
+	in
+
+	let found = Environment.find tk.value env in
+	match found with
+	| None -> raise (RuntimeError (("This object has no such property as '"^tk.value^"' "), tk))
+	| Some (v, _) -> v 
+
+and evaluate_object stmts inp =
+	let obj_env = Environment.child_of inp.env in
+	run {raw=stmts; env=obj_env; 
+			state={return_expr=None; 
+						 returned=false; 
+						 breaked=false; 
+						 continued=false; 
+						 call_depth=0; 
+						 loop_depth=0}};
+	Object(obj_env)
 
 and ev_subexpr expr tk inp =
 	let ev = evaluate expr inp in
@@ -123,7 +150,32 @@ and evaluate_funcall target arglist tk inp =
 	match lambda with
 	| Func (env, params, body)  -> evaluate_func env arglist params body tk inp
 	| NatFunc (paramc, _, func) -> evaluate_natfunc paramc arglist func tk inp
+	| Object obj -> copy_object obj
 	| _ -> raise (RuntimeError (("Cannot call a value of type '"^nameof lambda^"'"), tk));
+
+and copy_object obj =
+	let new_obj = Hashtbl.create (Hashtbl.length obj.values) in
+	Hashtbl.iter (fun k v -> 
+		let copied = match fst v with
+		| Float fl -> (Float fl, snd v)
+		| Bool _ | Func _ | NatFunc _ | Nil -> v
+		| Object obj -> (copy_object obj, snd v)
+		| Arr rez -> (copy_array rez, snd v) 
+		| String rez -> (String (Resizable.copy rez), snd v)
+	in Hashtbl.add new_obj k copied
+	) obj.values;
+	Object ({values=new_obj; parent=obj.parent})
+
+and copy_array arr =
+	let new_arr = Resizable.copy arr in
+	for i = 0 to Resizable.len arr - 1 do
+		match new_arr.arr.(i) with
+		| Float _ | Bool _ | Func _ | NatFunc _ | Nil -> ()
+		| Object env -> new_arr.arr.(i) <- copy_object env
+		| Arr rez -> new_arr.arr.(i) <- copy_array rez 
+		| String rez -> new_arr.arr.(i) <- String (Resizable.copy rez)
+	done;
+	Arr (new_arr)
 
 and evaluate_func env arglist params body tk inp =
 	let param_len = List.length params in
@@ -251,7 +303,7 @@ and assignment target expr token inp =
 		| _ -> assert false;
 	in
  	match target with 
-	| IdentExpr _ -> assign_ident mut expr target inp
+	| IdentExpr (tk, global) -> if global then ignore(evaluate_ident tk global inp); assign_ident mut expr target inp
 	| Subscript (target, (index, None), tk) -> 
 		if not mut then raise (RuntimeError ("Cannot constant-assign an index", tk))
 		else assign_subscript expr target index inp
@@ -442,4 +494,4 @@ and start_range range inp =
 	Environment.add name (Float (float_of_int beg), true) inp.env;
 	(Binary (ident, tk2, FloatLit (float_of_int endof)), name, beg, dir)
 
-let run inp = ignore (exec_stmt (Block inp.raw) inp)
+and run inp = ignore (exec_stmt (Block inp.raw) inp)

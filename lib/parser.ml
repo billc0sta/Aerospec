@@ -13,6 +13,8 @@ type expr =
   | ArrExpr of expr list * token
   | Subscript of expr * (expr * expr option) * token
   | Range of expr * token * expr * token * expr
+  | ObjectExpr of statement list
+  | PropertyExpr of expr * expr
   | NilExpr
 
 and statement = 
@@ -148,6 +150,16 @@ and _print_expr expr =
     print_string (nameof tk2.typeof);
     _print_expr expr2;
     print_string ")"
+  | ObjectExpr stmts ->
+    print_string "(object \n";
+    _print_parsed stmts;
+    print_string ")";
+  | PropertyExpr (expr, ident) ->
+    print_string "(access property ";
+    _print_expr ident;
+    print_string " of ";
+    _print_expr expr;
+    print_string ")";
   | NilExpr ->
   print_string "nil"
     
@@ -240,12 +252,21 @@ and postary parser =
     match tk.typeof with
     | OParen -> begin
       match ungroup expr with
-      | IdentExpr _ | FunCall _ | LambdaExpr _ ->
-      let (expr, parser) = funcall expr (forward parser) in aux expr parser
-      | _ -> raise (ParseError ("This value is not callable", tk))
+      | StringLit _ | FloatLit _ | Binary _ | Unary _ | ArrExpr _ | Range _ | NilExpr
+        -> raise (ParseError ("This value is not callable", tk))
+      | _ -> let (expr, parser) = funcall expr (forward parser) in aux expr parser
     end
-    | OSquare -> begin 
+    | OSquare ->
       let (expr, parser) = subscript expr (forward parser) in aux expr parser
+    | Dot -> begin
+      let (expr2, parser) = primary (forward parser) in
+      match expr with
+      | IdentExpr (tk, global) -> 
+        if global 
+        then raise (ParseError ("Global identifier cannot be used in this context", tk)) 
+        else aux (PropertyExpr (expr, expr2)) parser
+      | _ ->
+        raise (ParseError ("Expected an identifier", tk)) 
     end
     | _ -> (expr, parser) 
   in
@@ -302,6 +323,7 @@ and primary parser =
   | Ident -> (IdentExpr (tk, false), forward parser)
   | OParen -> lambda_expr (forward parser)
   | OSquare -> array_expr (forward parser)
+  | OCurly -> object_expr parser 
   | Dollar -> begin
     let parser = forward parser in
     let token = peek parser in
@@ -311,6 +333,12 @@ and primary parser =
   end
   | Underscore -> (NilExpr, forward parser)
   | _ -> raise (ParseError ("Expected an expression", tk))
+
+and object_expr parser =
+  let (block, parser) = block_stmt parser in
+  match block with
+  | Block stmts -> (ObjectExpr stmts, parser)
+  | _ -> assert false;
 
 and array_expr parser =
   let rec aux exprs parser =

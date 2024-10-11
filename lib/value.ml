@@ -6,14 +6,15 @@ type t =
 | Func of (string, (t * bool)) Environment.t * string list * statement
 | NatFunc of int * string list * (t list -> t)
 | Arr of t Resizable.t
+| Object of (string, (t * bool)) Environment.t 
 | Nil
 
 let truth = function
 	| Float f -> f <> 0.0
 	| String str -> Resizable.len str > 0
-	| Bool b -> b
-	| Func _ | NatFunc _ -> true
 	| Arr arr -> Resizable.len arr > 0 
+	| Bool b -> b
+	| Func _ | NatFunc _ | Object _ -> true
 	| Nil -> false
 
 let nameof = function
@@ -23,6 +24,7 @@ let nameof = function
 	| Func _ -> "function"
 	| NatFunc _ -> "native function"
 	| Arr _ -> "array"
+	| Object _ -> "object"
 	| Nil -> "nil"
 
 let make_rez_string str = 
@@ -48,6 +50,11 @@ let rec stringify = function
 			^")>")
 	| Arr arr -> 
 		stringify_arr arr
+	| Object obj -> stringify_object obj
+
+and stringify_object obj =
+	let _ = obj in
+	"object" (* modify later *)
 
 and stringify_str str =
 	String.init (Resizable.len str) (fun i -> (Resizable.get str i))

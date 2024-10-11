@@ -7,6 +7,8 @@ let resize rez size default =
 	Array.blit rez.arr 0 new_arr 0 rez.size;
 	rez.arr <- new_arr 
 
+let copy rez = {arr=Array.copy rez.arr; size=rez.size}
+
 let append rez elem =
 	if rez.size = Array.length rez.arr 
 		then resize rez (max 8 (rez.size*2)) elem;
