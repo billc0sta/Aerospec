@@ -19,7 +19,8 @@ let add_natives env =
 	Environment.add "pop" (NatFunc (256+2, ["sequence"; "indices..."], Natives.pop), true) env;
 	Environment.add "remove" (NatFunc (256+2, ["sequence"; "elements..."], Natives.remove), true) env;
 	Environment.add "clear" (NatFunc (1, ["sequence"], Natives.clear), true) env;
-	Environment.add "count" (NatFunc (2, ["sequence"; "element"], Natives.count), true) env
+	Environment.add "count" (NatFunc (2, ["sequence"; "element"], Natives.count), true) env;
+	Environment.add "copy" (NatFunc (1, ["value"], Natives.copy), true) env
 
 let make raw = 
 	let inp = {raw; env=(Environment.make ());
@@ -92,18 +93,17 @@ and evaluate_subscript expr subexpr tk inp =
 		let ending    = ev_subexpr expr2 tk inp in
 		let ev = evaluate expr inp in
 		match ev with
-		| Arr rez -> begin
+		| Arr (rez, _) -> begin
 			let beginning = if beginning = Float.neg_infinity then 0 else int_of_float beginning in
 			let ending    = if ending = Float.infinity then Resizable.len rez else int_of_float ending in
-			
-			try Arr (Resizable.range rez beginning ending)
+			try Arr (Resizable.range rez beginning ending, true)
 			with Invalid_argument _ -> raise (RuntimeError ("Accessing array out of bounds", tk))
 		end
-		| String rez -> begin
+		| String (rez, _) -> begin
 			let beginning = if beginning = Float.neg_infinity then 0 else int_of_float beginning in
 			let ending    = if ending = Float.infinity then Resizable.len rez else int_of_float ending in
 			
-			try String (Resizable.range rez beginning ending)
+			try String (Resizable.range rez beginning ending, true)
 			with Invalid_argument _ -> raise (RuntimeError ("Accessing string out of bounds", tk))
 		end
 		| _ -> raise (RuntimeError (("Value of type '"^nameof ev^"' is not subscriptable"), tk))
@@ -114,11 +114,11 @@ and evaluate_subscript expr subexpr tk inp =
 		let subscript = if subscript = Float.neg_infinity then 0 else int_of_float subscript in
 		let ev = evaluate expr inp in
 		match ev with
-		| Arr rez -> begin
+		| Arr (rez, _) -> begin
 			try Resizable.get rez subscript
 			with Invalid_argument _ -> raise (RuntimeError ("Accessing array out of bounds", tk))
 		end
-		| String rez -> begin
+		| String (rez, _) -> begin
 			try make_rez_string (Char.escaped (Resizable.get rez subscript))
 			with Invalid_argument _ -> raise (RuntimeError ("Accessing string out of bounds", tk))
 		end
@@ -128,7 +128,7 @@ and evaluate_subscript expr subexpr tk inp =
 and evaluate_arr exprs inp = 
 	let arr = Resizable.make () in
 	List.iter (fun expr -> Resizable.append arr (evaluate expr inp)) exprs;
-	(Arr arr)
+	(Arr (arr, true))
 
 and evaluate_lambda exprs body inp = 
 	let rec aux acc exprs =
@@ -146,36 +146,15 @@ and evaluate_lambda exprs body inp =
 	Func (inp.env, params, body)
 
 and evaluate_funcall target arglist tk inp =
-	let lambda = evaluate target inp in
-	match lambda with
+	let callable = evaluate target inp in
+	match callable with
 	| Func (env, params, body)  -> evaluate_func env arglist params body tk inp
 	| NatFunc (paramc, _, func) -> evaluate_natfunc paramc arglist func tk inp
-	| Object obj -> copy_object obj
-	| _ -> raise (RuntimeError (("Cannot call a value of type '"^nameof lambda^"'"), tk));
-
-and copy_object obj =
-	let new_obj = Hashtbl.create (Hashtbl.length obj.values) in
-	Hashtbl.iter (fun k v -> 
-		let copied = match fst v with
-		| Float fl -> (Float fl, snd v)
-		| Bool _ | Func _ | NatFunc _ | Nil -> v
-		| Object obj -> (copy_object obj, snd v)
-		| Arr rez -> (copy_array rez, snd v) 
-		| String rez -> (String (Resizable.copy rez), snd v)
-	in Hashtbl.add new_obj k copied
-	) obj.values;
-	Object ({values=new_obj; parent=obj.parent})
-
-and copy_array arr =
-	let new_arr = Resizable.copy arr in
-	for i = 0 to Resizable.len arr - 1 do
-		match new_arr.arr.(i) with
-		| Float _ | Bool _ | Func _ | NatFunc _ | Nil -> ()
-		| Object env -> new_arr.arr.(i) <- copy_object env
-		| Arr rez -> new_arr.arr.(i) <- copy_array rez 
-		| String rez -> new_arr.arr.(i) <- String (Resizable.copy rez)
-	done;
-	Arr (new_arr)
+	| Object obj -> 
+		if (List.length arglist) <> 0 
+		then raise (RuntimeError ("Cannot pass arguments in a function call to object", tk))
+		else copy_object obj
+	| _ -> raise (RuntimeError (("Cannot call a value of type '"^nameof callable^"'"), tk));
 
 and evaluate_func env arglist params body tk inp =
 	let param_len = List.length params in
@@ -220,26 +199,26 @@ and evaluate_binary expr1 expr2 op inp =
 		let (ev1, ev2) = ev_both expr1 expr2 in
 		match (ev1, ev2) with
 		| Float fl1, Float fl2 -> Float (fl1 +. fl2)
-		| String str1, String str2 -> String (Resizable.merge str1 str2)
-		| Arr arr1, Arr arr2 -> Arr (Resizable.merge arr1 arr2)
+		| String (str1, _), String (str2, _) -> String (Resizable.merge str1 str2, true)
+		| Arr (arr1, _), Arr (arr2, _) -> Arr (Resizable.merge arr1 arr2, true)
 		| _ -> raise_error ev1 ev2
 		end
 	| EqualEqual -> begin
 		let (ev1, ev2) = (ev_both expr1 expr2) in 
 		match (ev1, ev2) with
-		| String str1, String str2 -> Bool (str1 = str2)
+		| String (str1, _), String (str2, _) -> Bool (str1.arr = str2.arr)
 		| Float fl1, Float fl2 -> Bool (fl1 = fl2)
 		| Bool b1, Bool b2 -> Bool (b1 = b2)
-		| Arr arr1, Arr arr2 -> Bool (arr1.arr = arr2.arr) 
+		| Arr (arr1, _), Arr (arr2, _) -> Bool (arr1.arr = arr2.arr) 
 		| _ -> raise_error ev1 ev2 
 	end 
 	| ExcEqual -> begin
 		let (ev1, ev2) = (ev_both expr1 expr2) in 
 		match (ev1, ev2) with
-		| String str1, String str2 -> Bool (str1 <> str2)
+		| String (str1, _), String (str2, _) -> Bool (str1.arr <> str2.arr)
 		| Float fl1, Float fl2 -> Bool (fl1 <> fl2)
 		| Bool b1, Bool b2 -> Bool (b1 <> b2)
-		| Arr arr1, Arr arr2 -> Bool (arr1 <> arr2) 
+		| Arr (arr1, _), Arr (arr2, _) -> Bool (arr1.arr <> arr2.arr) 
 		| _ -> raise_error ev1 ev2
 	end
 	| Minus -> Float (simple_binary expr1 expr2 (-.))
@@ -267,8 +246,8 @@ and evaluate_unary op expr inp =
 	| Exclamation -> Bool (not (truth ev))
 	| Plus -> begin match ev with Float fl -> Float fl | _ -> raise_error ev end
 	| Minus -> begin match ev with Float fl -> Float (fl*.(-1.)) | _ -> raise_error ev end
-	| Tilde -> (Value.make_rez_string (nameof ev))
-	| At -> (Value.make_rez_string (Value.stringify ev))
+	| Tilde -> (make_rez_string (nameof ev))
+	| At -> (make_rez_string (Value.stringify ev))
 	| _ -> assert false;
 
 and evaluate_ident tk global inp =
@@ -328,7 +307,10 @@ and assign_subscript expr target index inp =
     if not mut then raise (RuntimeError ("Cannot re-assign to a constant", token))
     else
       match arr with
-      | Arr rez ->
+      | Arr (rez, mut) ->
+      	if not mut then
+      	raise (RuntimeError ("Cannot assign to a subscript of a constant array", token)) 
+        else 
         let index = int_of_float (ev_subexpr index token inp) in
         let value = evaluate expr inp in
         begin
@@ -336,12 +318,15 @@ and assign_subscript expr target index inp =
           with Invalid_argument _ ->
             raise (RuntimeError ("Accessing array out of bounds", token))
         end
-      | String rez ->
+      | String (rez, mut) ->
+        if not mut then
+      	raise (RuntimeError ("Cannot assign to a subscript of a constant string", token)) 
+        else 
         let index = int_of_float (ev_subexpr index token inp) in
         let value = evaluate expr inp in
         begin
           match value with
-          | String chr ->
+          | String (chr, _) ->
             let length = Resizable.len chr in
             if length <> 1 then
               raise (RuntimeError ("Assigning invalid character count value to a string index", token))
@@ -357,6 +342,7 @@ and assign_subscript expr target index inp =
       | _ -> raise (RuntimeError (("Value of type '"^nameof arr^"' is not subscriptable"), token))
 
 and assign_ident ismut expr ident inp =
+
 	let (name, global, token) = 
 	match ident with
 	| IdentExpr(tk, global) -> (tk.value, global, tk)
@@ -370,18 +356,18 @@ and assign_ident ismut expr ident inp =
 	in
 	match (Environment.find name env) with
 	| None -> begin
-		let value = evaluate expr inp in
+		let value = if ismut then evaluate expr inp else constant_value (evaluate expr inp) in
 		Environment.add name (value, ismut) env; value
 	end
 	| Some (_, mut) -> begin 
 		if not mut then raise (RuntimeError ("Cannot re-assign to a constant", token))
 		else 
-		let value = evaluate expr inp in
+		let value = if ismut then evaluate expr inp else constant_value (evaluate expr inp) in
 		Environment.replace name (value, ismut) env; value
 	end
 
 and exec_stmt stmt inp =
-		match stmt with
+	match stmt with
 	| Exprstmt expr -> ignore (evaluate expr inp); inp
 	| IfStmt (cond, whentrue, whenfalse) -> if_stmt cond whentrue whenfalse inp
 	| Block stmts -> block_stmt stmts inp

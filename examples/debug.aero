@@ -1,18 +1,2 @@
-person = {
-  name = ""
-  age  = 0
-
-  init := (name, age) {
-    $age  = age
-    $name = name
-  }
-
-  pp := () {
-    print("My name is ", $name, " and I'm ", $age, " years old.\n")
-  }
-}
-
-me = person()
-me.init("Alice", 999)
-me.pp()
-person.pp()
+arr := [1, 2, 3, 4, 5]
+append(arr, 11)

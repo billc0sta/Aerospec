@@ -13,29 +13,30 @@ let clock _ =
 let len params =
 	let seq = List.hd params in
 	match seq with
-	| String rez -> Float (float_of_int (Resizable.len rez)) 
-	| Arr rez -> Float (float_of_int (Resizable.len rez))
+	| String (rez, _) -> Float (float_of_int (Resizable.len rez)) 
+	| Arr (rez, _) -> Float (float_of_int (Resizable.len rez))
 	| _ -> raise (Invalid_argument "Non-sequence value was passed to len")
 
 let append params = 
 	let (seq, params) = (List.hd params, List.tl params) in
-	match seq with
-	| String _ | Arr _ -> ()
-	| _ -> raise (Invalid_argument "Non-sequence value was passed as a first parameter to append");
-	;
+	let () = match seq with
+	| String (_, mut) -> if not mut then raise (Invalid_argument "Cannot append to a constant string") 
+	| Arr (_, mut) -> if not mut then raise (Invalid_argument "Cannot append to a constant array")
+	| _ -> raise (Invalid_argument "Non-sequence value was passed as a first parameter to append")
+	in
 	List.iter (
 	fun param -> 
 	match param with 
-	| String p -> begin 
+	| String (p, _) -> begin 
 		match seq with 
-		| String r -> Resizable.iter (fun c -> Resizable.append r c) p 
-		| Arr r -> Resizable.append r param
+		| String (r, _) -> Resizable.iter (fun c -> Resizable.append r c) p 
+		| Arr (r, _) -> Resizable.append r param
 		| _ -> assert false;
 		end 
 	| _ -> begin 
 		match seq with 
 		| String _ -> raise (Invalid_argument "Cannot append non-string value to a string")
-		| Arr r -> Resizable.append r param
+		| Arr (r, _) -> Resizable.append r param
 		| _ -> assert false;
 		end
 	) params; 
@@ -44,7 +45,8 @@ let append params =
 let insert params =
 	let (seq, params) = (List.hd params, List.tl params) in
 	match seq with
-	| String _ | Arr _ -> ()
+	| String (_, mut) -> if not mut then raise (Invalid_argument "Cannot insert to a constant string") 
+	| Arr (_, mut) -> if not mut then raise (Invalid_argument "Cannot insert to a constant array")
 	| _ -> raise (Invalid_argument "Non-sequence value was passed as a first parameter to insert");
 	;
 	let (index, params) = (List.hd params, List.tl params) in
@@ -55,12 +57,12 @@ let insert params =
 	let elem = List.hd params in
 	let () = try 
 		match seq with
-		| String rez -> begin 
+		| String (rez, _) -> begin 
 			match elem with
-			| String p -> Resizable.iter (fun c -> Resizable.append rez c) p
+			| String (p, _) -> Resizable.iter (fun c -> Resizable.append rez c) p
 			| _ -> raise (Invalid_argument "Cannot insert non-string value to a string")
 		end
-		| Arr rez -> Resizable.insert rez index elem
+		| Arr (rez, _) -> Resizable.insert rez index elem
 		| _ -> assert false;
 	with Invalid_argument _ -> raise (Invalid_argument ("Accessing "^nameof seq^" out of bounds"))
 	in
@@ -70,8 +72,14 @@ let extend params =
 	let (seq1, params) = (List.hd params, List.tl params) in
 	List.iter (fun seq2 ->
 		match (seq1, seq2) with
-		| (String r1, String r2) -> Resizable.extend r1 r2
-		| (Arr r1, Arr r2) -> Resizable.extend r1 r2
+		| (String (r1, mut), String (r2, _)) -> 
+			if not mut 
+			then raise (Invalid_argument "Cannot extend a constant string") 
+			else Resizable.extend r1 r2
+		| (Arr (r1, mut), Arr (r2, _)) -> 
+			if not mut 
+			then raise (Invalid_argument "Cannot extend a constant array") 
+			else Resizable.extend r1 r2
 		| _ -> raise (Invalid_argument ("Cannot extend value of type '"^nameof seq1^"' with value of type '"^nameof seq2^"'"))
 	) params;
 	Nil
@@ -81,8 +89,8 @@ let merge params =
 
 	List.fold_left (fun seq1 seq2 -> 
 		match (seq1, seq2) with
-		| (String r1, String r2) -> String (Resizable.merge r1 r2)
-		| (Arr r1, Arr r2) -> Arr (Resizable.merge r1 r2)
+		| (String (r1, _), String (r2, _)) -> String (Resizable.merge r1 r2, true)
+		| (Arr (r1, _), Arr (r2, _)) -> Arr (Resizable.merge r1 r2, true)
 		| _ -> raise (Invalid_argument ("Cannot merge value of type '"^nameof seq1^"' with value of type '"^nameof seq2^"'"));
 	) seq1 params
 
@@ -90,21 +98,22 @@ let index params =
 	let (seq, params) = (List.hd params, List.tl params) in
 	let elem = List.hd params in
 	match seq with
-	| String rez -> begin 
+	| String (rez, _) -> begin 
 		match elem with
-		| String chr -> if Resizable.len chr <> 1 
+		| String (chr, _) -> if Resizable.len chr <> 1 
 			then raise (Invalid_argument "Invalid element character count was passed to index") 
 			else Float (float_of_int (Resizable.index rez (Resizable.get chr 0)))
 		| _ -> raise (Invalid_argument "Cannot index non-string value from string")
 	end
-	| Arr rez -> Float (float_of_int (Resizable.index rez elem))
+	| Arr (rez, _) -> Float (float_of_int (Resizable.index rez elem))
 	| _ -> raise (Invalid_argument "Non-sequence value was passed as a first parameter to index")
 
 let pop params = 
 	let (seq, params) = (List.hd params, List.tl params) in
 	let () = match seq with
-	| String _ | Arr _ -> ()
-	| _ -> raise (Invalid_argument "Non-sequence value was passed as a first parameter to index")
+	| String (_, mut) -> if not mut then raise (Invalid_argument "Cannot pop from a constant string") 
+	| Arr (_, mut) -> if not mut then raise (Invalid_argument "Cannot pop from a constant array")
+	| _ -> raise (Invalid_argument "Non-sequence value was passed as a first parameter to pop")
 	in
 
 	List.iter (fun index ->
@@ -116,8 +125,8 @@ let pop params =
 		in
 		try
 			match seq with
-			| String rez -> Resizable.pop rez index
-			| Arr rez -> Resizable.pop rez index
+			| String (rez, _) -> Resizable.pop rez index
+			| Arr (rez, _) -> Resizable.pop rez index
 			| _ -> assert false;
 		with Invalid_argument _ -> raise (Invalid_argument ("Accessing "^nameof seq^" out of bounds"))
 	) params; 
@@ -126,19 +135,20 @@ let pop params =
 let remove params =
 	let (seq, params) = (List.hd params, List.tl params) in
 	let () = match seq with
-	| String _ | Arr _ -> ()
-	| _ -> raise (Invalid_argument "Non-sequence value was passed as a first parameter to index")
+	| String (_, mut) -> if not mut then raise (Invalid_argument "Cannot remove from a constant string") 
+	| Arr (_, mut) -> if not mut then raise (Invalid_argument "Cannot remove from a constant array")
+	| _ -> raise (Invalid_argument "Non-sequence value was passed as a first parameter to remove")
 	in
 	List.iter (fun elem -> 
 		match seq with
-		| String rez -> begin
+		| String (rez, _) -> begin
 			match elem with
-			| String chr -> if Resizable.len chr <> 1 
+			| String (chr, _) -> if Resizable.len chr <> 1 
 				then raise (Invalid_argument "Invalid element character count was passed to remove") 
 				else Resizable.remove rez (Resizable.get chr 0)
 			| _ -> raise (Invalid_argument "Cannot remove non-string value from string")
 		end
-		| Arr rez -> Resizable.remove rez elem
+		| Arr (rez, _) -> Resizable.remove rez elem
 		| _ -> assert false;
 	) params; 
 	Nil
@@ -146,8 +156,14 @@ let remove params =
 let clear params =	
 	let seq = List.hd params in
 	let () = match seq with
-	| String rez -> Resizable.clear rez
-	| Arr rez -> Resizable.clear rez
+	| String (rez, mut) -> 
+		if not mut 
+		then raise (Invalid_argument "Cannot clear a constat string")
+		else Resizable.clear rez
+	| Arr (rez, mut) -> 	
+		if not mut 
+		then raise (Invalid_argument "Cannot clear a constat array")
+		else Resizable.clear rez
 	| _ -> raise (Invalid_argument "Non-sequence value was passed as a first parameter to clear");
 	in 
 	Nil
@@ -156,12 +172,16 @@ let count params =
 	let (seq, params) = (List.hd params, List.tl params) in
 	let elem = List.hd params in
 	match seq with
-	| String rez -> begin
+	| String (rez, _) -> begin
 		match elem with
-		| String chr -> if Resizable.len chr <> 1 
+		| String (chr, _) -> if Resizable.len chr <> 1 
 			then raise (Invalid_argument "Invalid element character count was passed to count") 
 			else Float (float_of_int (Resizable.count rez (Resizable.get chr 0)))
 		| _ -> raise (Invalid_argument "Cannot count non-string value in string")
 	end
-	| Arr rez -> Float (float_of_int (Resizable.count rez elem))
-	| _ -> raise (Invalid_argument "Non-sequence value was passed as a first parameter to count");
+	| Arr (rez, _) -> Float (float_of_int (Resizable.count rez elem))
+	| _ -> raise (Invalid_argument "Non-sequence value was passed as a first parameter to count")
+
+let copy params =
+	let value = List.hd params in
+	Value.copy_value value 
