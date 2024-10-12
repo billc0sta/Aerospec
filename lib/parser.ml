@@ -174,7 +174,7 @@ and assignexpr parser =
     begin
       let parser = forward parser in
       match expr with 
-      | Subscript (IdentExpr _, (_, None), _) | IdentExpr _ -> 
+      | Subscript (IdentExpr _, (_, None), _) | IdentExpr _ | PropertyExpr _ -> 
         let (expr2, parser) = assignexpr parser in 
         aux (Binary (expr, tk, expr2)) parser
       | _ -> raise (ParseError ("Cannot assign to an expression", tk))

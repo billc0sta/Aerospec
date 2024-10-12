@@ -54,7 +54,7 @@ let rec stringify = function
 
 and stringify_object obj =
 	let _ = obj in
-	"object" (* modify later *)
+	"<object>" (* modify later *)
 
 and stringify_str str =
 	String.init (Resizable.len str) (fun i -> (Resizable.get str i))

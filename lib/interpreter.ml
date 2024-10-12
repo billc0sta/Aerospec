@@ -45,10 +45,10 @@ let rec evaluate expr inp =
 	| Subscript (expr, subexpr, tk) -> evaluate_subscript expr subexpr tk inp
 	| Range (_, tk, _, _, _) -> raise (RuntimeError ("Cannot evaluate range expression in this context", tk))
 	| ObjectExpr stmts -> evaluate_object stmts inp
-	| PropertyExpr (expr, ident) -> evaluate_propery expr ident inp
+	| PropertyExpr (expr, ident) -> evaluate_property expr ident inp
 	| NilExpr -> Nil
 
-and evaluate_propery expr ident inp =
+and evaluate_property expr ident inp =
 	let tk = match ident with IdentExpr (tk, _) -> tk | _ -> assert false; in
 	let eval = evaluate expr inp in
 	let env = 
@@ -286,7 +286,34 @@ and assignment target expr token inp =
 	| Subscript (target, (index, None), tk) -> 
 		if not mut then raise (RuntimeError ("Cannot constant-assign an index", tk))
 		else assign_subscript expr target index inp
+	| PropertyExpr (obj, target) -> assign_property obj target expr mut inp 
 	| _ -> assert false
+
+and assign_property obj target expr ismut inp =
+	let tk = match target with IdentExpr (tk, _) -> tk | _ -> assert false; in
+	let env = 
+	match evaluate obj inp with
+	| Object env -> env
+	| eval -> raise (RuntimeError (("Value of type '"^nameof eval^"' has no properties"), tk))
+	in
+	
+	let ev_expr expr = 
+		match evaluate expr inp with
+		| Func (_, params, stmts) -> Func (env, params, stmts)
+		| eval -> eval
+	in
+
+	match (Environment.find tk.value env) with
+	| None -> begin
+		let value = if ismut then ev_expr expr else constant_value (ev_expr expr) in
+		Environment.add tk.value (value, ismut) env; value
+	end
+	| Some (_, mut) -> begin 
+		if not mut then raise (RuntimeError ("Cannot re-assign to a constant", tk))
+		else 
+		let value = if ismut then ev_expr expr else constant_value (ev_expr expr) in
+		Environment.replace tk.value (value, ismut) env; value
+	end
 
 and assign_subscript expr target index inp =
   let (name, global, token) =
