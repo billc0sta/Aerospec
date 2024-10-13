@@ -260,20 +260,20 @@ and unary parser =
 and import parser =
   let tk = peek parser in
   let (expr, parser) = primary parser in
-  let file_path = match expr with
-  | StringLit fp -> parser.path ^ fp
-  | _ -> raise (ParseError ("Expected a string", tk))
-  in
+  let fp = match expr with
+  | StringLit fp -> fp
+  | _ -> raise (ParseError ("Expected a string", tk)) in
+  let file_path = parser.path ^ fp in
   let ch = 
     try open_in_bin file_path 
-    with Sys_error _ -> raise (ParseError (("No such file as '"^file_path^"'"), tk))
+    with Sys_error _ -> raise (ParseError (("No such file as '"^file_path^"' in the current directory"), tk))
   in 
   let s = really_input_string ch (in_channel_length ch) in
   close_in ch;
 
   let lexer = Lexer.make s in
   let lexed = Lexer.lex lexer in
-  let new_parser = make lexed parser.path in
+  let new_parser = make lexed (Filename.dirname file_path ^ "/") in
   let parsed     = parse new_parser in
  (ObjectExpr parsed, parser)
 
