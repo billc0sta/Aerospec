@@ -32,17 +32,18 @@ type t = {
   raw: token list;
   previous: token;
   pos: int;
+  path: string;
 }
 
 exception ParseError of string * token
 
-let make raw = {raw; previous={value="";typeof=Unknown;line=0;pos=0}; pos=0}
+let make raw path = {raw; path; previous={value="";typeof=Unknown;line=0;pos=0}; pos=0}
 
 let peek parser = List.hd parser.raw
 
 let forward parser = 
   if (List.hd parser.raw).typeof = EOF then parser else
-  {previous=List.hd parser.raw; raw=List.tl parser.raw; pos=parser.pos+1}
+  {parser with previous=List.hd parser.raw; raw=List.tl parser.raw; pos=parser.pos+1}
 
 let consume typeof error parser =
 	if (peek parser).typeof = typeof then forward parser else raise (ParseError (error, peek parser))
@@ -250,10 +251,31 @@ and factor parser = build_binary [Slash; Star; Modulo] unary parser
 and unary parser =
   let tk = peek parser in
   match tk.typeof with
-  | Exclamation | Plus | Minus | Hash | Tilde | At -> 
+  | Exclamation | Plus | Minus | Tilde | At -> 
     let (expr, parser) = postary (forward parser) in
     (Unary (tk, expr), parser)
+  | Hash -> import (forward parser)
   | _ -> postary parser
+
+and import parser =
+  let tk = peek parser in
+  let (expr, parser) = primary parser in
+  let file_path = match expr with
+  | StringLit fp -> parser.path ^ fp
+  | _ -> raise (ParseError ("Expected a string", tk))
+  in
+  let ch = 
+    try open_in_bin file_path 
+    with Sys_error _ -> raise (ParseError (("No such file as '"^file_path^"'"), tk))
+  in 
+  let s = really_input_string ch (in_channel_length ch) in
+  close_in ch;
+
+  let lexer = Lexer.make s in
+  let lexed = Lexer.lex lexer in
+  let new_parser = make lexed parser.path in
+  let parsed     = parse new_parser in
+ (ObjectExpr parsed, parser)
 
 and postary parser =
   let rec aux expr parser = 
@@ -492,7 +514,7 @@ and if_stmt parser =
   else 
     (IfStmt (cond, whentrue, None), parser)
 
-let parse parser =
+and parse parser =
   let rec aux acc parser =
     if (peek parser).typeof = EOF then acc else
     let (stmt, parser) = statement parser in 

@@ -33,12 +33,12 @@ let read_whole_file filename =
   close_in ch;
   s
 
-let execute program debugging =
+let execute program path debugging =
 	let lexer = Lexer.make program in
 	try 
 		let lexed = Lexer.lex lexer in
 		if debugging then print_lexed lexed;
-	let parser = Parser.make lexed in
+	let parser = Parser.make lexed path in
 	try
 		let parsed = Parser.parse parser in
 		if debugging then Parser._print_parsed parsed;
@@ -59,8 +59,9 @@ let () = if Array.length Sys.argv < 2 then
   print_string "Aerospec: No program file was provided\n"
 else
 	try 
-  let program = read_whole_file Sys.argv.(1) in
-  execute program false
+	let file_path = Sys.argv.(1) in
+  let program   = read_whole_file file_path in
+  execute program (Filename.dirname file_path ^ "/") false
 	with Sys_error _ -> print_string "Aerospec: No such file"
 
 

@@ -1,12 +1,12 @@
 open Upl
 
-let test_no_failure name program =
+let test_no_failure name program path =
 	print_string "\n--- test_no_failure: "; 
 	print_string name;
 	print_string " ---\n"; 
 	let lexer  = Lexer.make program  in
 	let lexed  = Lexer.lex lexer     in
-	let parser = Parser.make lexed   in
+	let parser = Parser.make lexed path in
 	let parsed = Parser.parse parser in
 	let interpreter = Interpreter.make parsed in
 	Interpreter.run interpreter
@@ -38,7 +38,7 @@ let () =
 	print(\"output: \")
 	?? (0) print(\"Hello!\\n\")
 	:: print(\"Bye!\\n\")
-	";
+	" "";
 
 	test_no_failure "loops"
 	"
@@ -62,7 +62,7 @@ let () =
 	print(\"output: \")
 	>> i<100 i = i + 1
 	print(i, \"\\n\\n\")
-	";
+	" "";
 
 	test_no_failure "return statements"
 	"
@@ -85,7 +85,7 @@ let () =
 	print(\"() {-> 1 -> 0} - non-reachable return \\n\")
 	print(\"expected: 1\\n\")
 	print(\"output: \", (){-> 1 -> 0}(), \"\\n\\n\")
-	";
+	" "";
 
 	test_no_failure "break statements"
 	"
@@ -109,7 +109,7 @@ let () =
 	print(\"output: \")
 	>> 1 {?? 1 ** i = 1}
 	print(i, \"\\n\\n\")
-	";
+	" "";
 
 	test_no_failure "continue statements"
 	"
@@ -126,7 +126,7 @@ let () =
 	print(\"output: \")
 	>> i < 9 { ?? (i % 2 == 1) {i = i + 1 <<} print(i) i = i + 1 }
 	print(\"\\n\\n\")
-	";
+	" "";
 
 	test_no_failure "assignments"
 	"
@@ -153,7 +153,7 @@ let () =
 	print(\"expected: 2\\n\")
 	;() {$x=2}()
 	print(\"output: \", x, \"\\n\")
-	";
+	" "";
 
 	test_no_failure "if expression"
 	"
@@ -186,7 +186,7 @@ let () =
 	print(\"nested falsy/falsy\\n\")
 	print(\"expected: 0\\n\")
 	print(\"output: \", res, \"\\n\")
-	";
+	" "";
 
 	test_no_failure "arrays"
 	"
@@ -219,7 +219,7 @@ let () =
 	print(\"len()\\n\")
 	print(\"expected: 6\\n\")
 	print(\"output: \", len(arr), \"\\n\")
-	";
+	" "";
 
 	test_no_failure "lambdas (functions)"
 	"
@@ -248,4 +248,4 @@ let () =
 	print(\"one argument - recurses upon parameter until reaches 10\\n\")
 	print(\"expected: 10\\n\")
 	print(\"output: \", recursive(0), \"\\n\")
-	"
+	" "";

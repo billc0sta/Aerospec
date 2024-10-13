@@ -1,3 +1,5 @@
+utils := #"debug2.aero"
+
 arr = [1, 2, 3, 4, 5]
-doubled = [0<=i<len(arr);; arr[i]*2]
-print(doubled) // [2, 4, 6, 8, 10]
+sum = utils.sumall(arr)
+print(sum)

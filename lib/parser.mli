@@ -30,11 +30,12 @@ type t = {
   raw: Lexer.token list;
   previous: Lexer.token;
   pos: int;
+  path: string;
 }
 
 exception ParseError of string * Lexer.token
 
-val make: Lexer.token list -> t
+val make: Lexer.token list -> string -> t
 val expression: t -> expr * t
 val parse: t -> statement list
 val _print_parsed: statement list -> unit
