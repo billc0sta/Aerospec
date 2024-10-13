@@ -102,8 +102,9 @@ let rec constant_value value =
 	| String (rez, _) -> String (rez, false)
 	| Arr (rez, _) -> Arr (rez, false)
 	| Object obj -> begin
+		let new_obj = Environment.make () in
 		Hashtbl.iter (fun k v ->
-			Hashtbl.replace obj.values k ((constant_value (fst v)), false)
-		) obj.values; Object (obj)
+			Hashtbl.add new_obj.values k ((constant_value (fst v)), false)
+		) obj.values; Object (new_obj)
 	end
 	| _ -> value

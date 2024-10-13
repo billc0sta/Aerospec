@@ -15,6 +15,7 @@ type expr =
   | Range of expr * token * expr * token * expr
   | ObjectExpr of statement list
   | PropertyExpr of expr * expr
+  | Builder of expr * expr * expr
   | NilExpr
 
 and statement = 
@@ -341,6 +342,15 @@ and object_expr parser =
   | _ -> assert false;
 
 and array_expr parser =
+  let tk = peek parser in
+  match tk.typeof with
+  | CSquare -> (exprs, forward parser)
+  | _ -> begin
+    let (expr, parser) = expression parser in
+    if match expr with Range _ -> true | _ -> false then
+    then builder_expr expr parser 
+    else
+
   let rec aux exprs parser =
     let tk = peek parser in
     match tk.typeof with
@@ -357,6 +367,18 @@ and array_expr parser =
   let tk = peek parser in
   let (exprs, parser) = aux [] parser in
   (ArrExpr (List.rev exprs, tk), parser)
+
+and builder_expr range parser =
+  let parser = consume Semicolon "Expected a semicolon ';'" parser in
+  let (condition, parser) = 
+    match (peek parser).typeof with
+    | Semicolon -> (FloatLit 1.0, parser)
+    | _ -> expression parser
+  in
+  let parser = consume Semicolon "Expected a semicolon ';'" parser in
+  let (expr, parser) = expression parser in
+  let parser = consume Semicolon "Expected a Closing Bracket ']'" parser in
+  (Builder (range, condition, expr), parser)
 
 and lambda_expr parser =
   let (params, parser) = parameters parser in
@@ -461,5 +483,6 @@ and if_stmt parser =
 let parse parser =
   let rec aux acc parser =
     if (peek parser).typeof = EOF then acc else
-    let (stmt, parser) = statement parser in aux (stmt::acc) parser 
+    let (stmt, parser) = statement parser in 
+    let acc = match stmt with NoOp _ -> acc | _ -> stmt::acc in aux acc parser
   in List.rev (aux [] parser)
