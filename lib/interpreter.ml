@@ -50,10 +50,9 @@ let rec evaluate expr inp =
 	| NilExpr -> Nil
 
 and evaluate_builder range cond expr inp =
-	let (rcond, name, beg, endof, dir) = start_range range inp in
+	let (rcond, name, beg, _, dir) = start_range range inp in
 	let dir = float_of_int dir in
 	let arr = Resizable.make () in
-	Resizable.resize arr (abs (endof - beg)) Nil;
 	let iter = ref (float_of_int beg) in
 	while truth (evaluate rcond inp) do
 		(if truth (evaluate cond inp) then 

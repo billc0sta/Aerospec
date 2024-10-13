@@ -1,4 +1,5 @@
-utils := #"debug2.aero"
+utils  := #"debug2.aero"
+utils2 := #"debug2.aero"
 
 arr = [1, 2, 3, 4, 5]
 sum = utils.sumall(arr)

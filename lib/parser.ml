@@ -265,6 +265,9 @@ and import parser =
   | StringLit fp -> fp
   | _ -> raise (ParseError ("Expected a string", tk)) in
   let file_path = (Filename.dirname parser.path ^ "/") ^ fp in
+  if parser.path = file_path
+  then raise (ParseError ("Cannot Include a file recursively", tk))
+  else
   if List.mem file_path parser.imported
   then raise (ParseError (("Cycle import detected between 
     '"^file_path^"' and 
