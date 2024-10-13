@@ -154,15 +154,23 @@ and _print_expr expr =
   | ObjectExpr stmts ->
     print_string "(object \n";
     _print_parsed stmts;
-    print_string ")";
+    print_string ")"
   | PropertyExpr (expr, ident) ->
     print_string "(access property ";
     _print_expr ident;
     print_string " of ";
     _print_expr expr;
-    print_string ")";
+    print_string ")"
   | NilExpr ->
-  print_string "nil"
+    print_string "nil"
+  | Builder (range, cond, expr) ->
+    print_string "(builder ";
+    _print_expr range;
+    print_string ";";
+    _print_expr cond;
+    print_string ";";
+    _print_expr expr;
+    print_string ")"
     
 let rec expression parser = assignexpr parser
 
@@ -342,15 +350,6 @@ and object_expr parser =
   | _ -> assert false;
 
 and array_expr parser =
-  let tk = peek parser in
-  match tk.typeof with
-  | CSquare -> (exprs, forward parser)
-  | _ -> begin
-    let (expr, parser) = expression parser in
-    if match expr with Range _ -> true | _ -> false then
-    then builder_expr expr parser 
-    else
-
   let rec aux exprs parser =
     let tk = peek parser in
     match tk.typeof with
@@ -364,8 +363,17 @@ and array_expr parser =
       | _ -> raise (ParseError ("Expected a Comma ','", tk))
     end
   in
+
   let tk = peek parser in
-  let (exprs, parser) = aux [] parser in
+  match tk.typeof with
+  | CSquare -> (ArrExpr([], tk), forward parser)
+  | _ ->
+    let (expr, parser) = expression parser in
+    if match expr with Range _ -> true | _ -> false
+    then builder_expr expr parser 
+    else
+  let parser = if (peek parser).typeof = Comma then forward parser else parser in
+  let (exprs, parser) = aux [expr] parser in
   (ArrExpr (List.rev exprs, tk), parser)
 
 and builder_expr range parser =
@@ -377,7 +385,7 @@ and builder_expr range parser =
   in
   let parser = consume Semicolon "Expected a semicolon ';'" parser in
   let (expr, parser) = expression parser in
-  let parser = consume Semicolon "Expected a Closing Bracket ']'" parser in
+  let parser = consume CSquare "Expected a Closing Square Bracket ']'" parser in
   (Builder (range, condition, expr), parser)
 
 and lambda_expr parser =
@@ -458,7 +466,11 @@ and loop_stmt parser =
 
 and expr_stmt parser = 
   let (expr, parser) = expression parser in
-  (Exprstmt expr, parser) 
+  let stmt = match expr with
+  | Builder (range, cond, expr) -> (LoopStmt (range, IfStmt (cond, Exprstmt expr, None)))
+  | _ -> Exprstmt expr  
+  in 
+  (stmt, parser) 
   
 and block_stmt parser =
   let parser = consume OCurly "Expected a block (opening curly bracket '{')" parser in

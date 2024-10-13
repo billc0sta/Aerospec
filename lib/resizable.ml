@@ -107,7 +107,15 @@ let range rez beginning ending =
 	new_rez.size <- ending - beginning;
 	for i = beginning to ending - 1 do
 		new_rez.arr.(i-beginning) <- rez.arr.(i);
-	done; new_rez 
+	done; new_rez
+
+let shrink rez =
+	if rez.size = 0 
+	then rez.arr <- [||]
+	else 
+	let	new_arr = Array.make rez.size rez.arr.(0) in
+	Array.blit rez.arr 0 new_arr 0 rez.size;
+	rez.arr <- new_arr
 
 let iter f rez =
 	for i = 0 to (len rez - 1) do

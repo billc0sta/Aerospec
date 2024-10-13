@@ -13,6 +13,7 @@ type expr =
   | Range of expr * Lexer.token * expr * Lexer.token * expr
   | ObjectExpr of statement list
   | PropertyExpr of expr * expr
+  | Builder of expr * expr * expr
   | NilExpr
 
 and statement = 

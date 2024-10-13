@@ -46,7 +46,25 @@ let rec evaluate expr inp =
 	| Range (_, tk, _, _, _) -> raise (RuntimeError ("Cannot evaluate range expression in this context", tk))
 	| ObjectExpr stmts -> evaluate_object stmts inp
 	| PropertyExpr (expr, ident) -> evaluate_property expr ident inp
+	| Builder (range, cond, expr) -> evaluate_builder range cond expr inp
 	| NilExpr -> Nil
+
+and evaluate_builder range cond expr inp =
+	let (rcond, name, beg, endof, dir) = start_range range inp in
+	let dir = float_of_int dir in
+	let arr = Resizable.make () in
+	Resizable.resize arr (abs (endof - beg)) Nil;
+	let iter = ref (float_of_int beg) in
+	while truth (evaluate rcond inp) do
+		(if truth (evaluate cond inp) then 
+			Resizable.append arr (evaluate expr inp)
+		);
+		iter := !iter +. dir;
+		Environment.replace name (Float (!iter), true) inp.env
+	done;
+	Environment.remove name inp.env;
+	Resizable.shrink arr;
+	Arr (arr, true)
 
 and evaluate_property expr ident inp =
 	let tk = match ident with IdentExpr (tk, _) -> tk | _ -> assert false; in
@@ -441,7 +459,7 @@ and loop_stmt cond stmt inp =
 	| _ -> normal_loop cond stmt inp
     
 and range_loop range stmt inp =
-	let (cond, name, beg, dir) = start_range range inp in
+	let (cond, name, beg, _, dir) = start_range range inp in
 	let (beg, dir) = (float_of_int beg, float_of_int dir) in
 	let rec aux iter inp =
 		if truth (evaluate cond inp) then
@@ -492,11 +510,7 @@ and start_range range inp =
 		| LessEqual  -> ((ev_expr expr1),    1)
 		| _ -> assert false;
 	in
-	let endof =
-		match tk2.typeof with
-		| Greater | Lesser | LessEqual | GreatEqual -> (ev_expr expr2)
-		| _ -> assert false;
-	in
+	let endof = (ev_expr expr2) in
 	let () = if dir = 1 && not (beg < endof) then
 		raise (RuntimeError ("Beginning should be less than ending of range expression", tk1))
 		else if dir = -1 && not (beg > endof) then
@@ -505,6 +519,6 @@ and start_range range inp =
 	in
 	let name = match ident with IdentExpr (tk, _) -> tk.value | _ -> assert false; in
 	Environment.add name (Float (float_of_int beg), true) inp.env;
-	(Binary (ident, tk2, FloatLit (float_of_int endof)), name, beg, dir)
+	(Binary (ident, tk2, FloatLit (float_of_int endof)), name, beg, endof, (dir:int))
 
 and run inp = ignore (exec_stmt (Block inp.raw) inp)
