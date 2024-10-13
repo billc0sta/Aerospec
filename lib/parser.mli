@@ -31,6 +31,7 @@ type t = {
   previous: Lexer.token;
   pos: int;
   path: string;
+  imported: string list;
 }
 
 exception ParseError of string * Lexer.token

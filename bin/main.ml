@@ -61,7 +61,7 @@ else
 	try 
 	let file_path = Sys.argv.(1) in
   let program   = read_whole_file file_path in
-  execute program (Filename.dirname file_path ^ "/") false
+  execute program file_path false
 	with Sys_error _ -> print_string "Aerospec: No such file"
 
 

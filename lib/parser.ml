@@ -33,11 +33,12 @@ type t = {
   previous: token;
   pos: int;
   path: string;
+  imported: string list;
 }
 
 exception ParseError of string * token
 
-let make raw path = {raw; path; previous={value="";typeof=Unknown;line=0;pos=0}; pos=0}
+let make raw path = {imported=[]; raw; path; previous={value="";typeof=Unknown;line=0;pos=0}; pos=0}
 
 let peek parser = List.hd parser.raw
 
@@ -263,7 +264,13 @@ and import parser =
   let fp = match expr with
   | StringLit fp -> fp
   | _ -> raise (ParseError ("Expected a string", tk)) in
-  let file_path = parser.path ^ fp in
+  let file_path = (Filename.dirname parser.path ^ "/") ^ fp in
+  if List.mem file_path parser.imported
+  then raise (ParseError (("Cycle import detected between 
+    '"^file_path^"' and 
+    '"^parser.path^"'")
+    , tk))
+  else 
   let ch = 
     try open_in_bin file_path 
     with Sys_error _ -> raise (ParseError (("No such file as '"^file_path^"' in the current directory"), tk))
@@ -273,7 +280,8 @@ and import parser =
 
   let lexer = Lexer.make s in
   let lexed = Lexer.lex lexer in
-  let new_parser = make lexed (Filename.dirname file_path ^ "/") in
+  let new_parser = make lexed file_path in
+  let new_parser = {new_parser with imported=(file_path::parser.imported)} in
   let parsed     = parse new_parser in
  (ObjectExpr parsed, parser)
 

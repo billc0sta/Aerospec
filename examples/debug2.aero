@@ -1,3 +1,5 @@
+#"debug.aero"
+
 sumall := (arr) {
 	sum = 0 
 	>> 0 <= i < len(arr)
