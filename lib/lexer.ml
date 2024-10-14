@@ -48,8 +48,12 @@ type tokentype =
 type token = {value: string; line: int; pos: int; typeof: tokentype}
 type t = {raw: string; pos: int; line: int; path: string; errors: exn list}
 
-exception LexError of string * string * token
+exception LexError of string * string * string * int * int
 exception LexErrors of exn list
+
+let report_error message lexer = 
+	let lineof = Utils.get_line lexer.pos lexer.raw in
+	raise (LexError(message, lexer.path, lineof, lexer.line, lexer.pos))
 
 let nameof = function 
 	| EOF -> "EOF"
@@ -97,6 +101,11 @@ let nameof = function
 	| Tilde -> "~"
 	| Underscore -> "_"
 	
+let rec print_lexed l = 
+	match l with
+	| [] -> ()
+	| x::xs -> Printf.printf "{value=\"%s\"; typeof=\"%s\"; pos=%d; line=%d}\n" x.value (nameof x.typeof) x.pos x.line; print_lexed xs
+
 let make raw path = {errors=[]; raw; path; pos=0; line=1;}
 
 let peek lexer = 
@@ -132,7 +141,7 @@ let string_literal lexer =
 		| '"' -> if escaped then count (acc+1) false (forward lexer) else (acc, lexer) 
 		| '\\' -> count (acc+1) (not escaped) (forward lexer) 
 		| c when c = (Char.chr 0) -> 
-			raise (LexError("Non-terminated string", lexer.path, {value=""; typeof=StringLiteral; pos=lexer.pos; line=lexer.line}))
+			report_error "Non-terminated string" lexer
 		| _ -> count (acc+1) false (forward lexer)
 	in let (length, lexer) = count 0 false lexer in
 	if length = 0 then ("", forward lexer) else 
@@ -227,10 +236,11 @@ let lex lexer =
 		let (tk, lexer) = next_token lexer in
 		match tk.typeof with
 		| EOF -> (tk::acc, lexer.errors)
-		| Unknown -> raise (LexError ("Unrecognized token", lexer.path, tk))
+		| Unknown -> report_error "Unrecognized token" lexer
 		| TwoSlash -> aux acc lexer
 		| _ -> aux (tk::acc) lexer
-		with LexError (message, path, tk) -> aux acc {lexer with errors=(LexError(message, path, tk))::lexer.errors; line=tk.line; pos=tk.pos}
+		with LexError (message, path, lineof, linenum, pos) -> 
+			aux acc {lexer with errors=(LexError(message, path, lineof, linenum, pos))::lexer.errors; line=linenum; pos=pos}
 	in 
 	let (tokens, errors) = aux [] lexer in
 	if errors <> [] then raise (LexErrors (List.rev errors))

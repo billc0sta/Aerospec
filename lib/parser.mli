@@ -31,14 +31,15 @@ type t = {
   previous: Lexer.token;
   pos: int;
   path: string;
+  program: string;
   imported: string list;
   errors: exn list;
 }
 
-exception ParseError of string * string * int * int
+exception ParseError of string * string * string * int
 exception ParseErrors of exn list
 
-val make: Lexer.token list -> string -> t
+val make: Lexer.token list -> string -> string -> t
 val expression: t -> expr * t
 val parse: t -> statement list
-val _print_parsed: statement list -> unit
+val print_parsed: statement list -> unit

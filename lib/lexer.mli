@@ -50,6 +50,7 @@ type t = {raw: string; pos: int; line: int; path: string; errors: exn list}
 val make: string -> string -> t 
 val lex: t -> token list
 val nameof: tokentype -> string
+val print_lexed: token list -> unit
 
-exception LexError of string * string * token
+exception LexError of string * string * string * int * int
 exception LexErrors of exn list

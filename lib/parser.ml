@@ -33,14 +33,15 @@ type t = {
   previous: token;
   pos: int;
   path: string;
+  program: string;
   imported: string list;
   errors: exn list;
 }
 
-exception ParseError of string * string * int * int
+exception ParseError of string * string * string * int
 exception ParseErrors of exn list
 
-let make raw path = {errors=[]; imported=[]; raw; path; previous={value="";typeof=Unknown;line=0;pos=0}; pos=0}
+let make raw path program = {program; raw; path; errors=[]; imported=[]; previous={value="";typeof=Unknown;line=0;pos=0}; pos=0}
 
 let peek parser = List.hd parser.raw
 
@@ -50,7 +51,8 @@ let forward parser =
 
 let report_error message parser = 
   let tk = peek parser in
-  raise (ParseError(message, parser.path, tk.line, tk.pos))
+  let lineof = Utils.get_line tk.pos parser.program in
+  raise (ParseError(message, parser.path, lineof, tk.line))
 
 let consume typeof error parser =
 	if (peek parser).typeof = typeof then forward parser else report_error error parser
@@ -70,13 +72,13 @@ let rec ungroup expr =
   | _ -> expr
 
 (*test*)
-let rec _print_parsed l = 
+let rec print_parsed l = 
   let rec aux stmt =
     match stmt with
-    | Exprstmt expr -> _print_expr expr; print_string "\n"
+    | Exprstmt expr -> print_expr expr; print_string "\n"
     | IfStmt (expr, whentrue, whenfalse) -> 
       print_string "if "; 
-      _print_expr expr; 
+      print_expr expr; 
       print_string " do \n"; 
       aux whentrue;
       begin
@@ -85,25 +87,25 @@ let rec _print_parsed l =
       | Some block -> print_string "else do \n"; aux block
       end;
       print_string "if_end\n"
-    | Block block -> _print_parsed block;
+    | Block block -> print_parsed block;
     | LoopStmt (cond, block) -> 
       print_string "loop ";
-      _print_expr cond;
+      print_expr cond;
       print_string " do \n";
       aux block;
       print_string "loop_end";
     | Break _ -> print_string "break\n"
     | Continue _ -> print_string "continue\n"
     | NoOp _ -> print_string "no op\n"
-    | Return (expr, _) -> print_string "return "; _print_expr expr; print_string "\n";
+    | Return (expr, _) -> print_string "return "; print_expr expr; print_string "\n";
     ;
   in
   match l with
   | [] -> ()
-  | x::xs -> aux x; _print_parsed xs
+  | x::xs -> aux x; print_parsed xs
 
 (*test*)
-and _print_expr expr =
+and print_expr expr =
   match expr with
   | FloatLit fl ->
       let str = string_of_float fl in
@@ -114,79 +116,79 @@ and _print_expr expr =
           str)
   | Binary (expr1, op, expr2) ->
       print_string "(";
-      _print_expr expr1;
+      print_expr expr1;
       print_string (op.value);
-      _print_expr expr2;
+      print_expr expr2;
       print_string ")"
   | Unary (op, expr) ->
       print_string (op.value);
-      _print_expr expr
+      print_expr expr
   | Grouping expr ->
       print_string "(";
-      _print_expr expr;
+      print_expr expr;
       print_string ")"
   | IfExpr (cond, whentrue, whenfalse) -> 
-    print_string "if "; _print_expr cond;
-    print_string " then "; _print_expr whentrue; print_string " else ";
-    _print_expr whenfalse  
+    print_string "if "; print_expr cond;
+    print_string " then "; print_expr whentrue; print_string " else ";
+    print_expr whenfalse  
   | StringLit str -> print_string ("\""^str^"\"");
   | IdentExpr (tk, global) -> if global then print_string "global "; print_string tk.value
   | FunCall (expr, arglist, _) -> 
     print_string "(funcall (name ";
-    _print_expr expr;
+    print_expr expr;
     print_string ")";
     print_string "(arguments";
-    List.iter (fun expr -> print_string " "; _print_expr expr) arglist;
+    List.iter (fun expr -> print_string " "; print_expr expr) arglist;
     print_string "))";
   | LambdaExpr (params, body, _) ->
     print_string "(lambda (parameters";
-    List.iter (fun expr -> print_string " "; _print_expr expr) params;
+    List.iter (fun expr -> print_string " "; print_expr expr) params;
     print_string ") (body ";
     begin
     match body with
-    | Block stmts -> _print_parsed stmts;
+    | Block stmts -> print_parsed stmts;
     | _ -> assert false;
     end;
     print_string "))"
   | ArrExpr (exprs, _) ->
     print_string "[";
-    List.iter (fun expr -> print_string " "; _print_expr expr) exprs;
+    List.iter (fun expr -> print_string " "; print_expr expr) exprs;
     print_string " ]"
   | Subscript (expr, subexpr, _) ->
-    _print_expr expr;
+    print_expr expr;
     print_string "(subscript [";
-    _print_expr (fst subexpr);
+    print_expr (fst subexpr);
     let () = match (snd subexpr) with
     | None -> ()
-    | Some expr -> print_string ":"; _print_expr expr in
+    | Some expr -> print_string ":"; print_expr expr in
     print_string "])"
   | Range (expr1, tk1, ident, tk2, expr2) ->
     print_string "(range ";
-    _print_expr expr1;
+    print_expr expr1;
     print_string (nameof tk1.typeof);
-    _print_expr ident;
+    print_expr ident;
     print_string (nameof tk2.typeof);
-    _print_expr expr2;
+    print_expr expr2;
     print_string ")"
   | ObjectExpr stmts ->
     print_string "(object \n";
-    _print_parsed stmts;
+    print_parsed stmts;
     print_string ")"
   | PropertyExpr (expr, ident) ->
     print_string "(access property ";
-    _print_expr ident;
+    print_expr ident;
     print_string " of ";
-    _print_expr expr;
+    print_expr expr;
     print_string ")"
   | NilExpr ->
     print_string "nil"
   | Builder (range, cond, expr) ->
     print_string "(builder ";
-    _print_expr range;
+    print_expr range;
     print_string ";";
-    _print_expr cond;
+    print_expr cond;
     print_string ";";
-    _print_expr expr;
+    print_expr expr;
     print_string ")"
     
 let rec expression parser = assignexpr parser
@@ -297,8 +299,7 @@ and import parser =
 
   let lexer = Lexer.make s file_path in
   let lexed = Lexer.lex lexer in
-  let new_parser = make lexed file_path in
-  let new_parser = {new_parser with imported=(file_path::parser.imported)} in
+  let new_parser = {(make lexed file_path s) with imported=(file_path::parser.imported)} in
   let parsed     = parse new_parser in
  (ObjectExpr parsed, parser)
 
@@ -506,8 +507,8 @@ and statement parser =
     | Arrow -> let (expr, parser) = expression (forward parser) in (Return (expr, tk), parser)
     | Semicolon -> ((NoOp tk), (forward parser))
     | _  -> expr_stmt parser
-  with ParseError (message, path, line, pos) -> 
-    (Exprstmt (NilExpr), next_stmt {(forward parser) with errors=(ParseError (message, path, line, pos))::parser.errors})
+  with ParseError (message, path, lineof, linenum) -> 
+    (Exprstmt (NilExpr), next_stmt {(forward parser) with errors=(ParseError (message, path, lineof, linenum))::parser.errors})
 
 and loop_stmt parser =
   let (cond, parser)  = expression parser in
