@@ -45,10 +45,11 @@ type tokentype =
 | Underscore
 
 type token = {value: string; line: int; pos: int; typeof: tokentype}
-type t = {raw: string; pos: int; line: int;}
+type t = {raw: string; pos: int; line: int; path: string; errors: exn list}
 
-val make: string -> t 
+val make: string -> string -> t 
 val lex: t -> token list
 val nameof: tokentype -> string
 
-exception LexError of string * token
+exception LexError of string * string * token
+exception LexErrors of exn list

@@ -46,9 +46,10 @@ type tokentype =
 
 
 type token = {value: string; line: int; pos: int; typeof: tokentype}
-type t = {raw: string; pos: int; line: int;}
+type t = {raw: string; pos: int; line: int; path: string; errors: exn list}
 
-exception LexError of string * token
+exception LexError of string * string * token
+exception LexErrors of exn list
 
 let nameof = function 
 	| EOF -> "EOF"
@@ -96,7 +97,7 @@ let nameof = function
 	| Tilde -> "~"
 	| Underscore -> "_"
 	
-let make raw = {raw; pos=0; line=1}
+let make raw path = {errors=[]; raw; path; pos=0; line=1;}
 
 let peek lexer = 
 	if lexer.pos >= (String.length lexer.raw) then (Char.chr 0) else lexer.raw.[lexer.pos]
@@ -131,7 +132,7 @@ let string_literal lexer =
 		| '"' -> if escaped then count (acc+1) false (forward lexer) else (acc, lexer) 
 		| '\\' -> count (acc+1) (not escaped) (forward lexer) 
 		| c when c = (Char.chr 0) -> 
-			raise (LexError("Non-terminated string", {value=""; typeof=StringLiteral; pos=lexer.pos; line=lexer.line}))
+			raise (LexError("Non-terminated string", lexer.path, {value=""; typeof=StringLiteral; pos=lexer.pos; line=lexer.line}))
 		| _ -> count (acc+1) false (forward lexer)
 	in let (length, lexer) = count 0 false lexer in
 	if length = 0 then ("", forward lexer) else 
@@ -222,10 +223,15 @@ let next_token lexer =
 
 let lex lexer =
 	let rec aux acc lexer =
+		try
 		let (tk, lexer) = next_token lexer in
 		match tk.typeof with
-		| EOF -> tk::acc
-		| Unknown -> raise (LexError ("Unrecognized token '"^tk.value^"'", tk))
+		| EOF -> (tk::acc, lexer.errors)
+		| Unknown -> raise (LexError ("Unrecognized token", lexer.path, tk))
 		| TwoSlash -> aux acc lexer
 		| _ -> aux (tk::acc) lexer
-	in List.rev (aux [] lexer)
+		with LexError (message, path, tk) -> aux acc {lexer with errors=(LexError(message, path, tk))::lexer.errors; line=tk.line; pos=tk.pos}
+	in 
+	let (tokens, errors) = aux [] lexer in
+	if errors <> [] then raise (LexErrors (List.rev errors))
+	else (List.rev tokens)	

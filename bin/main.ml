@@ -5,7 +5,7 @@ let rec print_lexed l =
 	| [] -> ()
 	| x::xs -> Lexer.(Printf.printf "{value=\"%s\"; typeof=\"%s\"; pos=%d; line=%d}\n" x.value (nameof x.typeof) x.pos x.line); print_lexed xs
 
-let print_error from message (token: Lexer.token) program =
+let print_error from message line pos ?path program =
 
 	let rec get_line start_pos end_pos =
 	  let nstart_pos = if start_pos - 1 < 0 || program.[start_pos-1] = '\n' then start_pos else start_pos - 1 in
@@ -16,15 +16,14 @@ let print_error from message (token: Lexer.token) program =
 	    get_line nstart_pos nend_pos
 	in 
 
-	let line = begin 
-		match token.typeof with 
-		| EOF -> "End Of File" 
-		| _ -> let (start_pos, end_pos) = get_line token.pos token.pos 
-					 in String.sub program (start_pos) (end_pos - start_pos)
-	end in
+	let lineof = 
+		let (start_pos, end_pos) = get_line pos pos 
+		in String.sub program (start_pos) (end_pos - start_pos)
+	in
 	print_string ("\n::"^from^"\n");
-	print_string ("  at line: "^string_of_int (token.line)^"\n");
-	print_string ("  here --\" "^line^" \"-- \n");
+	match path with | None -> () | Some path -> print_string ("  at file: "^path^"\n");
+	print_string ("  at line: "^string_of_int (line)^"\n");
+	print_string ("  here --\" "^lineof^" \"-- \n");
 	print_string ("  "^message^".\n---------------------------")
 
 let read_whole_file filename =
@@ -34,7 +33,7 @@ let read_whole_file filename =
   s
 
 let execute program path debugging =
-	let lexer = Lexer.make program in
+	let lexer = Lexer.make program path in
 	try 
 		let lexed = Lexer.lex lexer in
 		if debugging then print_lexed lexed;
@@ -46,14 +45,26 @@ let execute program path debugging =
 	try 
 		Interpreter.run intp
 	with
-	| Interpreter.RuntimeError (message, token) ->
-		print_error "Runtime Error" message token program
+	| Interpreter.RuntimeError (message, tk) ->
+		print_error "RuntimeError" message tk.line tk.pos program
+
 	with
-	| Parser.ParseError (message, token) -> 
-		print_error "Syntax Error" message token program
+	| Parser.ParseErrors l ->
+		List.iter (fun err ->
+			match err with
+			| Parser.ParseError (message, path, line, pos) ->
+				print_error "Syntax Error" message line pos ~path program
+			| _ -> assert false;
+		) l
+
 	with 
-	| Lexer.LexError (message, token) ->
-		print_error "Syntax Error" message token program
+	| Lexer.LexErrors l ->
+		List.iter (fun err ->
+			match err with
+			| Lexer.LexError (message, path, tk) ->
+				print_error "Syntax Error" message tk.line tk.pos ~path program
+			| _ -> assert false;
+		) l
 
 let () = if Array.length Sys.argv < 2 then
   print_string "Aerospec: No program file was provided\n"

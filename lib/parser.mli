@@ -32,9 +32,11 @@ type t = {
   pos: int;
   path: string;
   imported: string list;
+  errors: exn list;
 }
 
-exception ParseError of string * Lexer.token
+exception ParseError of string * string * int * int
+exception ParseErrors of exn list
 
 val make: Lexer.token list -> string -> t
 val expression: t -> expr * t

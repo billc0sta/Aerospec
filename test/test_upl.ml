@@ -4,10 +4,10 @@ let test_no_failure name program path =
 	print_string "\n--- test_no_failure: "; 
 	print_string name;
 	print_string " ---\n"; 
-	let lexer  = Lexer.make program  in
-	let lexed  = Lexer.lex lexer     in
-	let parser = Parser.make lexed path in
-	let parsed = Parser.parse parser in
+	let lexer  = Lexer.make program path in
+	let lexed  = Lexer.lex lexer         in
+	let parser = Parser.make lexed path  in
+	let parsed = Parser.parse parser     in
 	let interpreter = Interpreter.make parsed in
 	Interpreter.run interpreter
 

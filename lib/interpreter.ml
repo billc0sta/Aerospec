@@ -3,7 +3,7 @@ open Value
 
 exception RuntimeError of string * Lexer.token
 
-type state = {return_expr: expr option; returned: bool; breaked: bool; continued: bool; call_depth: int; loop_depth: int}
+type state = {return_value: Value.t; returned: bool; breaked: bool; continued: bool; call_depth: int; loop_depth: int}
 type t = {env: (string, (Value.t * bool)) Environment.t; raw: statement list; state: state}
 
 let add_natives env =
@@ -20,11 +20,12 @@ let add_natives env =
 	Environment.add "remove" (NatFunc (256+2, ["sequence"; "elements..."], Natives.remove), true) env;
 	Environment.add "clear" (NatFunc (1, ["sequence"], Natives.clear), true) env;
 	Environment.add "count" (NatFunc (2, ["sequence"; "element"], Natives.count), true) env;
-	Environment.add "copy" (NatFunc (1, ["value"], Natives.copy), true) env
+	Environment.add "copy" (NatFunc (1, ["value"], Natives.copy), true) env;
+	Environment.add "fields" (NatFunc (1, ["object"], Natives.fields), true) env
 
 let make raw = 
 	let inp = {raw; env=(Environment.make ());
-	state={return_expr=None; returned=false;
+	state={return_value=Nil; returned=false;
 	breaked=false; continued=false;
 	call_depth=0; loop_depth=0}} in
 	add_natives inp.env;
@@ -82,7 +83,7 @@ and evaluate_property expr ident inp =
 and evaluate_object stmts inp =
 	let obj_env = Environment.child_of inp.env in
 	run {raw=stmts; env=obj_env; 
-			state={return_expr=None; 
+			state={return_value=Nil; 
 						 returned=false; 
 						 breaked=false; 
 						 continued=false; 
@@ -178,7 +179,7 @@ and evaluate_func env arglist params body tk inp =
 	let arg_len   = List.length arglist in
 	if param_len <> arg_len then
 		raise (RuntimeError ("The number of arguments do not match the number of parameters", tk))
-	else 
+	else try 
 		let ninp = 
 		{inp with env=Environment.child_of env; state={inp.state with call_depth=inp.state.call_depth+1; loop_depth=0}} in
 		let () = List.iter2 (fun arg param -> 
@@ -188,11 +189,10 @@ and evaluate_func env arglist params body tk inp =
 		match body with
 		| Block block -> begin 
 			let ninp = block_stmt block ninp in
-			match ninp.state.return_expr with
-			| Some expr -> evaluate expr ninp
-			| None -> Nil
+			ninp.state.return_value 
 		end 
 		| _ -> assert false;
+	with Stack_overflow -> raise (RuntimeError ("Stack overflow", tk))
 
 and evaluate_natfunc paramc arglist func tk inp =
 	let arg_len   = List.length arglist in
@@ -431,7 +431,7 @@ and continue_stmt tk inp =
 
 and return_stmt expr tk inp =
 		if inp.state.call_depth = 0 then raise (RuntimeError ("Return statement ('->') outside of function", tk))
-		else {inp with state={inp.state with returned = true; return_expr = Some expr}}
+		else {inp with state={inp.state with returned = true; return_value=evaluate expr inp}}
 
 and block_stmt stmts inp =
 	let rec aux stmts inp =
@@ -520,4 +520,5 @@ and start_range range inp =
 	Environment.add name (Float (float_of_int beg), true) inp.env;
 	(Binary (ident, tk2, FloatLit (float_of_int endof)), name, beg, endof, (dir:int))
 
-and run inp = ignore (exec_stmt (Block inp.raw) inp)
+and run inp = 
+	ignore (exec_stmt (Block inp.raw) inp)

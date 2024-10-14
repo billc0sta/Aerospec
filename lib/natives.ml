@@ -185,3 +185,20 @@ let count params =
 let copy params =
 	let value = List.hd params in
 	Value.copy_value value 
+
+let fields params =
+	let obj = List.hd params in
+	let env = match obj with
+	| Object env -> env
+	| _ -> raise (Invalid_argument "Non-object value was passed as a first parameter to fields")
+	in
+	let rez = Resizable.make () in
+	Hashtbl.iter
+	(fun k v -> 
+		let rez2 = Resizable.make () in
+		Resizable.append rez2 (make_rez_string k);
+		Resizable.append rez2 (fst v);
+		Resizable.append rez2 (Bool (snd v));
+		Resizable.append rez (Arr(rez2, true))
+	) env.values;
+	Arr (rez, true)

@@ -34,11 +34,13 @@ type t = {
   pos: int;
   path: string;
   imported: string list;
+  errors: exn list;
 }
 
-exception ParseError of string * token
+exception ParseError of string * string * int * int
+exception ParseErrors of exn list
 
-let make raw path = {imported=[]; raw; path; previous={value="";typeof=Unknown;line=0;pos=0}; pos=0}
+let make raw path = {errors=[]; imported=[]; raw; path; previous={value="";typeof=Unknown;line=0;pos=0}; pos=0}
 
 let peek parser = List.hd parser.raw
 
@@ -46,8 +48,21 @@ let forward parser =
   if (List.hd parser.raw).typeof = EOF then parser else
   {parser with previous=List.hd parser.raw; raw=List.tl parser.raw; pos=parser.pos+1}
 
+let report_error message parser = 
+  let tk = peek parser in
+  raise (ParseError(message, parser.path, tk.line, tk.pos))
+
 let consume typeof error parser =
-	if (peek parser).typeof = typeof then forward parser else raise (ParseError (error, peek parser))
+	if (peek parser).typeof = typeof then forward parser else report_error error parser
+
+let next_stmt parser =
+  let rec aux parser =
+    match (peek parser).typeof with 
+    | Right  | OCurly
+    | TwoQuestion | TwoStar | Left 
+    | Arrow | Semicolon | EOF -> parser
+    | _  -> aux (forward parser)
+  in aux parser
 
 let rec ungroup expr =
   match expr with
@@ -188,7 +203,7 @@ and assignexpr parser =
       | Subscript (IdentExpr _, (_, None), _) | IdentExpr _ | PropertyExpr _ -> 
         let (expr2, parser) = assignexpr parser in 
         aux (Binary (expr, tk, expr2)) parser
-      | _ -> raise (ParseError ("Cannot assign to an expression", tk))
+      | _ -> report_error "Cannot assign to an expression" parser 
     end
     | _ -> (expr, parser)
   in aux expr parser
@@ -222,9 +237,9 @@ and relational parser =
     begin
       let ident = match expr2 with
       | IdentExpr (_, global) -> 
-        if global then raise (ParseError ("Global identifier cannot be used in this context", tk1))
+        if global then report_error "Global identifier cannot be used in this context" parser
         else expr2
-      | _ -> raise (ParseError ("Expected an identifier", tk1))
+      | _ -> report_error "Expected an identifier" parser
       in
       let () = match (tk1.typeof, tk2.typeof) with
         | (Lesser, Lesser)
@@ -236,7 +251,7 @@ and relational parser =
         | (GreatEqual, Greater)
         | (GreatEqual, GreatEqual) -> ()
         | _ -> 
-          raise (ParseError (("operators '"^Lexer.nameof tk1.typeof^"' and '"^Lexer.nameof tk2.typeof^"' cannot be in the same range expression"), tk1))
+          report_error ("operators '"^Lexer.nameof tk1.typeof^"' and '"^Lexer.nameof tk2.typeof^"' cannot be in the same range expression") parser
       in
       let (expr3, parser) = basic (forward parser) in
       (Range (expr, tk1, ident, tk2, expr3), parser)
@@ -259,29 +274,28 @@ and unary parser =
   | _ -> postary parser
 
 and import parser =
-  let tk = peek parser in
   let (expr, parser) = primary parser in
   let fp = match expr with
   | StringLit fp -> fp
-  | _ -> raise (ParseError ("Expected a string", tk)) in
+  | _ -> report_error "Expected a string" parser in
   let file_path = (Filename.dirname parser.path ^ "/") ^ fp in
   if parser.path = file_path
-  then raise (ParseError ("Cannot Include a file recursively", tk))
+  then report_error "Cannot import a file in itself" parser
   else
   if List.mem file_path parser.imported
-  then raise (ParseError (("Cycle import detected between 
+  then report_error ("Import cycle detected between 
     '"^file_path^"' and 
     '"^parser.path^"'")
-    , tk))
+    parser
   else 
   let ch = 
     try open_in_bin file_path 
-    with Sys_error _ -> raise (ParseError (("No such file as '"^file_path^"' in the current directory"), tk))
+    with Sys_error _ -> report_error ("No such file as '"^file_path^"' in the current directory") parser
   in 
   let s = really_input_string ch (in_channel_length ch) in
   close_in ch;
 
-  let lexer = Lexer.make s in
+  let lexer = Lexer.make s file_path in
   let lexed = Lexer.lex lexer in
   let new_parser = make lexed file_path in
   let new_parser = {new_parser with imported=(file_path::parser.imported)} in
@@ -295,7 +309,7 @@ and postary parser =
     | OParen -> begin
       match ungroup expr with
       | StringLit _ | FloatLit _ | Binary _ | Unary _ | ArrExpr _ | Range _ | NilExpr
-        -> raise (ParseError ("This value is not callable", tk))
+        -> report_error "This value is not callable" parser
       | _ -> let (expr, parser) = funcall expr (forward parser) in aux expr parser
     end
     | OSquare ->
@@ -303,12 +317,12 @@ and postary parser =
     | Dot -> begin
       let (expr2, parser) = primary (forward parser) in
       match expr with
-      | IdentExpr (tk, global) -> 
+      | IdentExpr (_, global) -> 
         if global 
-        then raise (ParseError ("Global identifier cannot be used in this context", tk)) 
+        then report_error "Global identifier cannot be used in this context" parser 
         else aux (PropertyExpr (expr, expr2)) parser
       | _ ->
-        raise (ParseError ("Expected an identifier", tk)) 
+        report_error "Expected an identifier" parser 
     end
     | _ -> (expr, parser) 
   in
@@ -342,7 +356,7 @@ and funcall expr parser =
     let tk = peek parser in
     match tk.typeof with
     | CParen -> (acc, forward parser)
-    | EOF -> raise (ParseError ("Expected a Closing Parenthesis ')'", tk))
+    | EOF -> report_error "Expected a Closing Parenthesis ')'" parser
     | _ -> begin 
       let (expr, parser) = expression parser in
       let tk = (peek parser) in 
@@ -350,7 +364,7 @@ and funcall expr parser =
         match tk.typeof with 
         | Comma -> forward parser 
         | CParen -> parser 
-        | _ -> raise (ParseError ("Expected a Comma ','", tk)) in 
+        | _ -> report_error "Expected a Comma ','" parser in 
       aux (expr::acc) parser
     end 
   in 
@@ -371,10 +385,10 @@ and primary parser =
     let token = peek parser in
     match token.typeof with
     | Ident -> (IdentExpr (token, true), forward parser)
-    | _ -> raise (ParseError ("Expected an identifier", tk))
+    | _ -> report_error "Expected an identifier" parser
   end
   | Underscore -> (NilExpr, forward parser)
-  | _ -> raise (ParseError ("Expected an expression", tk))
+  | _ -> report_error "Expected an expression" parser
 
 and object_expr parser =
   let (block, parser) = block_stmt parser in
@@ -393,7 +407,7 @@ and array_expr parser =
       match tk.typeof with
       | CSquare -> aux (expr::exprs) parser
       | Comma -> aux (expr::exprs) (forward parser)
-      | _ -> raise (ParseError ("Expected a Comma ','", tk))
+      | _ -> report_error "Expected a Comma ','" parser
     end
   in
 
@@ -429,7 +443,7 @@ and lambda_expr parser =
   match length with
   | 0 -> begin
     if not block_follows 
-      then raise (ParseError ("Expected an expression", tk)) 
+      then report_error "Expected an expression" parser 
     else
     let (body, parser) = block_stmt parser in 
     (LambdaExpr (params, body, tk), parser) 
@@ -442,7 +456,7 @@ and lambda_expr parser =
     else
       (Grouping (List.hd params), parser)
   end 
-  | len when len > 255 -> raise (ParseError ("No more than 255 parameters are allowed", tk))
+  | len when len > 255 -> report_error "No more than 255 parameters are allowed" parser
   | _ -> let (body, parser) = block_stmt parser in 
         (LambdaExpr (params, body, tk), parser) 
 
@@ -451,7 +465,7 @@ and parameters parser =
     let tk = peek parser in
     match tk.typeof with
     | CParen -> (acc, forward parser) 
-    | EOF -> raise (ParseError ("Expected a Closing Parenthesis ')'", tk))
+    | EOF -> report_error "Expected a Closing Parenthesis ')'" parser
     | _ -> begin
       let (expr, parser) = expression parser in
       match expr with
@@ -460,7 +474,7 @@ and parameters parser =
         let parser = match tk.typeof with
         | CParen -> parser
         | Comma -> forward parser
-        | _ -> raise (ParseError ("Expected a Closing Parenthesis ')'", tk))
+        | _ -> report_error "Expected a Closing Parenthesis ')'" parser
         in aux (expr::acc) parser 
       end
       | _ -> (expr::acc, consume CParen "Expected a Closing Parenthesis ')'" parser)
@@ -481,8 +495,9 @@ and build_binary ops f parser =
 
 and statement parser =
   let tk = peek parser in
+  try
     match tk.typeof with
-    | EOF -> raise (ParseError ("Expected a statement", tk))
+    | EOF -> report_error "Expected a statement" parser
     | Right -> loop_stmt (forward parser)
     | OCurly -> block_stmt parser
     | TwoQuestion -> if_stmt (forward parser)
@@ -491,6 +506,8 @@ and statement parser =
     | Arrow -> let (expr, parser) = expression (forward parser) in (Return (expr, tk), parser)
     | Semicolon -> ((NoOp tk), (forward parser))
     | _  -> expr_stmt parser
+  with ParseError (message, path, line, pos) -> 
+    (Exprstmt (NilExpr), next_stmt {(forward parser) with errors=(ParseError (message, path, line, pos))::parser.errors})
 
 and loop_stmt parser =
   let (cond, parser)  = expression parser in
@@ -500,7 +517,12 @@ and loop_stmt parser =
 and expr_stmt parser = 
   let (expr, parser) = expression parser in
   let stmt = match expr with
-  | Builder (range, cond, expr) -> (LoopStmt (range, IfStmt (cond, Exprstmt expr, None)))
+  | Builder (range, cond, expr) -> 
+    let stmt = match cond with 
+      | FloatLit 1.0 -> (Exprstmt expr) (* 1.0 is a sentinel for omittion *) 
+      | _ -> IfStmt (cond, Exprstmt expr, None) 
+    in
+    (LoopStmt (range, stmt))
   | _ -> Exprstmt expr  
   in 
   (stmt, parser) 
@@ -511,7 +533,7 @@ and block_stmt parser =
     let tk = (peek parser) in 
     match tk.typeof with
     | CCurly -> (acc, forward parser)
-    | EOF -> raise (ParseError ("Expected a block limit (closing curly bracket '}')", tk)) 
+    | EOF -> report_error "Expected a block limit (closing curly bracket '}')" parser 
     | _ -> let (stmt, parser) = statement parser in aux (stmt::acc) parser
   in let (acc, parser) = aux [] parser in
   (Block (List.rev acc), parser)
@@ -527,7 +549,11 @@ and if_stmt parser =
 
 and parse parser =
   let rec aux acc parser =
-    if (peek parser).typeof = EOF then acc else
+    if (peek parser).typeof = EOF then (acc, parser.errors) else
     let (stmt, parser) = statement parser in 
-    let acc = match stmt with NoOp _ -> acc | _ -> stmt::acc in aux acc parser
-  in List.rev (aux [] parser)
+    let acc = match stmt with NoOp _ -> acc | _ -> stmt::acc 
+    in aux acc parser
+  in 
+  let (stmts, errors) = aux [] parser in
+  if errors <> [] then raise (ParseErrors (List.rev errors))
+  else List.rev stmts 
