@@ -19,7 +19,6 @@ type tokentype =
 | Right
 | Left
 | Hash
-| At
 | Dollar
 | Ident
 | FloatLiteral

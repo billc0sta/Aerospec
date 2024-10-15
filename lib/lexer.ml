@@ -19,7 +19,6 @@ type tokentype =
 | Right
 | Left
 | Hash
-| At
 | Dollar
 | Ident
 | FloatLiteral
@@ -72,7 +71,6 @@ let nameof = function
 	| EqualEqual -> "=="
 	| ExcEqual -> "!="
 	| Exclamation -> "!"
-	| At -> "@"
 	| Colon -> ":"
 	| Semicolon -> ";"
 	| Ampersands -> "&&"
@@ -191,7 +189,6 @@ let next_token lexer =
 	| ';' -> (Semicolon, forward lexer)
 	| ',' -> (Comma, forward lexer)
 	| '.' -> (Dot, forward lexer)
-	| '@' -> (At, forward lexer)
 	| '#' -> (Hash, forward lexer)
 	| '(' -> (OParen, forward lexer)
 	| ')' -> (CParen, forward lexer)

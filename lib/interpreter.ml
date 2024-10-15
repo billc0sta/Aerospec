@@ -21,7 +21,8 @@ let add_natives env =
 	Environment.add "clear" (NatFunc (1, ["sequence"], Natives.clear), true) env;
 	Environment.add "count" (NatFunc (2, ["sequence"; "element"], Natives.count), true) env;
 	Environment.add "copy" (NatFunc (1, ["value"], Natives.copy), true) env;
-	Environment.add "fields" (NatFunc (1, ["object"], Natives.fields), true) env
+	Environment.add "fields" (NatFunc (1, ["object"], Natives.fields), true) env;
+	Environment.add "stringify" (NatFunc (1, ["value"], Natives.stringify), true) env
 
 let make raw = 
 	let inp = {raw; env=(Environment.make ());
@@ -264,7 +265,6 @@ and evaluate_unary op expr inp =
 	| Plus -> begin match ev with Float fl -> Float fl | _ -> raise_error ev end
 	| Minus -> begin match ev with Float fl -> Float (fl*.(-1.)) | _ -> raise_error ev end
 	| Tilde -> (make_rez_string (nameof ev))
-	| At -> (make_rez_string (Value.stringify ev))
 	| _ -> assert false;
 
 and evaluate_ident tk global inp =

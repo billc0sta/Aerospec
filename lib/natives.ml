@@ -202,3 +202,7 @@ let fields params =
 		Resizable.append rez (Arr(rez2, true))
 	) env.values;
 	Arr (rez, true)
+
+let stringify params = 
+	let value = List.hd params in
+	(Value.make_rez_string (Value.stringify value))
