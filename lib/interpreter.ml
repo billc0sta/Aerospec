@@ -333,57 +333,47 @@ and assign_property obj target expr ismut inp =
 	end
 
 and assign_subscript expr target index inp =
-  let (name, global, token) =
+  let (rez, token) =
     match target with
-    | IdentExpr(tk, global) -> (tk.value, global, tk)
+    | IdentExpr(tk, global) -> (evaluate_ident tk global inp, tk)
+    | Subscript(expr, subexpr, tk) -> (evaluate_subscript expr subexpr tk inp, tk) 
     | _ -> assert false
   in
-  let env = 
-    if global then
-      try Environment.parent_of inp.env
+  match rez with
+  | Arr (rez, mut) ->
+  	if not mut then
+  	raise (RuntimeError ("Cannot assign to a subscript of a constant array", token)) 
+    else 
+    let index = int_of_float (ev_subexpr index token inp) in
+    let value = evaluate expr inp in
+    begin
+      try Resizable.putat rez index value; value
       with Invalid_argument _ ->
-        raise (RuntimeError ("Global variable '" ^ token.value ^ "' was referenced in global scope", token))
-    else inp.env
-  in
-  match (Environment.find name env) with
-  | None -> raise (RuntimeError ("Unbound variable '" ^ token.value ^ "' was referenced", token))
-  | Some (arr, mut) ->
-    if not mut then raise (RuntimeError ("Cannot re-assign to a constant", token))
-    else
-      match arr with
-      | Arr (rez, mut) ->
-      	if not mut then
-      	raise (RuntimeError ("Cannot assign to a subscript of a constant array", token)) 
-        else 
-        let index = int_of_float (ev_subexpr index token inp) in
-        let value = evaluate expr inp in
-        begin
-          try Resizable.putat rez index value; value
+        raise (RuntimeError ("Accessing array out of bounds", token))
+    end
+
+  | String (rez, mut) ->
+    if not mut then
+  	raise (RuntimeError ("Cannot assign to a subscript of a constant string", token)) 
+    else 
+    let index = int_of_float (ev_subexpr index token inp) in
+    let value = evaluate expr inp in
+    begin
+      match value with
+      | String (chr, _) ->
+        let length = Resizable.len chr in
+        if length <> 1 then
+          raise (RuntimeError ("Assigning invalid character count value to a string index", token))
+        else
+        	begin
+          try Resizable.putat rez index (Resizable.get chr 0); value
           with Invalid_argument _ ->
             raise (RuntimeError ("Accessing array out of bounds", token))
-        end
-      | String (rez, mut) ->
-        if not mut then
-      	raise (RuntimeError ("Cannot assign to a subscript of a constant string", token)) 
-        else 
-        let index = int_of_float (ev_subexpr index token inp) in
-        let value = evaluate expr inp in
-        begin
-          match value with
-          | String (chr, _) ->
-            let length = Resizable.len chr in
-            if length <> 1 then
-              raise (RuntimeError ("Assigning invalid character count value to a string index", token))
-            else
-            	begin
-              try Resizable.putat rez index (Resizable.get chr 0); value
-              with Invalid_argument _ ->
-                raise (RuntimeError ("Accessing array out of bounds", token))
-          		end
-          | _ ->
-            raise (RuntimeError ("Cannot assign to a string index with value of type '" ^ nameof value ^ "'", token))
-        end
-      | _ -> raise (RuntimeError (("Value of type '"^nameof arr^"' is not subscriptable"), token))
+      		end
+      | _ ->
+        raise (RuntimeError ("Cannot assign to a string index with value of type '" ^ nameof value ^ "'", token))
+    end
+  | _ -> raise (RuntimeError (("Value of type '"^nameof rez^"' is not subscriptable"), token))
 
 and assign_ident ismut expr ident inp =
 

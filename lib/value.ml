@@ -100,7 +100,17 @@ and copy_array arr =
 let rec constant_value value =
 	match value with
 	| String (rez, _) -> String (rez, false)
-	| Arr (rez, _) -> Arr (rez, false)
+	| Arr (rez, _) -> 
+		if Resizable.len rez = 0 then
+		Arr (rez, false)
+		else 
+		let new_rez = Resizable.make () in
+		Resizable.resize new_rez rez.size rez.arr.(0);
+		for i = 0 to rez.size - 1 do
+			new_rez.arr.(i) <- constant_value rez.arr.(i)
+		done;
+		new_rez.size <- rez.size;
+		Arr (new_rez, false)
 	| Object obj -> begin
 		let new_obj = Environment.make () in
 		Hashtbl.iter (fun k v ->
