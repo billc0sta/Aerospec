@@ -32,10 +32,11 @@ type tokentype =
 | Question
 | Colon
 | Semicolon
-| Ampersands
 | Columns
+| Amper
 | Dot
 | Comma
+| TwoAmper
 | TwoSlash
 | TwoStar
 | TwoQuestion

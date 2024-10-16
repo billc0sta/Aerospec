@@ -221,7 +221,7 @@ and ifexpr parser =
 
 and logical_or parser = build_binary [Columns] logical_and parser
 
-and logical_and parser = build_binary [Ampersands] equality parser
+and logical_and parser = build_binary [TwoAmper] equality parser
 
 and equality parser = build_binary [EqualEqual; ExcEqual] relational parser
 
@@ -268,7 +268,7 @@ and factor parser = build_binary [Slash; Star; Modulo] unary parser
 and unary parser =
   let tk = peek parser in
   match tk.typeof with
-  | Exclamation | Plus | Minus | Tilde -> 
+  | Exclamation | Plus | Minus | Tilde | Amper | TwoAmper -> 
     let (expr, parser) = postary (forward parser) in
     (Unary (tk, expr), parser)
   | Hash -> 

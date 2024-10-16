@@ -20,8 +20,8 @@ let len params =
 let append params = 
 	let (seq, params) = (List.hd params, List.tl params) in
 	let () = match seq with
-	| String (_, mut) -> if not mut then raise (Invalid_argument "Cannot append to a constant string") 
-	| Arr (_, mut) -> if not mut then raise (Invalid_argument "Cannot append to a constant array")
+	| String (_, mut) -> if not mut then raise (Invalid_argument "Cannot append to a locked string") 
+	| Arr (_, mut) -> if not mut then raise (Invalid_argument "Cannot append to a locked array")
 	| _ -> raise (Invalid_argument "Non-sequence value was passed as a first parameter to append")
 	in
 	List.iter (
@@ -45,8 +45,8 @@ let append params =
 let insert params =
 	let (seq, params) = (List.hd params, List.tl params) in
 	match seq with
-	| String (_, mut) -> if not mut then raise (Invalid_argument "Cannot insert to a constant string") 
-	| Arr (_, mut) -> if not mut then raise (Invalid_argument "Cannot insert to a constant array")
+	| String (_, mut) -> if not mut then raise (Invalid_argument "Cannot insert to a locked string") 
+	| Arr (_, mut) -> if not mut then raise (Invalid_argument "Cannot insert to a locked array")
 	| _ -> raise (Invalid_argument "Non-sequence value was passed as a first parameter to insert");
 	;
 	let (index, params) = (List.hd params, List.tl params) in
@@ -74,11 +74,11 @@ let extend params =
 		match (seq1, seq2) with
 		| (String (r1, mut), String (r2, _)) -> 
 			if not mut 
-			then raise (Invalid_argument "Cannot extend a constant string") 
+			then raise (Invalid_argument "Cannot extend a locked string") 
 			else Resizable.extend r1 r2
 		| (Arr (r1, mut), Arr (r2, _)) -> 
 			if not mut 
-			then raise (Invalid_argument "Cannot extend a constant array") 
+			then raise (Invalid_argument "Cannot extend a locked array") 
 			else Resizable.extend r1 r2
 		| _ -> raise (Invalid_argument ("Cannot extend value of type '"^nameof seq1^"' with value of type '"^nameof seq2^"'"))
 	) params;
@@ -111,8 +111,8 @@ let index params =
 let pop params = 
 	let (seq, params) = (List.hd params, List.tl params) in
 	let () = match seq with
-	| String (_, mut) -> if not mut then raise (Invalid_argument "Cannot pop from a constant string") 
-	| Arr (_, mut) -> if not mut then raise (Invalid_argument "Cannot pop from a constant array")
+	| String (_, mut) -> if not mut then raise (Invalid_argument "Cannot pop from a locked string") 
+	| Arr (_, mut) -> if not mut then raise (Invalid_argument "Cannot pop from a locked array")
 	| _ -> raise (Invalid_argument "Non-sequence value was passed as a first parameter to pop")
 	in
 
@@ -135,8 +135,8 @@ let pop params =
 let remove params =
 	let (seq, params) = (List.hd params, List.tl params) in
 	let () = match seq with
-	| String (_, mut) -> if not mut then raise (Invalid_argument "Cannot remove from a constant string") 
-	| Arr (_, mut) -> if not mut then raise (Invalid_argument "Cannot remove from a constant array")
+	| String (_, mut) -> if not mut then raise (Invalid_argument "Cannot remove from a locked string") 
+	| Arr (_, mut) -> if not mut then raise (Invalid_argument "Cannot remove from a locked array")
 	| _ -> raise (Invalid_argument "Non-sequence value was passed as a first parameter to remove")
 	in
 	List.iter (fun elem -> 
@@ -158,11 +158,11 @@ let clear params =
 	let () = match seq with
 	| String (rez, mut) -> 
 		if not mut 
-		then raise (Invalid_argument "Cannot clear a constat string")
+		then raise (Invalid_argument "Cannot clear a locked string")
 		else Resizable.clear rez
 	| Arr (rez, mut) -> 	
 		if not mut 
-		then raise (Invalid_argument "Cannot clear a constat array")
+		then raise (Invalid_argument "Cannot clear a locked array")
 		else Resizable.clear rez
 	| _ -> raise (Invalid_argument "Non-sequence value was passed as a first parameter to clear");
 	in 
@@ -189,7 +189,7 @@ let copy params =
 let fields params =
 	let obj = List.hd params in
 	let env = match obj with
-	| Object env -> env
+	| Object (env, _) -> env
 	| _ -> raise (Invalid_argument "Non-object value was passed as a first parameter to fields")
 	in
 	let rez = Resizable.make () in

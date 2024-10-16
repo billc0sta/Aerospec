@@ -85,7 +85,7 @@ and evaluate_property expr ident inp =
 	let eval = evaluate expr inp in
 	let env = 
 	match eval with
-	| Object env -> env
+	| Object (env, _) -> env
 	| _ -> report_error ("Value of type '"^nameof eval^"' has no properties") tk inp
 	in
 
@@ -97,7 +97,7 @@ and evaluate_property expr ident inp =
 and evaluate_object stmts inp =
 	let obj_env = Environment.child_of inp.env in
 	run {(make stmts inp.path) with env=obj_env};
-	Object(obj_env)
+	Object(obj_env, true)
 
 and ev_subexpr expr tk inp =
 	let ev = evaluate expr inp in
@@ -176,10 +176,10 @@ and evaluate_funcall target arglist tk inp =
 	match callable with
 	| Func (env, params, body)  -> evaluate_func env arglist params body tk inp
 	| NatFunc (paramc, _, func) -> evaluate_natfunc paramc arglist func tk inp
-	| Object obj -> 
+	| Object _ -> 
 		if (List.length arglist) <> 0 
-		then report_error "Cannot pass arguments in a function call to object" tk inp
-		else copy_object obj
+		then report_error "Cannot pass arguments in a call to object" tk inp
+		else copy_object callable
 	| _ -> report_error ("Cannot call a value of type '"^nameof callable^"'") tk inp
 
 and evaluate_func env arglist params body tk inp =
@@ -254,7 +254,7 @@ and evaluate_binary expr1 expr2 op inp =
 	| Lesser -> Bool (simple_binary expr1 expr2 (<))
 	| GreatEqual -> Bool (simple_binary expr1 expr2 (>=))
 	| LessEqual -> Bool (simple_binary expr1 expr2 (<=))
-	| Ampersands -> 
+	| TwoAmper -> 
 		let ev1 = evaluate expr1 inp in
 		if truth ev1 then evaluate expr2 inp else ev1
 	| Columns -> 
@@ -269,10 +269,12 @@ and evaluate_unary op expr inp =
 	let ev = evaluate expr inp in
 	match op.typeof with
 	| Exclamation -> Bool (not (truth ev))
-	| Plus -> begin match ev with Float fl -> Float fl | _ -> raise_error ev end
-	| Minus -> begin match ev with Float fl -> Float (fl*.(-1.)) | _ -> raise_error ev end
-	| Tilde -> (make_rez_string (nameof ev))
-	| Hash  -> evaluate_import op expr inp
+	| Plus     -> begin match ev with Float fl -> Float fl | _ -> raise_error ev end
+	| Minus    -> begin match ev with Float fl -> Float (fl*.(-1.)) | _ -> raise_error ev end
+	| Tilde    -> (make_rez_string (nameof ev))
+	| Hash     -> evaluate_import op expr inp
+	| Amper    -> shallow_lock (evaluate expr inp)
+	| TwoAmper -> deep_lock (evaluate expr inp)
 	| _ -> assert false;
 
 and evaluate_import tk expr inp =
@@ -284,7 +286,7 @@ and evaluate_import tk expr inp =
 	let file_path = (Filename.dirname inp.path ^ "/") ^ fp in
 	let find = Hashtbl.find_opt import_cache file_path in
 	match find with
-	| Some imp_obj -> (Object imp_obj)
+	| Some imp_obj -> (Object (imp_obj, true))
 	| None -> begin
   if inp.path = file_path
   then report_error "Cannot import a file in itself" tk inp
@@ -311,7 +313,7 @@ and evaluate_import tk expr inp =
   run ninp;
 
   Hashtbl.add import_cache file_path imp_obj;
- (Object imp_obj)
+ (Object (imp_obj, true))
 	end
 
 and evaluate_ident tk global inp =
@@ -357,7 +359,8 @@ and assign_property obj target expr ismut inp =
 	let tk = match target with IdentExpr (tk, _) -> tk | _ -> assert false; in
 	let env = 
 	match evaluate obj inp with
-	| Object env -> env
+	| Object (env, mut) -> 
+		if not mut then report_error "Cannot assign property to a locked object" tk inp else env
 	| eval -> report_error ("Value of type '"^nameof eval^"' has no properties") tk inp
 	in
 	
@@ -369,13 +372,13 @@ and assign_property obj target expr ismut inp =
 
 	match (Environment.find tk.value env) with
 	| None -> begin
-		let value = if ismut then ev_expr expr else constant_value (ev_expr expr) in
+		let value = ev_expr expr in
 		Environment.add tk.value (value, ismut) env; value
 	end
 	| Some (_, mut) -> begin 
 		if not mut then report_error "Cannot re-assign to a constant" tk inp
 		else 
-		let value = if ismut then ev_expr expr else constant_value (ev_expr expr) in
+		let value = ev_expr expr in
 		Environment.replace tk.value (value, ismut) env; value
 	end
 
@@ -389,7 +392,7 @@ and assign_subscript expr target index inp =
   match rez with
   | Arr (rez, mut) ->
   	if not mut then
-  	report_error "Cannot assign to a subscript of a constant array" token inp 
+  	report_error "Cannot assign to a subscript of a locked array" token inp 
     else 
     let index = int_of_float (ev_subexpr index token inp) in
     let value = evaluate expr inp in
@@ -401,7 +404,7 @@ and assign_subscript expr target index inp =
 
   | String (rez, mut) ->
     if not mut then
-  	report_error "Cannot assign to a subscript of a constant string" token inp 
+  	report_error "Cannot assign to a subscript of a locked string" token inp 
     else 
     let index = int_of_float (ev_subexpr index token inp) in
     let value = evaluate expr inp in
@@ -437,13 +440,13 @@ and assign_ident ismut expr ident inp =
 	in
 	match (Environment.find name env) with
 	| None -> begin
-		let value = if ismut then evaluate expr inp else constant_value (evaluate expr inp) in
+		let value = evaluate expr inp in
 		Environment.add name (value, ismut) env; value
 	end
 	| Some (_, mut) -> begin 
 		if not mut then report_error "Cannot re-assign to a constant" token inp
 		else 
-		let value = if ismut then evaluate expr inp else constant_value (evaluate expr inp) in
+		let value = evaluate expr inp in
 		Environment.replace name (value, ismut) env; value
 	end
 

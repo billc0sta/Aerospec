@@ -32,10 +32,11 @@ type tokentype =
 | Question
 | Colon
 | Semicolon
-| Ampersands
 | Columns
+| Amper
 | Dot
 | Comma
+| TwoAmper
 | TwoSlash
 | TwoStar
 | TwoQuestion
@@ -73,7 +74,7 @@ let nameof = function
 	| Exclamation -> "!"
 	| Colon -> ":"
 	| Semicolon -> ";"
-	| Ampersands -> "&&"
+	| Amper -> "&"
 	| Columns -> "||"
 	| Arrow -> "->"
 	| Right -> ">>"
@@ -92,6 +93,7 @@ let nameof = function
 	| Question -> "?"
 	| Dot -> "."
 	| Comma -> ","
+	| TwoAmper -> "&&"
 	| TwoSlash -> "//"
 	| TwoStar -> "**"
 	| TwoQuestion -> "??"
@@ -201,7 +203,7 @@ let next_token lexer =
 	| '~' -> (Tilde, forward lexer)
 	| '?' -> begin let lexer = forward lexer in match peek lexer with '?' -> (TwoQuestion, forward lexer) | _ -> (Question, lexer) end
 	| '*' -> begin let lexer = forward lexer in match peek lexer with '*' -> (TwoStar, forward lexer) | _ -> (Star, lexer) end
-	| '&' -> begin let lexer = forward lexer in match peek lexer with '&' -> (Ampersands, forward lexer) | _ -> (Unknown, lexer) end
+	| '&' -> begin let lexer = forward lexer in match peek lexer with '&' -> (TwoAmper, forward lexer) | _ -> (Amper, lexer) end
 	| '|' -> begin let lexer = forward lexer in match peek lexer with '|' -> (Columns, forward lexer) | _ -> (Unknown, lexer) end
 	| '=' -> begin let lexer = forward lexer in match peek lexer with '=' -> (EqualEqual, forward lexer) | _ -> (Equal, lexer) end
 	| '/' -> begin let lexer = forward lexer in match peek lexer with '/' -> (TwoSlash, forward lexer) | _ -> (Slash, lexer) end
