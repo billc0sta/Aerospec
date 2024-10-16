@@ -1,6 +1,6 @@
 type ('a, 'b) t = {values: ('a, 'b) Hashtbl.t; parent: ('a, 'b) t option;}
 
-let make () = {values=(Hashtbl.create 16); parent=None}
+let make () = {values=(Hashtbl.create 8); parent=None}
 
 let find ident env = Hashtbl.find_opt env.values ident
 

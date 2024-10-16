@@ -32,7 +32,6 @@ type t = {
   pos: int;
   path: string;
   program: string;
-  imported: string list;
   errors: exn list;
 }
 

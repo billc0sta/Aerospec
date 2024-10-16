@@ -19,12 +19,12 @@ let execute program path debugging =
       let parsed = Parser.parse parser in
       if debugging then Parser.print_parsed parsed;
       
-      let intp = Interpreter.make parsed in
+      let intp = Interpreter.make parsed path in
       try
         Interpreter.run intp
       with 
-      | Interpreter.RuntimeError (message, tk) ->
-        print_error "RuntimeError" message tk.line 
+      | Interpreter.RuntimeError (message, path, tk) ->
+        print_error "RuntimeError" message tk.line ~path 
     with
     | Parser.ParseErrors l ->
       List.iter (fun err ->

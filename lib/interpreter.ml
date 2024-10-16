@@ -1,10 +1,12 @@
 open Parser
 open Value
 
-exception RuntimeError of string * Lexer.token
+exception RuntimeError of string * string * Lexer.token
 
 type state = {return_value: Value.t; returned: bool; breaked: bool; continued: bool; call_depth: int; loop_depth: int}
-type t = {env: (string, (Value.t * bool)) Environment.t; raw: statement list; state: state}
+type t = {imported: string list; path: string; env: (string, (Value.t * bool)) Environment.t; raw: statement list; state: state}
+
+let import_cache = Hashtbl.create 8 
 
 let add_natives env =
 	Environment.add "print" (NatFunc (256+1, ["params..."], Natives.print), true) env;
@@ -24,11 +26,22 @@ let add_natives env =
 	Environment.add "fields" (NatFunc (1, ["object"], Natives.fields), true) env;
 	Environment.add "stringify" (NatFunc (1, ["value"], Natives.stringify), true) env
 
-let make raw = 
-	let inp = {raw; env=(Environment.make ());
-	state={return_value=Nil; returned=false;
-	breaked=false; continued=false;
-	call_depth=0; loop_depth=0}} in
+let report_error message tk inp =
+	raise (RuntimeError (message, inp.path, tk))
+
+let make raw path = 
+	let inp = {
+	path;
+	raw;
+	imported=[];
+	env=(Environment.make ());
+	state=
+		{return_value=Nil; 
+		returned=false;
+		breaked=false; 
+		continued=false;
+		call_depth=0; 
+		loop_depth=0}} in
 	add_natives inp.env;
 	inp
 
@@ -45,7 +58,7 @@ let rec evaluate expr inp =
 	| LambdaExpr (exprs, body, _) -> evaluate_lambda exprs body inp
 	| ArrExpr (exprs, _) -> evaluate_arr exprs inp
 	| Subscript (expr, subexpr, tk) -> evaluate_subscript expr subexpr tk inp
-	| Range (_, tk, _, _, _) -> raise (RuntimeError ("Cannot evaluate range expression in this context", tk))
+	| Range (_, tk, _, _, _) -> report_error "Cannot evaluate range expression in this context" tk inp
 	| ObjectExpr stmts -> evaluate_object stmts inp
 	| PropertyExpr (expr, ident) -> evaluate_property expr ident inp
 	| Builder (range, cond, expr) -> evaluate_builder range cond expr inp
@@ -73,23 +86,17 @@ and evaluate_property expr ident inp =
 	let env = 
 	match eval with
 	| Object env -> env
-	| _ -> raise (RuntimeError (("Value of type '"^nameof eval^"' has no properties"), tk))
+	| _ -> report_error ("Value of type '"^nameof eval^"' has no properties") tk inp
 	in
 
 	let found = Environment.find tk.value env in
 	match found with
-	| None -> raise (RuntimeError (("This object has no such property as '"^tk.value^"' "), tk))
+	| None -> report_error ("This object has no such property as '"^tk.value^"' ") tk inp
 	| Some (v, _) -> v 
 
 and evaluate_object stmts inp =
 	let obj_env = Environment.child_of inp.env in
-	run {raw=stmts; env=obj_env; 
-			state={return_value=Nil; 
-						 returned=false; 
-						 breaked=false; 
-						 continued=false; 
-						 call_depth=0; 
-						 loop_depth=0}};
+	run {(make stmts inp.path) with env=obj_env};
 	Object(obj_env)
 
 and ev_subexpr expr tk inp =
@@ -97,12 +104,12 @@ and ev_subexpr expr tk inp =
 	match ev with 
 	| Float fl -> begin
 		if Float.trunc fl <> fl then
-			raise (RuntimeError ("Cannot subscript with floating-point number", tk))
+			report_error "Cannot subscript with floating-point number" tk inp
 		else if fl < 0.0 && fl <> Float.neg_infinity then
-			raise (RuntimeError ("Cannot subscript with a negative number", tk))
+			report_error "Cannot subscript with a negative number" tk inp
 		else fl 
 	end 
-	| _ -> raise (RuntimeError (("Cannot subscript with value of type '"^nameof ev^"'"), tk))
+	| _ -> report_error ("Cannot subscript with value of type '"^nameof ev^"'") tk inp
 	
 and evaluate_subscript expr subexpr tk inp =
 
@@ -116,16 +123,16 @@ and evaluate_subscript expr subexpr tk inp =
 			let beginning = if beginning = Float.neg_infinity then 0 else int_of_float beginning in
 			let ending    = if ending = Float.infinity then Resizable.len rez else int_of_float ending in
 			try Arr (Resizable.range rez beginning ending, true)
-			with Invalid_argument _ -> raise (RuntimeError ("Accessing array out of bounds", tk))
+			with Invalid_argument _ -> report_error "Accessing array out of bounds" tk inp
 		end
 		| String (rez, _) -> begin
 			let beginning = if beginning = Float.neg_infinity then 0 else int_of_float beginning in
 			let ending    = if ending = Float.infinity then Resizable.len rez else int_of_float ending in
 			
 			try String (Resizable.range rez beginning ending, true)
-			with Invalid_argument _ -> raise (RuntimeError ("Accessing string out of bounds", tk))
+			with Invalid_argument _ -> report_error "Accessing string out of bounds" tk inp
 		end
-		| _ -> raise (RuntimeError (("Value of type '"^nameof ev^"' is not subscriptable"), tk))
+		| _ -> report_error ("Value of type '"^nameof ev^"' is not subscriptable") tk inp
 	end
 
 	| (subexpr, None) -> begin
@@ -135,13 +142,13 @@ and evaluate_subscript expr subexpr tk inp =
 		match ev with
 		| Arr (rez, _) -> begin
 			try Resizable.get rez subscript
-			with Invalid_argument _ -> raise (RuntimeError ("Accessing array out of bounds", tk))
+			with Invalid_argument _ -> report_error "Accessing array out of bounds" tk inp
 		end
 		| String (rez, _) -> begin
 			try make_rez_string (Char.escaped (Resizable.get rez subscript))
-			with Invalid_argument _ -> raise (RuntimeError ("Accessing string out of bounds", tk))
+			with Invalid_argument _ -> report_error "Accessing string out of bounds" tk inp
 		end
-		| _ -> raise (RuntimeError (("Value of type '"^nameof ev^"' is not subscriptable"), tk))
+		| _ -> report_error ("Value of type '"^nameof ev^"' is not subscriptable") tk inp
 	end
 
 and evaluate_arr exprs inp = 
@@ -156,7 +163,7 @@ and evaluate_lambda exprs body inp =
 		| x::xs -> begin 
 			match x with
 			| IdentExpr (tk, global) -> 
-				if global then raise (RuntimeError ("invalid parameter", tk))
+				if global then report_error "invalid parameter" tk inp
 				else aux (tk.value::acc) xs
 			| _ -> assert false;
 		end
@@ -171,15 +178,15 @@ and evaluate_funcall target arglist tk inp =
 	| NatFunc (paramc, _, func) -> evaluate_natfunc paramc arglist func tk inp
 	| Object obj -> 
 		if (List.length arglist) <> 0 
-		then raise (RuntimeError ("Cannot pass arguments in a function call to object", tk))
+		then report_error "Cannot pass arguments in a function call to object" tk inp
 		else copy_object obj
-	| _ -> raise (RuntimeError (("Cannot call a value of type '"^nameof callable^"'"), tk));
+	| _ -> report_error ("Cannot call a value of type '"^nameof callable^"'") tk inp
 
 and evaluate_func env arglist params body tk inp =
 	let param_len = List.length params in
 	let arg_len   = List.length arglist in
 	if param_len <> arg_len then
-		raise (RuntimeError ("The number of arguments do not match the number of parameters", tk))
+		report_error "The number of arguments do not match the number of parameters" tk inp
 	else try 
 		let ninp = 
 		{inp with env=Environment.child_of env; state={inp.state with call_depth=inp.state.call_depth+1; loop_depth=0}} in
@@ -193,21 +200,21 @@ and evaluate_func env arglist params body tk inp =
 			ninp.state.return_value 
 		end 
 		| _ -> assert false;
-	with Stack_overflow -> raise (RuntimeError ("Stack overflow", tk))
+	with Stack_overflow -> report_error "Stack overflow" tk inp
 
 and evaluate_natfunc paramc arglist func tk inp =
 	let arg_len   = List.length arglist in
 	let param_len = paramc in
 	if not (param_len = arg_len || param_len >= 256 && arg_len >= (param_len - 256)) then
-		raise (RuntimeError ("The number of arguments do not match the number of parameters", tk))
+		report_error "The number of arguments do not match the number of parameters" tk inp
 	else
 		let val_list = List.map (fun expr -> evaluate expr inp) arglist in
 		try func val_list
-		with Invalid_argument message -> raise (RuntimeError (message, tk))
+		with Invalid_argument message -> report_error message tk inp
 
 and evaluate_binary expr1 expr2 op inp =
-	let raise_error =  (fun ev1 ev2 -> raise (RuntimeError 
-		("Cannot apply operator '"^Lexer.nameof op.typeof^"' to values of types ('"^nameof ev1^"' and '"^nameof ev2^"')", op))) in
+	let raise_error =  (fun ev1 ev2 -> 
+		report_error ("Cannot apply operator '"^Lexer.nameof op.typeof^"' to values of types ('"^nameof ev1^"' and '"^nameof ev2^"')") op inp) in
 	let ev_both = (fun expr1 expr2 -> (evaluate expr1 inp, evaluate expr2 inp)) in
 	let simple_binary = (fun expr1 expr2 op -> let (ev1, ev2) = ev_both expr1 expr2 in
 		match (ev1, ev2) with Float fl1, Float fl2 -> (op fl1 fl2) | _ -> raise_error ev1 ev2)
@@ -257,15 +264,55 @@ and evaluate_binary expr1 expr2 op inp =
 	| _ -> assert false
 
 and evaluate_unary op expr inp =
-	let raise_error = (fun ev -> raise (RuntimeError 
-		("Cannot apply operator '"^Lexer.nameof op.typeof^"' to values of type '"^nameof ev^"'", op))) in
+	let raise_error = (fun ev -> report_error 
+		("Cannot apply operator '"^Lexer.nameof op.typeof^"' to values of type '"^nameof ev^"'") op inp) in
 	let ev = evaluate expr inp in
 	match op.typeof with
 	| Exclamation -> Bool (not (truth ev))
 	| Plus -> begin match ev with Float fl -> Float fl | _ -> raise_error ev end
 	| Minus -> begin match ev with Float fl -> Float (fl*.(-1.)) | _ -> raise_error ev end
 	| Tilde -> (make_rez_string (nameof ev))
+	| Hash  -> evaluate_import op expr inp
 	| _ -> assert false;
+
+and evaluate_import tk expr inp =
+	let fp = match expr with
+		| StringLit fp -> fp
+		| _ -> assert false;
+	in
+
+	let file_path = (Filename.dirname inp.path ^ "/") ^ fp in
+	let find = Hashtbl.find_opt import_cache file_path in
+	match find with
+	| Some imp_obj -> (Object imp_obj)
+	| None -> begin
+  if inp.path = file_path
+  then report_error "Cannot import a file in itself" tk inp
+  else
+
+  if List.mem file_path inp.imported
+  then report_error ("Import cycle detected between '"^file_path^"' and '"^inp.path^"'") tk inp
+  else 
+
+  let ch = 
+    try open_in_bin file_path 
+    with Sys_error _ -> report_error ("No such file as '"^file_path^"' in the current directory") tk inp
+  in 
+  let s = really_input_string ch (in_channel_length ch) in
+  close_in ch;
+
+  let lexer  = Lexer.make s file_path in
+  let lexed  = Lexer.lex lexer in
+  let parser = Parser.make lexed file_path s in
+  let parsed = Parser.parse parser in
+
+  let imp_obj = Environment.make () in
+  let ninp   = {(make parsed file_path) with imported=(file_path::inp.imported); env=imp_obj} in
+  run ninp;
+
+  Hashtbl.add import_cache file_path imp_obj;
+ (Object imp_obj)
+	end
 
 and evaluate_ident tk global inp =
 	let rec aux env =
@@ -274,7 +321,7 @@ and evaluate_ident tk global inp =
 			begin
 				let env = 
 				try Environment.parent_of env 
-				with Invalid_argument _ -> raise (RuntimeError ("Unbinded variable '"^tk.value^"' was referenced", tk)) 
+				with Invalid_argument _ -> report_error ("Unbinded variable '"^tk.value^"' was referenced") tk inp 
 				in aux env
 			end
 		| Some (value, _) -> value
@@ -282,7 +329,7 @@ and evaluate_ident tk global inp =
 	in let env = if global then 
 		try Environment.parent_of inp.env
 		with Invalid_argument _ ->
-			raise (RuntimeError ("Global variable '"^tk.value^"' was referenced in global scope", tk))
+			report_error ("Global variable '"^tk.value^"' was referenced in global scope") tk inp
 		else inp.env in
 	aux env
 
@@ -301,7 +348,7 @@ and assignment target expr token inp =
  	match target with 
 	| IdentExpr (tk, global) -> if global then ignore(evaluate_ident tk global inp); assign_ident mut expr target inp
 	| Subscript (target, (index, None), tk) -> 
-		if not mut then raise (RuntimeError ("Cannot constant-assign an index", tk))
+		if not mut then report_error "Cannot constant-assign an index" tk inp
 		else assign_subscript expr target index inp
 	| PropertyExpr (obj, target) -> assign_property obj target expr mut inp 
 	| _ -> assert false
@@ -311,7 +358,7 @@ and assign_property obj target expr ismut inp =
 	let env = 
 	match evaluate obj inp with
 	| Object env -> env
-	| eval -> raise (RuntimeError (("Value of type '"^nameof eval^"' has no properties"), tk))
+	| eval -> report_error ("Value of type '"^nameof eval^"' has no properties") tk inp
 	in
 	
 	let ev_expr expr = 
@@ -326,7 +373,7 @@ and assign_property obj target expr ismut inp =
 		Environment.add tk.value (value, ismut) env; value
 	end
 	| Some (_, mut) -> begin 
-		if not mut then raise (RuntimeError ("Cannot re-assign to a constant", tk))
+		if not mut then report_error "Cannot re-assign to a constant" tk inp
 		else 
 		let value = if ismut then ev_expr expr else constant_value (ev_expr expr) in
 		Environment.replace tk.value (value, ismut) env; value
@@ -342,19 +389,19 @@ and assign_subscript expr target index inp =
   match rez with
   | Arr (rez, mut) ->
   	if not mut then
-  	raise (RuntimeError ("Cannot assign to a subscript of a constant array", token)) 
+  	report_error "Cannot assign to a subscript of a constant array" token inp 
     else 
     let index = int_of_float (ev_subexpr index token inp) in
     let value = evaluate expr inp in
     begin
       try Resizable.putat rez index value; value
       with Invalid_argument _ ->
-        raise (RuntimeError ("Accessing array out of bounds", token))
+        report_error "Accessing array out of bounds" token inp
     end
 
   | String (rez, mut) ->
     if not mut then
-  	raise (RuntimeError ("Cannot assign to a subscript of a constant string", token)) 
+  	report_error "Cannot assign to a subscript of a constant string" token inp 
     else 
     let index = int_of_float (ev_subexpr index token inp) in
     let value = evaluate expr inp in
@@ -363,17 +410,17 @@ and assign_subscript expr target index inp =
       | String (chr, _) ->
         let length = Resizable.len chr in
         if length <> 1 then
-          raise (RuntimeError ("Assigning invalid character count value to a string index", token))
+          report_error "Assigning invalid character count value to a string index" token inp
         else
         	begin
           try Resizable.putat rez index (Resizable.get chr 0); value
           with Invalid_argument _ ->
-            raise (RuntimeError ("Accessing array out of bounds", token))
+            report_error "Accessing array out of bounds" token inp
       		end
       | _ ->
-        raise (RuntimeError ("Cannot assign to a string index with value of type '" ^ nameof value ^ "'", token))
+        report_error ("Cannot assign to a string index with value of type '" ^ nameof value ^ "'") token inp
     end
-  | _ -> raise (RuntimeError (("Value of type '"^nameof rez^"' is not subscriptable"), token))
+  | _ -> report_error ("Value of type '"^nameof rez^"' is not subscriptable") token inp
 
 and assign_ident ismut expr ident inp =
 
@@ -385,7 +432,7 @@ and assign_ident ismut expr ident inp =
 	let env = if global then
 		try Environment.parent_of inp.env
 		with Invalid_argument _ -> 
-			raise (RuntimeError ("Global variable '"^token.value^"' was referenced in global scope", token))
+			report_error ("Global variable '"^token.value^"' was referenced in global scope") token inp
 		else inp.env 
 	in
 	match (Environment.find name env) with
@@ -394,7 +441,7 @@ and assign_ident ismut expr ident inp =
 		Environment.add name (value, ismut) env; value
 	end
 	| Some (_, mut) -> begin 
-		if not mut then raise (RuntimeError ("Cannot re-assign to a constant", token))
+		if not mut then report_error "Cannot re-assign to a constant" token inp
 		else 
 		let value = if ismut then evaluate expr inp else constant_value (evaluate expr inp) in
 		Environment.replace name (value, ismut) env; value
@@ -412,15 +459,15 @@ and exec_stmt stmt inp =
 	| Return (expr, tk) -> return_stmt expr tk inp
 
 and break_stmt tk inp =
-		if inp.state.loop_depth = 0 then raise (RuntimeError ("Break statement ('**') outside of loop", tk))
+		if inp.state.loop_depth = 0 then report_error "Break statement ('**') outside of loop" tk inp
 		else {inp with state={inp.state with breaked = true}}
 
 and continue_stmt tk inp =
-		if inp.state.loop_depth = 0 then raise (RuntimeError ("Continue statement ('<<') outside of loop", tk))
+		if inp.state.loop_depth = 0 then report_error "Continue statement ('<<') outside of loop" tk inp
 		else {inp with state={inp.state with continued = true}}
 
 and return_stmt expr tk inp =
-		if inp.state.call_depth = 0 then raise (RuntimeError ("Return statement ('->') outside of function", tk))
+		if inp.state.call_depth = 0 then report_error "Return statement ('->') outside of function" tk inp
 		else {inp with state={inp.state with returned = true; return_value=evaluate expr inp}}
 
 and block_stmt stmts inp =
@@ -485,10 +532,10 @@ and start_range range inp =
 		match evaluate expr inp with
 		| Float fl -> 
 			if Float.trunc fl <> fl 
-			then raise (RuntimeError ("Cannot use floating-point number in range expression", tk1))
+			then report_error "Cannot use floating-point number in range expression" tk1 inp
 			else int_of_float fl
 		| ev ->  
-			raise (RuntimeError (("Cannot use value of type '"^Value.nameof ev^"' in range expression"), tk1))
+			report_error ("Cannot use value of type '"^Value.nameof ev^"' in range expression") tk1 inp
 	in
 
 	let (beg, dir) = 
@@ -501,9 +548,9 @@ and start_range range inp =
 	in
 	let endof = (ev_expr expr2) in
 	let () = if dir = 1 && not (beg < endof) then
-		raise (RuntimeError ("Beginning should be less than ending of range expression", tk1))
+		report_error "Beginning should be less than ending of range expression" tk1 inp
 		else if dir = -1 && not (beg > endof) then
-		raise (RuntimeError ("Beginning should be greter than ending of range expression", tk1))
+		report_error "Beginning should be greter than ending of range expression" tk1 inp
 		else ()
 	in
 	let name = match ident with IdentExpr (tk, _) -> tk.value | _ -> assert false; in

@@ -34,14 +34,13 @@ type t = {
   pos: int;
   path: string;
   program: string;
-  imported: string list;
   errors: exn list;
 }
 
 exception ParseError of string * string * string * int
 exception ParseErrors of exn list
 
-let make raw path program = {program; raw; path; errors=[]; imported=[]; previous={value="";typeof=Unknown;line=0;pos=0}; pos=0}
+let make raw path program = {program; raw; path; errors=[]; previous={value="";typeof=Unknown;line=0;pos=0}; pos=0}
 
 let peek parser = List.hd parser.raw
 
@@ -272,36 +271,13 @@ and unary parser =
   | Exclamation | Plus | Minus | Tilde -> 
     let (expr, parser) = postary (forward parser) in
     (Unary (tk, expr), parser)
-  | Hash -> import (forward parser)
+  | Hash -> 
+    let (expr, parser) = primary (forward parser) in
+    let () = match expr with
+    | StringLit _ -> ()
+    | _ -> report_error "Expected a string" parser in
+    (Unary (tk, expr), parser) 
   | _ -> postary parser
-
-and import parser =
-  let (expr, parser) = primary parser in
-  let fp = match expr with
-  | StringLit fp -> fp
-  | _ -> report_error "Expected a string" parser in
-  let file_path = (Filename.dirname parser.path ^ "/") ^ fp in
-  if parser.path = file_path
-  then report_error "Cannot import a file in itself" parser
-  else
-  if List.mem file_path parser.imported
-  then report_error ("Import cycle detected between 
-    '"^file_path^"' and 
-    '"^parser.path^"'")
-    parser
-  else 
-  let ch = 
-    try open_in_bin file_path 
-    with Sys_error _ -> report_error ("No such file as '"^file_path^"' in the current directory") parser
-  in 
-  let s = really_input_string ch (in_channel_length ch) in
-  close_in ch;
-
-  let lexer = Lexer.make s file_path in
-  let lexed = Lexer.lex lexer in
-  let new_parser = {(make lexed file_path s) with imported=(file_path::parser.imported)} in
-  let parsed     = parse new_parser in
- (ObjectExpr parsed, parser)
 
 and postary parser =
   let rec aux expr parser = 
@@ -517,16 +493,16 @@ and loop_stmt parser =
 
 and expr_stmt parser = 
   let (expr, parser) = expression parser in
-  let stmt = match expr with
-  | Builder (range, cond, expr) -> 
-    let stmt = match cond with 
-      | FloatLit 1.0 -> (Exprstmt expr) (* 1.0 is a sentinel for omittion *) 
-      | _ -> IfStmt (cond, Exprstmt expr, None) 
-    in
-    (LoopStmt (range, stmt))
-  | _ -> Exprstmt expr  
-  in 
-  (stmt, parser) 
+  let rec aux = function
+    | Builder (range, cond, expr) ->
+      let instmt = aux expr in 
+      let stmt = match cond with 
+        | FloatLit 1.0 -> instmt (* 1.0 is a sentinel for omittion *) 
+        | _ -> IfStmt (cond, instmt, None) 
+      in
+      (LoopStmt (range, stmt))
+    | _ -> Exprstmt expr
+  in (aux expr, parser)
   
 and block_stmt parser =
   let parser = consume OCurly "Expected a block (opening curly bracket '{')" parser in
