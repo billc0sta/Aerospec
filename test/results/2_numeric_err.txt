@@ -1,0 +1,61 @@
+
+::Syntax Error
+  at file: .\tests\2_numeric_err.aero
+  at line: 1
+  here --" ; .0 "-- 
+  Expected an expression.
+---------------------------
+::Syntax Error
+  at file: .\tests\2_numeric_err.aero
+  at line: 2
+  here --" ; .1 "-- 
+  Expected an expression.
+---------------------------
+::Syntax Error
+  at file: .\tests\2_numeric_err.aero
+  at line: 3
+  here --" ; .12 "-- 
+  Expected an expression.
+---------------------------
+::Syntax Error
+  at file: .\tests\2_numeric_err.aero
+  at line: 4
+  here --" ; .123 "-- 
+  Expected an expression.
+---------------------------
+::Syntax Error
+  at file: .\tests\2_numeric_err.aero
+  at line: 7
+  here --" ; 0..1 "-- 
+  Expected an identifier.
+---------------------------
+::Syntax Error
+  at file: .\tests\2_numeric_err.aero
+  at line: 8
+  here --" ; 0..123 "-- 
+  Expected an identifier.
+---------------------------
+::Syntax Error
+  at file: .\tests\2_numeric_err.aero
+  at line: 9
+  here --" ; 1..1 "-- 
+  Expected an identifier.
+---------------------------
+::Syntax Error
+  at file: .\tests\2_numeric_err.aero
+  at line: 10
+  here --" ; 1..123 "-- 
+  Expected an identifier.
+---------------------------
+::Syntax Error
+  at file: .\tests\2_numeric_err.aero
+  at line: 11
+  here --" ; 123..12 "-- 
+  Expected an identifier.
+---------------------------
+::Syntax Error
+  at file: .\tests\2_numeric_err.aero
+  at line: 11
+  here --" ; 123..123 "-- 
+  Expected an identifier.
+---------------------------

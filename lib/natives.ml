@@ -20,8 +20,8 @@ let len params =
 let append params = 
 	let (seq, params) = (List.hd params, List.tl params) in
 	let () = match seq with
-	| String (_, mut) -> if not mut then raise (Invalid_argument "Cannot append to a locked string") 
-	| Arr (_, mut) -> if not mut then raise (Invalid_argument "Cannot append to a locked array")
+	| String (_, locked) -> if locked then raise (Invalid_argument "Cannot append to a locked string") 
+	| Arr (_, locked) -> if locked then raise (Invalid_argument "Cannot append to a locked array")
 	| _ -> raise (Invalid_argument "Non-sequence value was passed as a first parameter to append")
 	in
 	List.iter (
@@ -45,8 +45,8 @@ let append params =
 let insert params =
 	let (seq, params) = (List.hd params, List.tl params) in
 	match seq with
-	| String (_, mut) -> if not mut then raise (Invalid_argument "Cannot insert to a locked string") 
-	| Arr (_, mut) -> if not mut then raise (Invalid_argument "Cannot insert to a locked array")
+	| String (_, locked) -> if locked then raise (Invalid_argument "Cannot insert to a locked string") 
+	| Arr (_, locked) -> if locked then raise (Invalid_argument "Cannot insert to a locked array")
 	| _ -> raise (Invalid_argument "Non-sequence value was passed as a first parameter to insert");
 	;
 	let (index, params) = (List.hd params, List.tl params) in
@@ -72,12 +72,12 @@ let extend params =
 	let (seq1, params) = (List.hd params, List.tl params) in
 	List.iter (fun seq2 ->
 		match (seq1, seq2) with
-		| (String (r1, mut), String (r2, _)) -> 
-			if not mut 
+		| (String (r1, locked), String (r2, _)) -> 
+			if locked
 			then raise (Invalid_argument "Cannot extend a locked string") 
 			else Resizable.extend r1 r2
-		| (Arr (r1, mut), Arr (r2, _)) -> 
-			if not mut 
+		| (Arr (r1, locked), Arr (r2, _)) -> 
+			if locked 
 			then raise (Invalid_argument "Cannot extend a locked array") 
 			else Resizable.extend r1 r2
 		| _ -> raise (Invalid_argument ("Cannot extend value of type '"^nameof seq1^"' with value of type '"^nameof seq2^"'"))
@@ -89,8 +89,8 @@ let merge params =
 
 	List.fold_left (fun seq1 seq2 -> 
 		match (seq1, seq2) with
-		| (String (r1, _), String (r2, _)) -> String (Resizable.merge r1 r2, true)
-		| (Arr (r1, _), Arr (r2, _)) -> Arr (Resizable.merge r1 r2, true)
+		| (String (r1, _), String (r2, _)) -> String (Resizable.merge r1 r2, false)
+		| (Arr (r1, _), Arr (r2, _)) -> Arr (Resizable.merge r1 r2, false)
 		| _ -> raise (Invalid_argument ("Cannot merge value of type '"^nameof seq1^"' with value of type '"^nameof seq2^"'"));
 	) seq1 params
 
@@ -111,8 +111,8 @@ let index params =
 let pop params = 
 	let (seq, params) = (List.hd params, List.tl params) in
 	let () = match seq with
-	| String (_, mut) -> if not mut then raise (Invalid_argument "Cannot pop from a locked string") 
-	| Arr (_, mut) -> if not mut then raise (Invalid_argument "Cannot pop from a locked array")
+	| String (_, locked) -> if locked then raise (Invalid_argument "Cannot pop from a locked string") 
+	| Arr (_, locked) -> if locked then raise (Invalid_argument "Cannot pop from a locked array")
 	| _ -> raise (Invalid_argument "Non-sequence value was passed as a first parameter to pop")
 	in
 
@@ -135,8 +135,8 @@ let pop params =
 let remove params =
 	let (seq, params) = (List.hd params, List.tl params) in
 	let () = match seq with
-	| String (_, mut) -> if not mut then raise (Invalid_argument "Cannot remove from a locked string") 
-	| Arr (_, mut) -> if not mut then raise (Invalid_argument "Cannot remove from a locked array")
+	| String (_, locked) -> if locked then raise (Invalid_argument "Cannot remove from a locked string") 
+	| Arr (_, locked) -> if locked then raise (Invalid_argument "Cannot remove from a locked array")
 	| _ -> raise (Invalid_argument "Non-sequence value was passed as a first parameter to remove")
 	in
 	List.iter (fun elem -> 
@@ -156,12 +156,12 @@ let remove params =
 let clear params =	
 	let seq = List.hd params in
 	let () = match seq with
-	| String (rez, mut) -> 
-		if not mut 
+	| String (rez, locked) -> 
+		if locked 
 		then raise (Invalid_argument "Cannot clear a locked string")
 		else Resizable.clear rez
-	| Arr (rez, mut) -> 	
-		if not mut 
+	| Arr (rez, locked) -> 	
+		if locked 
 		then raise (Invalid_argument "Cannot clear a locked array")
 		else Resizable.clear rez
 	| _ -> raise (Invalid_argument "Non-sequence value was passed as a first parameter to clear");
@@ -199,9 +199,9 @@ let fields params =
 		Resizable.append rez2 (make_rez_string k);
 		Resizable.append rez2 (fst v);
 		Resizable.append rez2 (Bool (snd v));
-		Resizable.append rez (Arr(rez2, true))
+		Resizable.append rez (Arr(rez2, false))
 	) env.values;
-	Arr (rez, true)
+	Arr (rez, false)
 
 let stringify params = 
 	let value = List.hd params in

@@ -30,7 +30,7 @@ let nameof = function
 let make_rez_string str = 
 	let rez = Resizable.make () in
 	String.iter (fun c -> Resizable.append rez c) str;
-	(String (rez, true))
+	(String (rez, false))
 
 let rec stringify = function
 	| String (str, _) -> stringify_str str
@@ -75,45 +75,41 @@ and stringify_arr arr =
 let rec copy_value v =
 	match v with 
 	| Float _ | Bool _ | Func _ | NatFunc _ | Nil -> v
-	| Object _ -> copy_object v
-	| Arr (rez, _) -> copy_array rez 
-	| String (rez, _) -> String (Resizable.copy rez, true)
+	| Object (env, locked) -> copy_object env locked
+	| Arr (rez, locked) -> copy_array rez locked 
+	| String (rez, locked) -> String (Resizable.copy rez, locked)
 
-and copy_object obj =
-	let (obj_env, mut) = match obj with
-		| Object (env, mut) -> (env, mut)
-		| _ -> assert false;
-	in
-	let new_obj = Hashtbl.create (Hashtbl.length obj_env.values) in
-	let new_obj = ({values=new_obj; parent=obj_env.parent}: (string, (t * bool)) Environment.t) in
+and copy_object env locked =
+	let new_obj = Hashtbl.create (Hashtbl.length env.values) in
+	let new_obj = ({values=new_obj; parent=env.parent}: (string, (t * bool)) Environment.t) in
 	Hashtbl.iter (fun k v -> 
 		let copied = match fst v with
 		| Func (_, params, stmts) -> (Func(new_obj, params, stmts), snd v)
 		| value -> (copy_value value, snd v)
 	in Hashtbl.add new_obj.values k copied
-	) obj_env.values;
-	Object (new_obj, mut)
+	) env.values;
+	Object (new_obj, locked)
 
-and copy_array arr =
+and copy_array arr locked =
 	let new_arr = Resizable.copy arr in
 	for i = 0 to Resizable.len arr - 1 do
 		new_arr.arr.(i) <- copy_value arr.arr.(i)
 	done;
-	Arr (new_arr, true)
+	Arr (new_arr, locked)
 
 let shallow_lock value =
 	match value with
-	| String (rez, _) -> String (rez, false)
-	| Arr (rez, _) -> Arr (rez, false)
-	| Object (obj, _) -> Object (obj, false)
+	| String (rez, _) -> String (rez, true)
+	| Arr (rez, _) -> Arr (rez, true)
+	| Object (obj, _) -> Object (obj, true)
 	| _ -> value
 
 let rec deep_lock value =
 	match value with
-	| String (rez, _) -> String (rez, false)
+	| String (rez, _) -> String (rez, true)
 	| Arr (rez, _) -> 
 		if Resizable.len rez = 0 then
-		Arr (rez, false)
+		Arr (rez, true)
 		else 
 		let new_rez = Resizable.make () in
 		Resizable.resize new_rez rez.size rez.arr.(0);
@@ -121,11 +117,11 @@ let rec deep_lock value =
 			new_rez.arr.(i) <- deep_lock rez.arr.(i)
 		done;
 		new_rez.size <- rez.size;
-		Arr (new_rez, false)
+		Arr (new_rez, true)
 	| Object (obj, _) -> begin
 		let new_obj = Environment.make () in
 		Hashtbl.iter (fun k v ->
-			Hashtbl.add new_obj.values k ((deep_lock (fst v)), false)
-		) obj.values; Object (new_obj, false)
+			Hashtbl.add new_obj.values k ((deep_lock (fst v)), true)
+		) obj.values; Object (new_obj, true)
 	end
 	| _ -> value

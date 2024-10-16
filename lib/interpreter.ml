@@ -78,7 +78,7 @@ and evaluate_builder range cond expr inp =
 	done;
 	Environment.remove name inp.env;
 	Resizable.shrink arr;
-	Arr (arr, true)
+	Arr (arr, false)
 
 and evaluate_property expr ident inp =
 	let tk = match ident with IdentExpr (tk, _) -> tk | _ -> assert false; in
@@ -97,7 +97,7 @@ and evaluate_property expr ident inp =
 and evaluate_object stmts inp =
 	let obj_env = Environment.child_of inp.env in
 	run {(make stmts inp.path) with env=obj_env};
-	Object(obj_env, true)
+	Object(obj_env, false)
 
 and ev_subexpr expr tk inp =
 	let ev = evaluate expr inp in
@@ -122,14 +122,14 @@ and evaluate_subscript expr subexpr tk inp =
 		| Arr (rez, _) -> begin
 			let beginning = if beginning = Float.neg_infinity then 0 else int_of_float beginning in
 			let ending    = if ending = Float.infinity then Resizable.len rez else int_of_float ending in
-			try Arr (Resizable.range rez beginning ending, true)
+			try Arr (Resizable.range rez beginning ending, false)
 			with Invalid_argument _ -> report_error "Accessing array out of bounds" tk inp
 		end
 		| String (rez, _) -> begin
 			let beginning = if beginning = Float.neg_infinity then 0 else int_of_float beginning in
 			let ending    = if ending = Float.infinity then Resizable.len rez else int_of_float ending in
 			
-			try String (Resizable.range rez beginning ending, true)
+			try String (Resizable.range rez beginning ending, false)
 			with Invalid_argument _ -> report_error "Accessing string out of bounds" tk inp
 		end
 		| _ -> report_error ("Value of type '"^nameof ev^"' is not subscriptable") tk inp
@@ -154,7 +154,7 @@ and evaluate_subscript expr subexpr tk inp =
 and evaluate_arr exprs inp = 
 	let arr = Resizable.make () in
 	List.iter (fun expr -> Resizable.append arr (evaluate expr inp)) exprs;
-	(Arr (arr, true))
+	(Arr (arr, false))
 
 and evaluate_lambda exprs body inp = 
 	let rec aux acc exprs =
@@ -176,10 +176,10 @@ and evaluate_funcall target arglist tk inp =
 	match callable with
 	| Func (env, params, body)  -> evaluate_func env arglist params body tk inp
 	| NatFunc (paramc, _, func) -> evaluate_natfunc paramc arglist func tk inp
-	| Object _ -> 
+	| Object (env, locked) -> 
 		if (List.length arglist) <> 0 
 		then report_error "Cannot pass arguments in a call to object" tk inp
-		else copy_object callable
+		else copy_object env locked
 	| _ -> report_error ("Cannot call a value of type '"^nameof callable^"'") tk inp
 
 and evaluate_func env arglist params body tk inp =
@@ -224,8 +224,8 @@ and evaluate_binary expr1 expr2 op inp =
 		let (ev1, ev2) = ev_both expr1 expr2 in
 		match (ev1, ev2) with
 		| Float fl1, Float fl2 -> Float (fl1 +. fl2)
-		| String (str1, _), String (str2, _) -> String (Resizable.merge str1 str2, true)
-		| Arr (arr1, _), Arr (arr2, _) -> Arr (Resizable.merge arr1 arr2, true)
+		| String (str1, _), String (str2, _) -> String (Resizable.merge str1 str2, false)
+		| Arr (arr1, _), Arr (arr2, _) -> Arr (Resizable.merge arr1 arr2, false)
 		| _ -> raise_error ev1 ev2
 		end
 	| EqualEqual -> begin
@@ -286,7 +286,7 @@ and evaluate_import tk expr inp =
 	let file_path = (Filename.dirname inp.path ^ "/") ^ fp in
 	let find = Hashtbl.find_opt import_cache file_path in
 	match find with
-	| Some imp_obj -> (Object (imp_obj, true))
+	| Some imp_obj -> (Object (imp_obj, false))
 	| None -> begin
   if inp.path = file_path
   then report_error "Cannot import a file in itself" tk inp
@@ -313,7 +313,7 @@ and evaluate_import tk expr inp =
   run ninp;
 
   Hashtbl.add import_cache file_path imp_obj;
- (Object (imp_obj, true))
+ (Object (imp_obj, false))
 	end
 
 and evaluate_ident tk global inp =
@@ -359,8 +359,8 @@ and assign_property obj target expr ismut inp =
 	let tk = match target with IdentExpr (tk, _) -> tk | _ -> assert false; in
 	let env = 
 	match evaluate obj inp with
-	| Object (env, mut) -> 
-		if not mut then report_error "Cannot assign property to a locked object" tk inp else env
+	| Object (env, locked) -> 
+		if locked then report_error "Cannot assign property to a locked object" tk inp else env
 	| eval -> report_error ("Value of type '"^nameof eval^"' has no properties") tk inp
 	in
 	
@@ -390,8 +390,8 @@ and assign_subscript expr target index inp =
     | _ -> assert false
   in
   match rez with
-  | Arr (rez, mut) ->
-  	if not mut then
+  | Arr (rez, locked) ->
+  	if locked then
   	report_error "Cannot assign to a subscript of a locked array" token inp 
     else 
     let index = int_of_float (ev_subexpr index token inp) in
@@ -402,8 +402,8 @@ and assign_subscript expr target index inp =
         report_error "Accessing array out of bounds" token inp
     end
 
-  | String (rez, mut) ->
-    if not mut then
+  | String (rez, locked) ->
+    if locked then
   	report_error "Cannot assign to a subscript of a locked string" token inp 
     else 
     let index = int_of_float (ev_subexpr index token inp) in
