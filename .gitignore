@@ -1,6 +1,5 @@
 dune-project
 upl.opam
-./test/dune
 _build
 .git
 ./lib/dune

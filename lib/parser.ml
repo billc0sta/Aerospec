@@ -59,9 +59,9 @@ let consume typeof error parser =
 let next_stmt parser =
   let rec aux parser =
     match (peek parser).typeof with 
-    | Right  | OCurly
+    | Right       | OCurly  | Semicolon 
     | TwoQuestion | TwoStar | Left 
-    | Arrow | Semicolon | EOF -> parser
+    | Arrow       | EOF -> parser
     | _  -> aux (forward parser)
   in aux parser
 

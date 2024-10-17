@@ -6,14 +6,14 @@ ifstmt           = '??' expression statement ('::' statement)?
 expression       = assignexpr
 assignexpr       = ('$')? expression (('=' | ":=") assignexpr)? | ifexpr 
 ifexpr           = logic ('?' ifexpr ':' ifexpr)?
-logic_or         = equality ("||" equality)*
-logic_and        = equality ("&&" equality)*
+logic_or         = logic_and ("||" logic_and)*
+logic_and        = equality ("&&" equality)* 
 equality         = relation (("==" | "!=") relation)*
 relation         = basic (rel-op (basic | ident rel-op basic))?
 rel-op           = '>' | '>=' | '<' | '<='
 basic            = factor (("+" | "-") factor)*
 factor           = unary (("*" | "/" | "%") unary)*
-unary            = ("!" | "+" | "-" | "#" | "~") unary | postary
+unary            = ("!" | "+" | "-" | "#" | "~" | "&" | "&&") unary | postary
 postary          = primary (arguments | indexing | '.' ident)*
 arguments        = '(' (expression (',' expression)*)? ')'
 indexing         = '[' (expression | (arr-range)) (',' (expression | arr-range))? ']'
@@ -22,7 +22,7 @@ primary          = ident | float | string | array | object | grouping | lambda |
 ident            = (alphabet | '_') (alphabet | '_' | digit)*
 alphabet         = ('a'->'z' | 'A->Z')
 digit            = '0'->'9'
-float            = number ('.' number)?
+float            = number ('.' (number)?)?
 number           = (digit)+
 array            = '[' (expression (',' expression)*)? ']'
 string           = '"' (writable)* '"'

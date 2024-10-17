@@ -1,8 +1,0 @@
-get_expression := () {
-	print("Write An Expression: ")
-	input()
-}
-
-exec_expression := (expr) {
-	stack = [1, 2, 3, 4]
-}
