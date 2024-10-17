@@ -24,7 +24,9 @@ let add_natives env =
 	Environment.add "count" (NatFunc (2, ["sequence"; "element"], Natives.count), true) env;
 	Environment.add "copy" (NatFunc (1, ["value"], Natives.copy), true) env;
 	Environment.add "fields" (NatFunc (1, ["object"], Natives.fields), true) env;
-	Environment.add "stringify" (NatFunc (1, ["value"], Natives.stringify), true) env
+	Environment.add "stringify" (NatFunc (1, ["value"], Natives.stringify), true) env;
+	Environment.add "float_nan" (Float Float.nan, true) env;
+	Environment.add "float_inf" (Float Float.infinity, true) env
 
 let report_error message tk inp =
 	raise (RuntimeError (message, inp.path, tk))

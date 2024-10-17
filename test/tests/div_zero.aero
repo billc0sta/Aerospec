@@ -1,0 +1,6 @@
+print(0 / 1, "\n")
+print(0 / 123, "\n")
+print(0 / float_inf, "\n")
+print(0 / float_nan, "\n")
+print(0 / -float_nan, "\n")
+print(0 / -float_inf, "\n")

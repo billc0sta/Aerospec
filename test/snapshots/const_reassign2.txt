@@ -1,0 +1,7 @@
+200
+
+::RuntimeError
+  at file: .\tests\const_reassign2.aero
+  at line: 4
+  Cannot re-assign to a constant.
+---------------------------

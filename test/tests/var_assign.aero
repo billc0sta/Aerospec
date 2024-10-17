@@ -1,0 +1,31 @@
+x = 10
+y = 20
+z = x + y
+print(x, y, z, "\n")
+
+x = x * 2
+y = y - 5
+z = z / x
+print(x, y, z, "\n")
+
+a = 50
+b = a + z
+c = b * 2 + a
+print(a, b, c, "\n")
+
+a = a + 10 * z - b / x
+print(a, "\n")
+
+counter = 0
+counter = counter + 1
+counter = counter - 2
+print(counter, "\n")
+
+f1 = 2.5
+f2 = 3.75
+f3 = f1 * f2 + x
+print(f1, f2, f3, "\n")
+
+f1 = f3 - f2
+f2 = f2 * 1.5
+print(f1, f2, "\n")

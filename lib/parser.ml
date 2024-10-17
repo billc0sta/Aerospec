@@ -269,7 +269,7 @@ and unary parser =
   let tk = peek parser in
   match tk.typeof with
   | Exclamation | Plus | Minus | Tilde | Amper | TwoAmper -> 
-    let (expr, parser) = postary (forward parser) in
+    let (expr, parser) = unary (forward parser) in
     (Unary (tk, expr), parser)
   | Hash -> 
     let (expr, parser) = primary (forward parser) in
