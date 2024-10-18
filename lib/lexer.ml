@@ -148,7 +148,7 @@ let string_literal lexer =
 	let bytes = Bytes.create length in
 	let rec blit wp rp escaped =
 		if rp >= length then wp else
-		let c = lexer.raw.[rp+(lexer.pos-length)] in 
+		let c = lexer.raw.[rp+(lexer.pos-length)] in
 		match c with
 		| '\\' -> if escaped then (Bytes.set bytes wp c; blit (wp+1) (rp+1) false) else (blit wp (rp+1) true)
 		| 'b' -> let c = if escaped then (Char.chr 8) else 'b' in
@@ -163,6 +163,7 @@ let string_literal lexer =
 		         Bytes.set bytes wp c; blit (wp+1) (rp+1) false
 		| 'r' -> let c = if escaped then (Char.chr 13) else 'r' in
 		         Bytes.set bytes wp c; blit (wp+1) (rp+1) false
+		| c when c = (Char.chr 13) -> blit wp (rp+1) false
 		| _ -> Bytes.set bytes wp c; blit (wp+1) (rp+1) false
 	in 
 	let written = blit 0 0 false in
@@ -181,11 +182,19 @@ let builder f lexer =
 
 let ident = builder (fun c -> is_alnum c || c = '_')
 
-let comment = builder (fun c -> c <> '\n' && c <> Char.chr 0)
-	
+let skip_line lexer =
+	let rec aux lexer =
+		let c = peek lexer in
+		match c with
+		| '\n' | ' ' | '\t' | '\r' -> lexer 
+		| c when c = (Char.chr 0) -> lexer
+		| _ -> aux (forward lexer)
+	in aux lexer  
+
 let next_token lexer =
 	let lexer = skip_space lexer in
-	let (typeof, lexer) = match peek lexer with
+	let (typeof, lexer) = 
+	match peek lexer with
 	| '+' -> (Plus, forward lexer)
 	| '%' -> (Modulo, forward lexer)
 	| ';' -> (Semicolon, forward lexer)
@@ -215,13 +224,13 @@ let next_token lexer =
 	| c when c = (Char.chr 0) -> (EOF, lexer)
 	| c when is_num c -> (FloatLiteral, lexer)
 	| c when is_alpha c || c = '_' -> (Ident, lexer)
-	| _ -> (Unknown, lexer)
+	| _ -> (Unknown, forward lexer)
 	in
 	let (value, lexer) = match typeof with
 	| FloatLiteral  -> float_literal lexer 
 	| StringLiteral -> string_literal lexer
 	| Ident    -> ident lexer
-	| TwoSlash -> comment lexer
+	| TwoSlash -> ("", skip_line lexer)
 	| _        -> (nameof typeof, lexer)
 	in
 	let (typeof, value) = 
@@ -235,7 +244,7 @@ let lex lexer =
 		let (tk, lexer) = next_token lexer in
 		match tk.typeof with
 		| EOF -> (tk::acc, lexer.errors)
-		| Unknown -> report_error "Unrecognized token" lexer
+		| Unknown -> report_error "Unrecognized token" (skip_line lexer)
 		| TwoSlash -> aux acc lexer
 		| _ -> aux (tk::acc) lexer
 		with LexError (message, path, lineof, linenum, pos) -> 

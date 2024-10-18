@@ -1,43 +1,30 @@
-@echo off
-setlocal enabledelayedexpansion
+@Echo Off
+SetLocal EnableExtensions DisableDelayedExpansion
 
-set passed=0
-set failed=0
-set nosnaps=0
+Set /A passed=failed=nosnaps=0
 
-set results_path=.\results
-set snapshots_path=.\snapshots
-
-for %%i in (./tests/*) do (
-    set "filename=%%~ni"
-
-    call dune exec ..\_build\default\bin\main.exe ".\tests\%%i" > "!results_path!\!filename!.txt" 2> nul
-
-    if exist "!results_path!\!filename!.txt" (
-        set "snapshot_file=!snapshots_path!\!filename!.txt"
-
-        if exist "!snapshot_file!" (            
-            fc "!results_path!\!filename!.txt" "!snapshot_file!" > nul
-            if !errorlevel! == 0 (
-                echo PASSED TEST: !filename!
-                set /a passed+=1
-            ) else (
-                echo FAILED TEST: !filename!
-                set /a failed+=1
-            )
-        ) else (
-            echo NOSNAP TEST: !filename!
-            set /a nosnaps+=1
+For %%G In ("tests\*") Do (
+    
+    dune.exe exec ..\_build\default\bin\main.exe "%%G" 1>"results\%%~nG.txt" 2>NUL
+    
+    If Exist "snapshots\%%~nG.txt" (
+        %SystemRoot%\System32\fc.exe "snapshots\%%~nG.txt" "results\%%~nG.txt" 1>NUL && (
+            Echo PASSED TEST: %%~nG
+            Set /A passed += 1
+        ) || (
+            Echo FAILED TEST: %%~nG
+            Set /A failed += 1
         )
-    ) else (
-        echo Result file does NOT exist: "!results_path!\!filename!.txt"
+    ) Else (
+        Echo NOSNAP TEST: %%~nG
+        Set /A nosnaps += 1
     )
 )
 
-echo.
-echo SUMMARY:
-echo PASSED: !passed!
-echo FAILED: !failed!
-echo NOSNAP: !nosnaps!
+Echo.
+Echo SUMMARY:
+Echo PASSED: %passed%
+Echo FAILED: %failed%
+Echo NOSNAP: %nosnaps%
 
-endlocal
+EndLocal

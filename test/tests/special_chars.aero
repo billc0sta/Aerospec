@@ -1,0 +1,5 @@
+specials := "\n\b\r\t\v\f\\"
+print(specials)
+print("new\nline\n")
+print("bb \t bb")
+print("escaped_slash: \\\n")

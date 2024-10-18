@@ -1,0 +1,7 @@
+
+::Syntax Error
+  at file: tests\unterminated_string.aero
+  at line: 1
+  here --" "hello world "-- 
+  Non-terminated string.
+---------------------------

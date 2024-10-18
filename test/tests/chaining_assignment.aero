@@ -1,0 +1,9 @@
+a = b := c = d := e = 1000
+
+print(a + b + c + d + e, "\n")
+
+a = 500
+c = 300
+e = 200
+
+print(a + b + c + d + e, "\n")

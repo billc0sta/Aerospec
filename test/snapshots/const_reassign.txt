@@ -1,7 +1,7 @@
 10
 
 ::RuntimeError
-  at file: .\tests\const_reassign.aero
+  at file: tests\const_reassign.aero
   at line: 3
   Cannot re-assign to a constant.
 ---------------------------
