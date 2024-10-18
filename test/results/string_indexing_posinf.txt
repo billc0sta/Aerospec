@@ -1,0 +1,6 @@
+
+::RuntimeError
+  at file: tests\string_indexing_posinf.aero
+  at line: 2
+  Cannot index with 'Infinity' value.
+---------------------------

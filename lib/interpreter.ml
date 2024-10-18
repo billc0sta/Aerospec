@@ -105,7 +105,9 @@ and ev_subexpr expr tk inp =
 	let ev = evaluate expr inp in
 	match ev with 
 	| Float fl -> begin
-		if Float.trunc fl <> fl then
+        if Float.is_nan fl
+          then report_error ("Cannot index with a 'NaN' value") tk inp
+		else if Float.trunc fl <> fl then
 			report_error "Cannot subscript with floating-point number" tk inp
 		else if fl < 0.0 && fl <> Float.neg_infinity then
 			report_error "Cannot subscript with a negative number" tk inp
@@ -119,7 +121,10 @@ and evaluate_subscript expr subexpr tk inp =
 	| (expr1, Some expr2) -> begin
 		let beginning = ev_subexpr expr1 tk inp in
 		let ending    = ev_subexpr expr2 tk inp in
-		let ev = evaluate expr inp in
+        if beginning > ending then
+          report_error ("Range subscript is invalid as the begin value exceeds the end value") tk inp
+        else 
+        let ev = evaluate expr inp in
 		match ev with
 		| Arr (rez, _) -> begin
 			let beginning = if beginning = Float.neg_infinity then 0 else int_of_float beginning in
@@ -130,7 +135,7 @@ and evaluate_subscript expr subexpr tk inp =
 		| String (rez, _) -> begin
 			let beginning = if beginning = Float.neg_infinity then 0 else int_of_float beginning in
 			let ending    = if ending = Float.infinity then Resizable.len rez else int_of_float ending in
-			
+ 
 			try String (Resizable.range rez beginning ending, false)
 			with Invalid_argument _ -> report_error "Accessing string out of bounds" tk inp
 		end
@@ -138,8 +143,12 @@ and evaluate_subscript expr subexpr tk inp =
 	end
 
 	| (subexpr, None) -> begin
-		let subscript = (ev_subexpr subexpr tk inp) in
-		let subscript = if subscript = Float.neg_infinity then 0 else int_of_float subscript in
+		let subscript =
+          let v = ev_subexpr subexpr tk inp in
+          if abs_float v = Float.infinity
+          then report_error ("Cannot index with 'Infinity' value") tk inp
+          else int_of_float v
+        in
 		let ev = evaluate expr inp in
 		match ev with
 		| Arr (rez, _) -> begin

@@ -1,0 +1,2 @@
+str := "code degeneration"
+str[float_nan]

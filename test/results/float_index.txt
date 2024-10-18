@@ -1,0 +1,6 @@
+
+::RuntimeError
+  at file: tests\float_index.aero
+  at line: 2
+  Value of type 'float' is not subscriptable.
+---------------------------

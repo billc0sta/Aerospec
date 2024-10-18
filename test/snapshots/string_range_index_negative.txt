@@ -1,0 +1,6 @@
+
+::RuntimeError
+  at file: tests\string_range_index_negative.aero
+  at line: 2
+  Cannot subscript with a negative number.
+---------------------------

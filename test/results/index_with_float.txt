@@ -1,0 +1,6 @@
+
+::RuntimeError
+  at file: tests\index_with_float.aero
+  at line: 2
+  Cannot subscript with floating-point number.
+---------------------------

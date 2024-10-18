@@ -1,0 +1,2 @@
+str := "code degeneration"
+print(str[float_inf])

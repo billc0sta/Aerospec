@@ -1,0 +1,2 @@
+str := "string"
+str[3:0]

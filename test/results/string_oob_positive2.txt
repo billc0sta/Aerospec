@@ -1,0 +1,6 @@
+
+::RuntimeError
+  at file: tests\string_oob_positive2.aero
+  at line: 2
+  Accessing string out of bounds.
+---------------------------

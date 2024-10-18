@@ -1,0 +1,2 @@
+float := 112.032
+print(float[1])
