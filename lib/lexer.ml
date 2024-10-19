@@ -186,10 +186,19 @@ let skip_line lexer =
 	let rec aux lexer =
 		let c = peek lexer in
 		match c with
-		| '\n' | ' ' | '\t' | '\r' -> lexer 
+		| '\n' -> lexer 
 		| c when c = (Char.chr 0) -> lexer
 		| _ -> aux (forward lexer)
-	in aux lexer  
+	in aux lexer
+
+let skip_word lexer =
+  let rec aux lexer =
+    let c = peek lexer in
+    match c with
+    | '\n' | '\r' | '\t' | ' ' -> lexer
+    | c when c = (Char.chr 0) -> lexer
+    | _ -> aux (forward lexer)
+  in aux lexer 
 
 let next_token lexer =
 	let lexer = skip_space lexer in
@@ -244,7 +253,7 @@ let lex lexer =
 		let (tk, lexer) = next_token lexer in
 		match tk.typeof with
 		| EOF -> (tk::acc, lexer.errors)
-		| Unknown -> report_error "Unrecognized token" (skip_line lexer)
+		| Unknown -> report_error "Unrecognized token" (skip_word lexer)
 		| TwoSlash -> aux acc lexer
 		| _ -> aux (tk::acc) lexer
 		with LexError (message, path, lineof, linenum, pos) -> 

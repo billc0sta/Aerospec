@@ -1,0 +1,197 @@
+// BNF rules
+// expr     = basic
+// basic    = factor (('+' | '-') factor)*
+// factor   = primary (('*' | '/') primary)*
+// primary  = grouping | number
+// grouping = '(' expr ')'
+// number   = natural (real)+
+// natural  = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'
+// real     = '0' | natural
+
+in_arr := (el, arr) {
+    >> (0 <= i < len(arr)) {
+        ?? el == arr[i] -> !0
+    }
+    -> !!0
+}
+
+// ord() and chr() will later be added to the standard library
+is_digit := (c) {
+    ->
+    c == "0" ||
+    c == "1" ||
+    c == "2" ||
+    c == "3" ||
+    c == "4" ||
+    c == "5" ||
+    c == "6" ||
+    c == "7" ||
+    c == "8" ||
+    c == "9" 
+}
+
+char_to_digit := (c) {
+    ?? c == "0" -> 0
+    ?? c == "1" -> 1
+    ?? c == "2" -> 2
+    ?? c == "3" -> 3
+    ?? c == "4" -> 4
+    ?? c == "5" -> 5
+    ?? c == "6" -> 6
+    ?? c == "7" -> 7
+    ?? c == "8" -> 8
+    ?? c == "9" -> 9
+}
+
+string_to_number := (str) {
+    n = 0
+    >> (0 <= i < len(str)) {
+        n = n * 10
+        n = n + char_to_digit(str[i])
+    }
+    -> n
+}
+
+parser := {
+    NUMBER := 0
+    BINARY := 1
+
+    raw = ""
+    index = 0
+    ended = !!0
+    erred = !!0
+
+    consume := (token, message) {
+        ?? (token == peek_char()) forward_char()
+        :: error(message)
+    }
+
+    error := (message) {
+        print("Error: ", message, ".\n")
+        $erred = !0
+    }
+
+    forward_char := () {
+        ?? $ended -> _
+        $index = $index + 1
+        $ended = index >= len(raw)
+    }
+
+    peek_char := () {
+        ?? $ended -> _
+        -> $raw[$index]
+    }
+
+    skip_space := () {
+        >> (peek_char() == " ")
+           forward_char()
+    }
+
+    make_rule := (rule, ops) {
+        -> () {
+            skip_space()
+            expr = rule()
+            ?? $erred -> _
+
+            skip_space()
+            >> in_arr(c = peek_char(), ops) {
+               forward_char()
+               expr2 = rule()
+               ?? $erred -> _
+               expr = { type = BINARY; lhd = expr; rhd = expr2; op = c; }
+               skip_space()
+            }
+            -> expr
+        }
+    }
+
+    rule_grouping := () {
+        consume("(", "Expected an opening parenthesis '('")
+        expr := rule_expr()
+        consume(")", "Expected a closing parenthesis ')'")
+        -> expr
+    }
+
+    rule_number := () {
+        number = ""
+        >> is_digit(c = peek_char()) {
+            extend(number, c)
+            forward_char()
+        }
+        -> {
+            type  = NUMBER
+            value = number
+        }
+    }
+
+    rule_primary := () {
+        skip_space()
+        c := peek_char()
+        ?? c == "(" -> rule_grouping()
+        ?? is_digit(c) {
+            ?? (c == "0") -> error("Numbers cannot start with '0'")
+            :: -> rule_number()
+        }
+
+        -> error("Expected an expression")
+    }
+
+    rule_factor := make_rule(rule_primary, ["*", "/"])
+
+    rule_basic := make_rule(rule_factor, ["+", "-"])
+
+    rule_expr := () {
+        skip_space()
+        expr := rule_basic()
+        -> expr
+    }
+
+    parse := (raw) {
+        $raw   = raw
+        $index = 0
+        $ended = !!0
+        $erred = !!0
+        -> rule_expr()
+    }
+}
+
+kalkul := {
+    erred = !0
+
+    error := (message) {
+        print("Error: ", message, ".\n")
+        $erred = !!0
+    }
+
+    evaluate := (expr) {
+        ?? expr.type == parser.BINARY -> evaluate_binary(expr)
+        ?? expr.type == parser.NUMBER -> evaluate_number(expr)
+
+        error("Unknown expression type")
+    }
+
+    evaluate_binary := (expr) {
+        ev1 := evaluate(expr.lhd)
+        ev2 := evaluate(expr.rhd)
+        ?? (!$erred) -> _ 
+        op := expr.op
+        ?? op == "+" -> ev1 + ev2
+        ?? op == "-" -> ev1 - ev2
+        ?? op == "*" -> ev1 * ev2
+        ?? op == "/" -> ev1 / ev2
+    }
+
+    evaluate_number := (expr) {
+        -> string_to_number(expr.value)
+    }
+}
+
+>> 1 {
+   print(">> ")
+   raw   = input()
+   expr  = parser.parse(raw)
+   ?? !parser.erred {
+      value = kalkul.evaluate(expr)
+      print("eval: ", value, "\n")
+   }
+}

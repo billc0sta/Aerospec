@@ -1,36 +1,36 @@
 
 ::Syntax Error
-  at file: tests\non-ascii-tokens.aero
+  at file: tests\non-ascii_tokens.aero
   at line: 1
   here --" こんにちは "-- 
   Unrecognized token.
 ---------------------------
 ::Syntax Error
-  at file: tests\non-ascii-tokens.aero
+  at file: tests\non-ascii_tokens.aero
   at line: 2
   here --" Здравствуйте "-- 
   Unrecognized token.
 ---------------------------
 ::Syntax Error
-  at file: tests\non-ascii-tokens.aero
+  at file: tests\non-ascii_tokens.aero
   at line: 3
   here --" Grüß  "-- 
   Unrecognized token.
 ---------------------------
 ::Syntax Error
-  at file: tests\non-ascii-tokens.aero
+  at file: tests\non-ascii_tokens.aero
   at line: 4
   here --" ÆØÅ "-- 
   Unrecognized token.
 ---------------------------
 ::Syntax Error
-  at file: tests\non-ascii-tokens.aero
+  at file: tests\non-ascii_tokens.aero
   at line: 5
   here --" αβγδε "-- 
   Unrecognized token.
 ---------------------------
 ::Syntax Error
-  at file: tests\non-ascii-tokens.aero
+  at file: tests\non-ascii_tokens.aero
   at line: 6
   here --" 😊 "-- 
   Unrecognized token.

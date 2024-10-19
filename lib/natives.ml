@@ -1,7 +1,7 @@
 open Value
 
 let print params =
-	List.iter (fun value -> print_string (stringify value)) params;
+    List.iter (fun value -> print_string (stringify value)) params;
 	Nil
 
 let input _ = 

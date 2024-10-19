@@ -1,0 +1,6 @@
+
+::RuntimeError
+  at file: tests\off-by-one.aero
+  at line: 2
+  Accessing string out of bounds.
+---------------------------

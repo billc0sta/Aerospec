@@ -1,6 +1,3 @@
-string indexing
-string positive out-of-bounds
-string negative out-of-bounds
-empty string indexing
 string index-assignment
-... more on strings
+string native functions
+comments

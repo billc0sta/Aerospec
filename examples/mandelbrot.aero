@@ -9,7 +9,6 @@ mandelbrot := (cx, cy, max_iter) {
     -> iter
 }
 
-
 generate_mandelbrot := (width, height, max_iter, x_min, x_max, y_min, y_max) {
     x_range := (x_max - x_min) / width
     y_range := (y_max - y_min) / height

@@ -183,7 +183,7 @@ and evaluate_lambda exprs body inp =
 	Func (inp.env, params, body)
 
 and evaluate_funcall target arglist tk inp =
-	let callable = evaluate target inp in
+    let callable = evaluate target inp in
 	match callable with
 	| Func (env, params, body)  -> evaluate_func env arglist params body tk inp
 	| NatFunc (paramc, _, func) -> evaluate_natfunc paramc arglist func tk inp
@@ -246,7 +246,7 @@ and evaluate_binary expr1 expr2 op inp =
 		| Float fl1, Float fl2 -> Bool (fl1 = fl2)
 		| Bool b1, Bool b2 -> Bool (b1 = b2)
 		| Arr (arr1, _), Arr (arr2, _) -> Bool (arr1.arr = arr2.arr) 
-		| _ -> raise_error ev1 ev2 
+		| _ -> (Bool false) 
 	end 
 	| ExcEqual -> begin
 		let (ev1, ev2) = (ev_both expr1 expr2) in 
@@ -255,7 +255,7 @@ and evaluate_binary expr1 expr2 op inp =
 		| Float fl1, Float fl2 -> Bool (fl1 <> fl2)
 		| Bool b1, Bool b2 -> Bool (b1 <> b2)
 		| Arr (arr1, _), Arr (arr2, _) -> Bool (arr1.arr <> arr2.arr) 
-		| _ -> raise_error ev1 ev2
+		| _ -> (Bool false)
 	end
 	| Minus -> Float (simple_binary expr1 expr2 (-.))
 	| Star -> Float (simple_binary expr1 expr2 ( *. ))

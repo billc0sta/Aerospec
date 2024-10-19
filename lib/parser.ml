@@ -293,7 +293,7 @@ and postary parser =
       let (expr, parser) = subscript expr (forward parser) in aux expr parser
     | Dot -> begin
       let (expr2, parser) = primary (forward parser) in
-      match expr with
+      match expr2 with
       | IdentExpr (_, global) -> 
         if global 
         then report_error "Global identifier cannot be used in this context" parser 
@@ -426,7 +426,7 @@ and lambda_expr parser =
     (LambdaExpr (params, body, tk), parser) 
   end
   | 1 -> begin
-    let is_ident = match List.hd params with IdentExpr _ -> true | _ -> false in 
+    let is_ident = match List.hd params with IdentExpr (_, false) -> true | _ -> false in 
     if is_ident && block_follows then
       let (body, parser) = block_stmt parser in
       (LambdaExpr (params, body, tk), parser)
