@@ -1,5 +1,5 @@
 str := "Hello, World!"
-print(str[0], "\n")
-print(str[4], "\n")
-print(str[11], "\n")
-print(str[12], "\n")
+IO.print(str[0], "\n")
+IO.print(str[4], "\n")
+IO.print(str[11], "\n")
+IO.print(str[12], "\n")

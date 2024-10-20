@@ -1,2 +1,2 @@
 str := "Hello, World"
-print(str[1.02])
+IO.print(str[1.02])

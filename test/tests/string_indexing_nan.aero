@@ -1,2 +1,2 @@
 str := "code degeneration"
-str[float_nan]
+str[Float.nan]

@@ -1,3 +1,0 @@
-string index-assignment
-string native functions
-comments

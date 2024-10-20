@@ -1,24 +1,24 @@
 b := 10
 a = b
 c := a + b
-print(a, b, c, "\n")
+IO.print(a, b, c, "\n")
 
 a = 100
-print(a, b, c, "\n")
+IO.print(a, b, c, "\n")
 
 x := 5
 y := x * 3 + b
 z := y - 2 * b
-print(x, y, z, "\n")
+IO.print(x, y, z, "\n")
 
 p := b + z * x
 q := p / (b + 1)
-print(p, q, "\n")
+IO.print(p, q, "\n")
 
 m := 30
 n = m + 5
 o := n * m
-print(m, n, o, "\n")
+IO.print(m, n, o, "\n")
 
 n := n - 10
-print(n, "\n")
+IO.print(n, "\n")

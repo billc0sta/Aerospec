@@ -1,0 +1,2 @@
+str := "a"
+IO.print(str[1])

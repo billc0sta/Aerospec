@@ -7,4 +7,4 @@ Grüß
 αβγδε
 😊
 "
-print(str)
+IO.print(str)

@@ -1,2 +1,2 @@
 str := "code degeneration"
-print(str[float_inf])
+IO.print(str[Float.inf])

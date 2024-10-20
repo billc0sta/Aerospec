@@ -1,2 +1,0 @@
-str := "a"
-print(str[1])
