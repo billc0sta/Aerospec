@@ -5,7 +5,6 @@ type expr =
   | StringLit of string
   | Binary of expr * token * expr
   | Unary of token * expr
-  | Grouping of expr
   | IdentExpr of token * bool
   | IfExpr of expr * expr * expr
   | FunCall of expr * expr list * token
@@ -65,12 +64,6 @@ let next_stmt parser =
     | _  -> aux (forward parser)
   in aux parser
 
-let rec ungroup expr =
-  match expr with
-  | Grouping expr -> ungroup expr
-  | _ -> expr
-
-(*test*)
 let rec print_parsed l = 
   let rec aux stmt =
     match stmt with
@@ -103,7 +96,6 @@ let rec print_parsed l =
   | [] -> ()
   | x::xs -> aux x; print_parsed xs
 
-(*test*)
 and print_expr expr =
   match expr with
   | FloatLit fl ->
@@ -122,10 +114,6 @@ and print_expr expr =
   | Unary (op, expr) ->
       print_string (op.value);
       print_expr expr
-  | Grouping expr ->
-      print_string "(";
-      print_expr expr;
-      print_string ")"
   | IfExpr (cond, whentrue, whenfalse) -> 
     print_string "if "; print_expr cond;
     print_string " then "; print_expr whentrue; print_string " else ";
@@ -284,7 +272,7 @@ and postary parser =
     let tk = peek parser in
     match tk.typeof with
     | OParen -> begin
-      match ungroup expr with
+      match expr with
       | StringLit _ | FloatLit _ | Binary _ | Unary _ | ArrExpr _ | Range _ | NilExpr
         -> report_error "This value is not callable" parser
       | _ -> let (expr, parser) = funcall expr (forward parser) in aux expr parser
@@ -431,7 +419,7 @@ and lambda_expr parser =
       let (body, parser) = block_stmt parser in
       (LambdaExpr (params, body, tk), parser)
     else
-      (Grouping (List.hd params), parser)
+      (List.hd params, parser)
   end 
   | len when len > 255 -> report_error "No more than 255 parameters are allowed" parser
   | _ -> let (body, parser) = block_stmt parser in 
@@ -489,7 +477,7 @@ and statement parser =
 and loop_stmt parser =
   let (cond, parser)  = expression parser in
   let (block, parser) = statement parser in
-  (LoopStmt (ungroup cond, block), parser)
+  (LoopStmt (cond, block), parser)
 
 and expr_stmt parser = 
   let (expr, parser) = expression parser in

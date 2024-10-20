@@ -18,10 +18,10 @@ generate_mandelbrot := (width, height, max_iter, x_min, x_max, y_min, y_max) {
             cy = y_min + i * y_range
             iter = mandelbrot(cx, cy, max_iter)
             
-            ?? (iter == max_iter) print("*")
-            :: print(" ")
+            ?? (iter == max_iter) IO.print("*")
+            :: IO.print(" ")
         }
-        print("\n")
+        IO.print("\n")
     }
 }
 

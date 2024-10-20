@@ -12,11 +12,11 @@ let remove ident env = Hashtbl.remove env.values ident
 let replace ident value env = Hashtbl.replace env.values ident value
 
 let child_of env =
-	{(make ()) with parent=(Some env)}
+  {(make ()) with parent=(Some env)}
 
 let parent_of env =
-	match env.parent with
-	| None -> raise (Invalid_argument "Environment.parent_of")
-	| Some env -> env
+  match env.parent with
+  | None -> raise (Invalid_argument "Environment.parent_of")
+  | Some env -> env
 
 let _ = parent_of

@@ -1,20 +1,3 @@
-// BNF rules
-// expr     = basic
-// basic    = factor (('+' | '-') factor)*
-// factor   = primary (('*' | '/') primary)*
-// primary  = grouping | number
-// grouping = '(' expr ')'
-// number   = natural (real)+
-// natural  = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'
-// real     = '0' | natural
-
-in_arr := (el, arr) {
-    >> (0 <= i < len(arr)) {
-        ?? el == arr[i] -> !0
-    }
-    -> !!0
-}
-
 // ord() and chr() will later be added to the standard library
 is_digit := (c) {
     ->
@@ -45,7 +28,7 @@ char_to_digit := (c) {
 
 string_to_number := (str) {
     n = 0
-    >> (0 <= i < len(str)) {
+    >> (0 <= i < String.len(str)) {
         n = n * 10
         n = n + char_to_digit(str[i])
     }
@@ -67,14 +50,14 @@ parser := {
     }
 
     error := (message) {
-        print("Error: ", message, ".\n")
+        IO.print("Error: ", message, ".\n")
         $erred = !0
     }
 
     forward_char := () {
         ?? $ended -> _
         $index = $index + 1
-        $ended = index >= len(raw)
+        $ended = index >= String.len(raw)
     }
 
     peek_char := () {
@@ -94,7 +77,7 @@ parser := {
             ?? $erred -> _
 
             skip_space()
-            >> in_arr(c = peek_char(), ops) {
+            >> Array.index(ops, c = peek_char()) != -1 {
                forward_char()
                expr2 = rule()
                ?? $erred -> _
@@ -115,7 +98,7 @@ parser := {
     rule_number := () {
         number = ""
         >> is_digit(c = peek_char()) {
-            extend(number, c)
+            String.extend(number, c)
             forward_char()
         }
         -> {
@@ -159,7 +142,7 @@ kalkul := {
     erred = !0
 
     error := (message) {
-        print("Error: ", message, ".\n")
+        IO.print("Error: ", message, ".\n")
         $erred = !!0
     }
 
@@ -187,11 +170,11 @@ kalkul := {
 }
 
 >> 1 {
-   print(">> ")
-   raw   = input()
+   IO.print(">> ")
+   raw   = IO.input()
    expr  = parser.parse(raw)
    ?? !parser.erred {
       value = kalkul.evaluate(expr)
-      print("eval: ", value, "\n")
+      IO.print("eval: ", value, "\n")
    }
 }

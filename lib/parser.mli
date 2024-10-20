@@ -3,7 +3,6 @@ type expr =
   | StringLit of string
   | Binary of expr * Lexer.token * expr
   | Unary of Lexer.token * expr
-  | Grouping of expr
   | IdentExpr of Lexer.token * bool
   | IfExpr of expr * expr * expr
   | FunCall of expr * expr list * Lexer.token
@@ -27,13 +26,13 @@ and statement =
   | Return of expr * Lexer.token 
 
 type t = {
-  raw: Lexer.token list;
-  previous: Lexer.token;
-  pos: int;
-  path: string;
-  program: string;
-  errors: exn list;
-}
+    raw: Lexer.token list;
+    previous: Lexer.token;
+    pos: int;
+    path: string;
+    program: string;
+    errors: exn list;
+  }
 
 exception ParseError of string * string * string * int
 exception ParseErrors of exn list
