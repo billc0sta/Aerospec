@@ -1,0 +1,2 @@
+str := "Aerospec"
+String.insert(str, 21, 0)

@@ -1,0 +1,2 @@
+str := ""
+String.pop(str, 0)

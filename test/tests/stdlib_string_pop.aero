@@ -1,0 +1,39 @@
+str = "Hello, world!"
+IO.print("Original: ", str, "\n")
+String.pop(str, 7)
+IO.print("After pop(7): ", str, "\n")
+
+str = "Aerospec"
+IO.print("Original: ", str, "\n")
+String.pop(str, 0)
+IO.print("After pop(0): ", str, "\n")
+
+str = "This is a test"
+IO.print("Original: ", str, "\n")
+String.pop(str, 5, 7)
+IO.print("After pop(5, 7): ", str, "\n")
+
+str = "123456789"
+IO.print("Original: ", str, "\n")
+String.pop(str, 1, 3, 5)
+IO.print("After pop(1, 3, 5): ", str, "\n")
+
+str = "こんにちは、世界！"
+IO.print("Original: ", str, "\n")
+String.pop(str, 5, 10)
+IO.print("After pop(5, 10): ", str, "\n")
+
+str = "你好，世界！"
+IO.print("Original: ", str, "\n")
+String.pop(str, 2, 8)
+IO.print("After pop(2, 8): ", str, "\n")
+
+str = "Текст с Юникодом"
+IO.print("Original: ", str, "\n")
+String.pop(str, 0, 10)
+IO.print("After pop(0, 10): ", str, "\n")
+
+str = "Привет, мир!"
+IO.print("Original: ", str, "\n")
+String.pop(str, 3, 7)
+IO.print("After pop(3, 7): ", str, "\n")

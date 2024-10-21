@@ -1,0 +1,6 @@
+
+::RuntimeError
+  at file: tests\string_locked_index_assignment.aero
+  at line: 2
+  Cannot assign to a subscript of a locked string.
+---------------------------

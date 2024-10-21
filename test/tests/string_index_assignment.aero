@@ -1,0 +1,11 @@
+str := "Hello,  World"
+IO.print(str)
+str[0] = "G"
+str[1] = "o"
+str[2] = "o"
+str[3] = "d"
+str[4] = "B"
+str[5] = "y"
+str[6] = "e"
+str[12] = "D"
+IO.print(str)

@@ -1,0 +1,6 @@
+
+::RuntimeError
+  at file: tests\str_iassi_twochars.aero
+  at line: 2
+  Assigning invalid character count value to a string index.
+---------------------------

@@ -1,0 +1,6 @@
+
+::RuntimeError
+  at file: tests\stdlib_string_remove_float2.aero
+  at line: 1
+  Invalid Argument: String.remove only accepts arguments of type 'string'.
+---------------------------

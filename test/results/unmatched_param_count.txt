@@ -1,0 +1,6 @@
+
+::RuntimeError
+  at file: tests\unmatched_param_count.aero
+  at line: 1
+  The number of arguments do not match the number of parameters.
+---------------------------

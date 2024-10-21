@@ -1,0 +1,6 @@
+
+::RuntimeError
+  at file: tests\stdlib_string_remove_locked.aero
+  at line: 2
+  Invalid Argument: Cannot apply String.remove to a locked string.
+---------------------------

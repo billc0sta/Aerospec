@@ -1,0 +1,19 @@
+str = "Hello"
+IO.print("Before: ", str, " (size: ", String.len(str), ")\n")
+String.extend(str, " World", "!", " How", " are you?")
+IO.print("After: ", str, " (size: ", String.len(str), ")\n\n")
+
+str = "Extend me"
+IO.print("Before: ", str, " (size: ", String.len(str), ")\n")
+String.extend(str, " with", " multiple", " substrings.")
+IO.print("After: ", str, " (size: ", String.len(str), ")\n\n")
+
+str = "Just testing"
+IO.print("Before: ", str, " (size: ", String.len(str), ")\n")
+String.extend(str, "")
+IO.print("After: ", str, " (size: ", String.len(str), ")\n\n")
+
+str = "Edge case"
+IO.print("Before: ", str, " (size: ", String.len(str), ")\n")
+String.extend(str, " ", "123")
+IO.print("After: ", str, " (size: ", String.len(str), ")\n\n")

@@ -1,0 +1,47 @@
+str = "Lorem  "
+IO.print("Before: ", str, " (size: ", String.len(str), ")\n")
+String.insert(str, "ipsum", 6)
+IO.print("After: ", str, " (size: ", String.len(str), ")\n\n")
+
+IO.print("Before: ", str, " (size: ", String.len(str), ")\n")
+String.insert(str, "Delamoir ", 0)
+IO.print("After: ", str, " (size: ", String.len(str), ")\n\n")
+
+IO.print("Before: ", str, " (size: ", String.len(str), ")\n")
+String.insert(str, "O'rilly?", 4)
+IO.print("After: ", str, " (size: ", String.len(str), ")\n\n")
+
+str = "Hello World"
+IO.print("Before: ", str, " (size: ", String.len(str), ")\n")
+String.insert(str, "Beautiful ", 6)
+IO.print("After: ", str, " (size: ", String.len(str), ")\n\n")
+
+str = "Test"
+IO.print("Before: ", str, " (size: ", String.len(str), ")\n")
+String.insert(str, " Insert", 4)
+IO.print("After: ", str, " (size: ", String.len(str), ")\n\n")
+
+str = "Boundary"
+IO.print("Before: ", str, " (size: ", String.len(str), ")\n")
+String.insert(str, " Check", String.len(str))
+IO.print("After: ", str, " (size: ", String.len(str), ")\n\n")
+
+str = "Insert at index"
+IO.print("Before: ", str, " (size: ", String.len(str), ")\n")
+String.insert(str, "negative ", 7)
+IO.print("After: ", str, " (size: ", String.len(str), ")\n\n")
+
+str = "Beginning"
+IO.print("Before: ", str, " (size: ", String.len(str), ")\n")
+String.insert(str, "Start: ", 0)
+IO.print("After: ", str, " (size: ", String.len(str), ")\n\n")
+
+str = "Append here: "
+IO.print("Before: ", str, " (size: ", String.len(str), ")\n")
+String.insert(str, "End", String.len(str))
+IO.print("After: ", str, " (size: ", String.len(str), ")\n\n")
+
+str = "Empty string"
+IO.print("Before: ", str, " (size: ", String.len(str), ")\n")
+String.insert(str, "", 5)
+IO.print("After: ", str, " (size: ", String.len(str), ")\n\n")

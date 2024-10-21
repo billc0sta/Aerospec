@@ -1,0 +1,6 @@
+IO.print(String.len("Hello, World!"), "\n")
+IO.print(String.len("Hello, World"), "\n")
+IO.print(String.len("Hello"), "\n")
+IO.print(String.len(""), "\n")
+IO.print(String.len("1"), "\n")
+IO.print(String.len("     "), "\n")

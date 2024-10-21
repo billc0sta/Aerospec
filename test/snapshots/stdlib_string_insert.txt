@@ -1,0 +1,30 @@
+Before: Lorem   (size: 7)
+After: Lorem ipsum  (size: 12)
+
+Before: Lorem ipsum  (size: 12)
+After: Delamoir Lorem ipsum  (size: 21)
+
+Before: Delamoir Lorem ipsum  (size: 21)
+After: DelaO'rilly?moir Lorem ipsum  (size: 29)
+
+Before: Hello World (size: 11)
+After: Hello Beautiful World (size: 21)
+
+Before: Test (size: 4)
+After: Test Insert (size: 11)
+
+Before: Boundary (size: 8)
+After: Boundary Check (size: 14)
+
+Before: Insert at index (size: 15)
+After: Insert negative at index (size: 24)
+
+Before: Beginning (size: 9)
+After: Start: Beginning (size: 16)
+
+Before: Append here:  (size: 13)
+After: Append here: End (size: 16)
+
+Before: Empty string (size: 12)
+After: Empty string (size: 12)
+

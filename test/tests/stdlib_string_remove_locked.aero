@@ -1,0 +1,2 @@
+str := &"Hello, World"
+String.remove(str, "Hello")

@@ -1,0 +1,34 @@
+str = "123456789"
+IO.print("Original: ", str, " Size: ", String.len(str), "\n")
+String.clear(str)
+IO.print("After clear: ", str, " Size: ", String.len(str), "\n")
+
+str = "The quick brown fox jumps over the lazy dog"
+IO.print("Original: ", str, " Size: ", String.len(str), "\n")
+String.clear(str)
+IO.print("After clear: ", str, " Size: ", String.len(str), "\n")
+
+str = "こんにちは、世界！"
+IO.print("Original: ", str, " Size: ", String.len(str), "\n")
+String.clear(str)
+IO.print("After clear: ", str, " Size: ", String.len(str), "\n")
+
+str = "Привет, мир!"
+IO.print("Original: ", str, " Size: ", String.len(str), "\n")
+String.clear(str)
+IO.print("After clear: ", str, " Size: ", String.len(str), "\n")
+
+str = ""
+IO.print("Original: ", str, " Size: ", String.len(str), "\n")
+String.clear(str)
+IO.print("After clear: ", str, " Size: ", String.len(str), "\n")
+
+str = "   "
+IO.print("Original: '   ', Size: ", String.len(str), "\n")
+String.clear(str)
+IO.print("After clear: ", str, " Size: ", String.len(str), "\n")
+
+str = "Empty test"
+IO.print("Original: ", str, " Size: ", String.len(str), "\n")
+String.clear(str)
+IO.print("After clear: ", str, " Size: ", String.len(str), "\n")

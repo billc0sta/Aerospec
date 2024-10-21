@@ -1,0 +1,48 @@
+// Test with a mix of short and long strings
+str1 = "Short"
+str2 = " and this is a much longer string to merge"
+merged_str = String.merge(str1, str2)
+IO.print("Merged: ", merged_str, " (size: ", String.len(merged_str), ")\n\n")
+
+// Test with special characters and whitespace
+str1 = "Special"
+str2 = "\n\tCharacters"
+str3 = " like @#$%^&*()"
+merged_str = String.merge(str1, str2, str3)
+IO.print("Merged: ", merged_str, " (size: ", String.len(merged_str), ")\n\n")
+
+// Test with Unicode characters
+str1 = "Unicode"
+str2 = " characters: "
+str3 = "😀🚀🌍"
+merged_str = String.merge(str1, str2, str3)
+IO.print("Merged: ", merged_str, " (size: ", String.len(merged_str), ")\n\n")
+
+// Test with alternating empty strings
+str1 = "Alternating"
+str2 = ""
+str3 = "empty"
+str4 = ""
+str5 = "strings"
+merged_str = String.merge(str1, str2, str3, str4, str5)
+IO.print("Merged: ", merged_str, " (size: ", String.len(merged_str), ")\n\n")
+
+// Test with a very large number of arguments
+merged_str = String.merge("a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z")
+IO.print("Merged: ", merged_str, " (size: ", String.len(merged_str), ")\n\n")
+
+// Test with repeating identical strings
+merged_str = String.merge("Repeat", "Repeat", "Repeat", "Repeat")
+IO.print("Merged: ", merged_str, " (size: ", String.len(merged_str), ")\n\n")
+
+// Test with a very long single string split into parts
+part1 = "This is a very long string"
+part2 = " that has been split into multiple parts,"
+part3 = " but it should be merged"
+part4 = " into one cohesive sentence."
+merged_str = String.merge(part1, part2, part3, part4)
+IO.print("Merged: ", merged_str, " (size: ", String.len(merged_str), ")\n\n")
+
+// Test with numeric strings and symbols
+merged_str = String.merge("123", "+", "456", "=", "579")
+IO.print("Merged: ", merged_str, " (size: ", String.len(merged_str), ")\n\n")

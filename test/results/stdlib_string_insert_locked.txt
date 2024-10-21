@@ -1,0 +1,6 @@
+
+::RuntimeError
+  at file: tests\stdlib_string_insert_locked.aero
+  at line: 2
+  Invalid Argument: Cannot apply String.insert to a locked string.
+---------------------------

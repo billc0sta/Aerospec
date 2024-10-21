@@ -1,0 +1,49 @@
+str = "Hello, world! Hello again!"
+IO.print("Original: ", str, " Size: ", String.len(str), "\n")
+IO.print("Count of 'Hello': ", String.count(str, "Hello"), "\n")
+IO.print("Count of 'Goodbye': ", String.count(str, "Goodbye"), "\n")
+
+str = "Aerospec is awesome and Aerospec is cool"
+IO.print("Original: ", str, " Size: ", String.len(str), "\n")
+IO.print("Count of 'Aerospec': ", String.count(str, "Aerospec"), "\n")
+IO.print("Count of 'Python': ", String.count(str, "Python"), "\n")
+
+str = "This is a test. This is only a test."
+IO.print("Original: ", str, " Size: ", String.len(str), "\n")
+IO.print("Count of 'This': ", String.count(str, "This"), "\n")
+IO.print("Count of 'Java': ", String.count(str, "Java"), "\n")
+
+str = "123456789123456789"
+IO.print("Original: ", str, " Size: ", String.len(str), "\n")
+IO.print("Count of '123': ", String.count(str, "123"), "\n")
+IO.print("Count of '000': ", String.count(str, "000"), "\n")
+
+str = "The quick brown fox jumps over the lazy dog"
+IO.print("Original: ", str, " Size: ", String.len(str), "\n")
+IO.print("Count of 'the': ", String.count(str, "the"), "\n")
+IO.print("Count of 'cat': ", String.count(str, "cat"), "\n")
+
+str = "abcdabcabcdabc"
+IO.print("Original: ", str, " Size: ", String.len(str), "\n")
+IO.print("Count of 'abc': ", String.count(str, "abc"), "\n")
+IO.print("Count of 'xyz': ", String.count(str, "xyz"), "\n")
+
+str = "こんにちは、世界！こんにちは、友達！"
+IO.print("Original: ", str, " Size: ", String.len(str), "\n")
+IO.print("Count of 'こんにちは': ", String.count(str, "こんにちは"), "\n")
+IO.print("Count of 'さようなら': ", String.count(str, "さようなら"), "\n")
+
+str = "你好，世界！你好，朋友！"
+IO.print("Original: ", str, " Size: ", String.len(str), "\n")
+IO.print("Count of '你好': ", String.count(str, "你好"), "\n")
+IO.print("Count of '不存在': ", String.count(str, "不存在"), "\n")
+
+str = "Привет, мир! Привет, друг!"
+IO.print("Original: ", str, " Size: ", String.len(str), "\n")
+IO.print("Count of 'Привет': ", String.count(str, "Привет"), "\n")
+IO.print("Count of 'друзья': ", String.count(str, "друзья"), "\n")
+
+str = "The quick brown fox jumps over the lazy dog"
+IO.print("Original: ", str, " Size: ", String.len(str), "\n")
+IO.print("Count of 'dog': ", String.count(str, "dog"), "\n")
+IO.print("Count of 'elephant': ", String.count(str, "elephant"), "\n")

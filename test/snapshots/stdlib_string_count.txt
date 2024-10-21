@@ -1,0 +1,30 @@
+Original: Hello, world! Hello again! Size: 26
+Count of 'Hello': 2
+Count of 'Goodbye': 0
+Original: Aerospec is awesome and Aerospec is cool Size: 40
+Count of 'Aerospec': 2
+Count of 'Python': 0
+Original: This is a test. This is only a test. Size: 36
+Count of 'This': 2
+Count of 'Java': 0
+Original: 123456789123456789 Size: 18
+Count of '123': 2
+Count of '000': 0
+Original: The quick brown fox jumps over the lazy dog Size: 43
+Count of 'the': 1
+Count of 'cat': 0
+Original: abcdabcabcdabc Size: 14
+Count of 'abc': 4
+Count of 'xyz': 0
+Original: こんにちは、世界！こんにちは、友達！ Size: 54
+Count of 'こんにちは': 2
+Count of 'さようなら': 0
+Original: 你好，世界！你好，朋友！ Size: 36
+Count of '你好': 2
+Count of '不存在': 0
+Original: Привет, мир! Привет, друг! Size: 45
+Count of 'Привет': 2
+Count of 'друзья': 0
+Original: The quick brown fox jumps over the lazy dog Size: 43
+Count of 'dog': 1
+Count of 'elephant': 0

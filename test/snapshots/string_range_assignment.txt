@@ -1,0 +1,7 @@
+
+::Syntax Error
+  at file: tests\string_range_assignment.aero
+  at line: 3
+  here --" str[1:4] = "G" "-- 
+  Cannot assign to an expression.
+---------------------------

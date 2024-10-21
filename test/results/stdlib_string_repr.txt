@@ -1,0 +1,19 @@
+String.repr([]): []
+String.repr([1]): [1]
+String.repr([1, 2, 3]): [1, 2, 3]
+String.repr(0): 0
+String.repr(1): 1
+String.repr(1.123): 1.123
+String.repr(0.123): 0.123
+String.repr(123): 123
+String.repr(123.123): 123.123
+String.repr({}): <object>
+String.repr({field=""}): <object>
+String.repr(""): 
+String.repr("a"): a
+String.repr("abc"): abc
+String.repr(IO.print): <native ( params... )>
+String.repr(String.repr): <native ( value )>
+String.repr((){}): <function ( )>
+String.repr((a){}): <function ( a )>
+String.repr((a, b, c){}): <function ( a b c )>

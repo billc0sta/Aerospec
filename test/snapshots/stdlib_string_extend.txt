@@ -1,0 +1,12 @@
+Before: Hello (size: 5)
+After: Hello World! How are you? (size: 25)
+
+Before: Extend me (size: 9)
+After: Extend me with multiple substrings. (size: 35)
+
+Before: Just testing (size: 12)
+After: Just testing (size: 12)
+
+Before: Edge case (size: 9)
+After: Edge case 123 (size: 13)
+

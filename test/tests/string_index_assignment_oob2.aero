@@ -1,0 +1,2 @@
+str := "WASD"
+str[4] = "Q"

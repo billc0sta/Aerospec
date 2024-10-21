@@ -1,0 +1,2 @@
+str := &"This is a locked string"
+String.insert(str, "Shall fail", 0)

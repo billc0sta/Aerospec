@@ -1,0 +1,2 @@
+str := "Pickle"
+str[0] := "D"

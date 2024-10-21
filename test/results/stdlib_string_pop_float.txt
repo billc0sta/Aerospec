@@ -1,0 +1,6 @@
+
+::RuntimeError
+  at file: tests\stdlib_string_pop_float.aero
+  at line: 1
+  Invalid Argument: Expected a string as the 'str' argument to String.pop.
+---------------------------

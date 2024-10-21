@@ -1,0 +1,17 @@
+Merged: Short and this is a much longer string to merge (size: 47)
+
+Merged: Special
+	Characters like @#$%^&*() (size: 34)
+
+Merged: Unicode characters: 😀🚀🌍 (size: 32)
+
+Merged: Alternatingemptystrings (size: 23)
+
+Merged: abcdefghijklmnopqrstuvwxyz (size: 26)
+
+Merged: RepeatRepeatRepeatRepeat (size: 24)
+
+Merged: This is a very long string that has been split into multiple parts, but it should be merged into one cohesive sentence. (size: 119)
+
+Merged: 123+456=579 (size: 11)
+

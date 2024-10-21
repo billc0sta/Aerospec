@@ -1,0 +1,6 @@
+
+::RuntimeError
+  at file: tests\stdlib_string_extend_locked.aero
+  at line: 2
+  Invalid Argument: Cannot apply String.extend to a locked string.
+---------------------------

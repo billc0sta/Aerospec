@@ -1,0 +1,2 @@
+str := "Hello"
+String.insert(str, "Shall Fail", 6)

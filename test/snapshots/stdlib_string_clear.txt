@@ -1,0 +1,14 @@
+Original: 123456789 Size: 9
+After clear:  Size: 0
+Original: The quick brown fox jumps over the lazy dog Size: 43
+After clear:  Size: 0
+Original: こんにちは、世界！ Size: 27
+After clear:  Size: 0
+Original: Привет, мир! Size: 21
+After clear:  Size: 0
+Original:  Size: 0
+After clear:  Size: 0
+Original: '   ', Size: 3
+After clear:  Size: 0
+Original: Empty test Size: 10
+After clear:  Size: 0

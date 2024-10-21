@@ -1,0 +1,6 @@
+
+::RuntimeError
+  at file: tests\stdlib_string_insert_float.aero
+  at line: 2
+  Invalid Argument: Expected a string as the 'substr' argument to String.insert.
+---------------------------

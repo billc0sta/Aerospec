@@ -1,0 +1,6 @@
+
+::RuntimeError
+  at file: tests\string_index_assign_float.aero
+  at line: 2
+  Cannot assign to a string index with value of type 'float'.
+---------------------------

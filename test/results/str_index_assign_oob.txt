@@ -1,0 +1,6 @@
+
+::RuntimeError
+  at file: tests\str_index_assign_oob.aero
+  at line: 2
+  Cannot subscript with a negative number.
+---------------------------

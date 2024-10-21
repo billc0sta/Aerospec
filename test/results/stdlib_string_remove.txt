@@ -1,0 +1,24 @@
+Original: The quick brown fox jumps over the lazy dog Size: 43
+After remove('quick', 'lazy', 'dog'): The  brown fox jumps over the   Size: 31
+Original: This is a simple test case Size: 26
+After remove('simple', 'test'): This is a   case Size: 16
+Original: 123abc456 Size: 9
+After remove('abc', '123'): 456 Size: 3
+Original: Aerospec is great Size: 17
+After remove('great'): Aerospec is  Size: 12
+Original: Hello, world! Size: 13
+After remove('foo', 'bar'): Hello, world! Size: 13
+Original: Aerospec is awesome Size: 19
+After remove('notexist', 'missing'): Aerospec is awesome Size: 19
+Original: This is a test Size: 14
+After remove('nonexistent'): This is a test Size: 14
+Original: 123456789 Size: 9
+After remove('10'): 123456789 Size: 9
+Original: こんにちは、世界！ Size: 27
+After remove('あいうえお'): こんにちは、世界！ Size: 27
+Original: 你好，世界！ Size: 18
+After remove('不存在'): 你好，世界！ Size: 18
+Original: Текст с Юникодом Size: 30
+After remove('Нет'): Текст с Юникодом Size: 30
+Original: Привет, мир! Size: 21
+After remove('несуществующее'): Привет, мир! Size: 21

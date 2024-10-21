@@ -9,14 +9,14 @@ For %%G In ("tests\*") Do (
     
     If Exist "snapshots\%%~nG.txt" (
         %SystemRoot%\System32\fc.exe "snapshots\%%~nG.txt" "results\%%~nG.txt" 1>NUL && (
-            Echo PASSED TEST: %%~nG
+            Echo PASSED: %%~nG
             Set /A passed += 1
         ) || (
-            Echo FAILED TEST: %%~nG
+            Echo FAILED: %%~nG
             Set /A failed += 1
         )
     ) Else (
-        Echo NOSNAP TEST: %%~nG
+        Echo NOSNAP: %%~nG
         Set /A nosnaps += 1
     )
 )

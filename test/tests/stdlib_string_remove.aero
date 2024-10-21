@@ -1,0 +1,59 @@
+str = "The quick brown fox jumps over the lazy dog"
+IO.print("Original: ", str, " Size: ", String.len(str), "\n")
+String.remove(str, "quick", "lazy", "dog")
+IO.print("After remove('quick', 'lazy', 'dog'): ", str, " Size: ", String.len(str), "\n")
+
+str = "This is a simple test case"
+IO.print("Original: ", str, " Size: ", String.len(str), "\n")
+String.remove(str, "simple", "test")
+IO.print("After remove('simple', 'test'): ", str, " Size: ", String.len(str), "\n")
+
+str = "123abc456"
+IO.print("Original: ", str, " Size: ", String.len(str), "\n")
+String.remove(str, "abc", "123")
+IO.print("After remove('abc', '123'): ", str, " Size: ", String.len(str), "\n")
+
+str = "Aerospec is great"
+IO.print("Original: ", str, " Size: ", String.len(str), "\n")
+String.remove(str, "great")
+IO.print("After remove('great'): ", str, " Size: ", String.len(str), "\n")
+
+str = "Hello, world!"
+IO.print("Original: ", str, " Size: ", String.len(str), "\n")
+String.remove(str, "foo", "bar")
+IO.print("After remove('foo', 'bar'): ", str, " Size: ", String.len(str), "\n")
+
+str = "Aerospec is awesome"
+IO.print("Original: ", str, " Size: ", String.len(str), "\n")
+String.remove(str, "notexist", "missing")
+IO.print("After remove('notexist', 'missing'): ", str, " Size: ", String.len(str), "\n")
+
+str = "This is a test"
+IO.print("Original: ", str, " Size: ", String.len(str), "\n")
+String.remove(str, "nonexistent")
+IO.print("After remove('nonexistent'): ", str, " Size: ", String.len(str), "\n")
+
+str = "123456789"
+IO.print("Original: ", str, " Size: ", String.len(str), "\n")
+String.remove(str, "10")
+IO.print("After remove('10'): ", str, " Size: ", String.len(str), "\n")
+
+str = "こんにちは、世界！"
+IO.print("Original: ", str, " Size: ", String.len(str), "\n")
+String.remove(str, "あいうえお")
+IO.print("After remove('あいうえお'): ", str, " Size: ", String.len(str), "\n")
+
+str = "你好，世界！"
+IO.print("Original: ", str, " Size: ", String.len(str), "\n")
+String.remove(str, "不存在")
+IO.print("After remove('不存在'): ", str, " Size: ", String.len(str), "\n")
+
+str = "Текст с Юникодом"
+IO.print("Original: ", str, " Size: ", String.len(str), "\n")
+String.remove(str, "Нет")
+IO.print("After remove('Нет'): ", str, " Size: ", String.len(str), "\n")
+
+str = "Привет, мир!"
+IO.print("Original: ", str, " Size: ", String.len(str), "\n")
+String.remove(str, "несуществующее")
+IO.print("After remove('несуществующее'): ", str, " Size: ", String.len(str), "\n")

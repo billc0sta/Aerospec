@@ -1,0 +1,4 @@
+str := "Hello, World"
+IO.print(str)
+str[1:4] = "G"
+IO.print("str: ", str)

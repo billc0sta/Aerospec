@@ -1,0 +1,2 @@
+str := &"Locked string"
+String.pop(str, 1, 1)

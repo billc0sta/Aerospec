@@ -1,0 +1,2 @@
+str := "AERO"
+String.pop(str, 5)

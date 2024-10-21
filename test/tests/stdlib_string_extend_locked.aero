@@ -1,0 +1,2 @@
+str := &"Locked String"
+String.extend(str, "Shall Fail")

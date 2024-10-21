@@ -1,0 +1,15 @@
+Before: Hello (size: 5)
+After: Hello 😀🚀🌍 (size: 18)
+
+Before: Unicode (size: 7)
+After: Unicode characters:  (size: 20)
+
+Before: Mixing  (size: 7)
+After: Mixing  🚀🌟 (size: 16)
+
+Before: Special (size: 7)
+After: Special 🎉🔥 (size: 16)
+
+Before: Testing (size: 7)
+After: Testing 𠜎𠜏 (size: 16)
+

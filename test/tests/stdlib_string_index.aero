@@ -1,0 +1,18 @@
+str = "Hello, world!"
+IO.print("Index of 'world': ", String.index(str, "world"), "\n")
+IO.print("Index of 'Hello': ", String.index(str, "Hello"), "\n")
+IO.print("Index of 'l': ", String.index(str, "l"), "\n")
+IO.print("Index of 'o': ", String.index(str, "o"), "\n")
+IO.print("Index of 'test': ", String.index(str, "test"), "\n")
+
+str = "Short"
+IO.print("Index of 'LongerSubstring': ", String.index(str, "LongerSubstring"), "\n")
+
+str = "こんにちは、世界！"
+IO.print("Index of '世界': ", String.index(str, "世界"), "\n")
+IO.print("Index of 'こ': ", String.index(str, "こ"), "\n")
+
+str = "Hola, mundo"
+IO.print("Index of 'mundo': ", String.index(str, "mundo"), "\n")
+IO.print("Index of 'Hola': ", String.index(str, "Hola"), "\n")
+IO.print("Index of 'world': ", String.index(str, "world"), "\n")

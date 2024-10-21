@@ -1,0 +1,24 @@
+str = "Hello"
+IO.print("Before: ", str, " (size: ", String.len(str), ")\n")
+String.insert(str, " 😀🚀🌍", 5)
+IO.print("After: ", str, " (size: ", String.len(str), ")\n\n")
+
+str = "Unicode"
+IO.print("Before: ", str, " (size: ", String.len(str), ")\n")
+String.insert(str, " characters: ", 7)
+IO.print("After: ", str, " (size: ", String.len(str), ")\n\n")
+
+str = "Mixing "
+IO.print("Before: ", str, " (size: ", String.len(str), ")\n")
+String.insert(str, " 🚀🌟", 7)
+IO.print("After: ", str, " (size: ", String.len(str), ")\n\n")
+
+str = "Special"
+IO.print("Before: ", str, " (size: ", String.len(str), ")\n")
+String.insert(str, " 🎉🔥", 7)
+IO.print("After: ", str, " (size: ", String.len(str), ")\n\n")
+
+str = "Testing"
+IO.print("Before: ", str, " (size: ", String.len(str), ")\n")
+String.insert(str, " 𠜎𠜏", 7)
+IO.print("After: ", str, " (size: ", String.len(str), ")\n\n")
