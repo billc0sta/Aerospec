@@ -1,0 +1,6 @@
+// This is a single-line comment
+IO.print("Hello, World!\n") // This should print
+IO.print("Testing comments\n") // Another test
+
+// This comment should be ignored
+IO.print("Johnson\n") // Final output

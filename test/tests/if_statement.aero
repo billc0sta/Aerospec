@@ -1,0 +1,60 @@
+true  := !0
+false := !!0
+
+value = 5
+?? (value > 0)
+IO.print("Value is positive\n") :: IO.print("Value is non-positive\n")
+
+value = -3
+?? (value < 0)
+IO.print("Value is negative\n") :: IO.print("Value is non-negative\n")
+
+is_valid = true
+?? is_valid
+IO.print("Valid input\n") :: IO.print("Invalid input\n")
+
+age = 20
+?? (age >= 18) {
+   IO.print("Adult\n")
+   ?? (age >= 21) {
+      IO.print("Legal drinking age\n")
+   } :: {
+      IO.print("Not of legal drinking age\n")
+   }
+} :: {
+   IO.print("Minor\n")
+}
+
+score = 85
+?? (score >= 90)
+IO.print("Grade: A\n") :: 
+?? (score >= 80)
+IO.print("Grade: B\n") ::
+?? (score >= 70)
+IO.print("Grade: C\n") ::
+IO.print("Grade: D or lower\n")
+
+?? !0;
+?? !!0; ::;
+IO.print("No-op after if statement\n")
+
+arr = [10, 20, 30]
+?? (arr[0] > arr[1])
+IO.print("First element is greater\n")
+:: IO.print("First element is not greater\n")
+
+empty_arr = []
+?? (Array.len(empty_arr) == 0)
+IO.print("Array is empty\n") :: IO.print("Array is not empty\n")
+
+num = 15
+?? (num % 2 == 0) {
+   IO.print("Number is even\n")
+   ?? (num > 10) {
+      IO.print("Even number greater than 10\n")
+   } :: {
+      IO.print("Even number 10 or less\n")
+   }
+} :: {
+   IO.print("Number is odd\n")
+}

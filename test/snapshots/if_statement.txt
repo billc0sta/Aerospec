@@ -1,0 +1,10 @@
+Value is positive
+Value is negative
+Valid input
+Adult
+Not of legal drinking age
+Grade: B
+No-op after if statement
+First element is not greater
+Array is empty
+Number is odd

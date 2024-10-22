@@ -1,0 +1,48 @@
+// Basic conditional tests
+test1 := "" ? "Hello" : "World"
+test2 := "Hello" ? "World" : "Hello"
+logical_and := test1 ? test2 : test1
+logical_or := test1 ? test1 : test2
+
+// Nested conditional tests
+nested :=
+       test1 == "Hello" ? IO.print("test1 is Hello\n")
+       : test1 == "World" ? IO.print("test1 is World\n")
+       : test2 == "World" ? IO.print("test2 is World\n")
+       : logical_and == logical_or ? IO.print("logical_and == logical_or\n")
+       : IO.print("out of nest\n")
+
+IO.print(test1, "\n")
+IO.print(test2, "\n")
+IO.print(logical_and, "\n")
+IO.print(logical_or, "\n")
+IO.print(nested, "\n")
+
+extra_test1 := "Test" ? "Valid" : "Invalid"
+extra_test2 := "" ? "Valid" : "Invalid"
+extra_test3 := "Sample" ? "Valid" : "Invalid"
+extra_test4 := "Not Empty" ? "Valid" : "Invalid"
+
+IO.print(extra_test1, "\n")
+IO.print(extra_test2, "\n")
+IO.print(extra_test3, "\n")
+IO.print(extra_test4, "\n")
+
+nested2 :=
+       test1 == "Hello" ? IO.print("First branch matched\n")
+       : test1 == "World" ? IO.print("Second branch matched\n")
+       : test2 == "Hello" ? IO.print("Third branch matched\n")
+       : test2 == "World" ? IO.print("Fourth branch matched\n")
+       : IO.print("No branches matched\n")
+
+IO.print(nested2, "\n")
+
+logical_test1 := test1 == "Hello" ? "Yes" : "No"
+logical_test2 := test2 == "Hello" ? "Yes" : "No"
+IO.print("Logical test 1: ", logical_test1, "\n")
+IO.print("Logical test 2: ", logical_test2, "\n")
+
+edge_case1 := "" == "" ? "Both are empty\n" : "Not empty\n"
+edge_case2 := " " == "" ? "Space is not empty\n" : "It's empty\n"
+IO.print(edge_case1, "\n")
+IO.print(edge_case2, "\n")
