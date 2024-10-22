@@ -1,0 +1,30 @@
+IO.print("abc" < "def", "\n")
+IO.print("abc" < "abc", "\n")
+IO.print("abc" < "abcd", "\n")
+IO.print("abc" < "ab", "\n")
+
+IO.print("def" > "abc", "\n")
+IO.print("abc" > "abc", "\n")
+IO.print("abcd" > "abc", "\n")
+IO.print("ab" > "abc", "\n")
+
+IO.print("abc" <= "def", "\n")
+IO.print("abc" <= "abc", "\n")
+IO.print("abc" <= "abcd", "\n")
+IO.print("abc" <= "ab", "\n")
+
+IO.print("def" >= "abc", "\n")
+IO.print("abc" >= "abc", "\n")
+IO.print("abcd" >= "abc", "\n")
+IO.print("ab" >= "abc", "\n")
+
+IO.print("" < "a", "\n")
+IO.print("" > "a", "\n")
+IO.print("" <= "", "\n")
+IO.print("" >= "", "\n")
+
+IO.print("こんにちは" < "さようなら", "\n")
+IO.print("😊" < "🚀", "\n")
+IO.print("🐍" <= "🚀", "\n")
+IO.print("中文" > "测试", "\n")
+IO.print("🌍" > "❤️", "\n")
