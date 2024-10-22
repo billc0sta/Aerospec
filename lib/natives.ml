@@ -7,6 +7,9 @@ let print params =
 let input _ = 
   make_rez_string (read_line ())
 
+let report_error message =
+  raise (Invalid_argument ("Invalid Argument: "^message))
+
 let clock _ = 
   Float (Sys.time ()) 
 
@@ -14,22 +17,22 @@ let string_len params =
   let str = List.hd params in
   match str with
   | String (rez, _) -> Float (float_of_int (Resizable.len rez))
-  | _ -> raise (Invalid_argument "Invalid Argument: Expected a string as the first argument to String.len")
+  | _ -> report_error ("String.len only accepts arguments of type 'string'")
 
 let array_len params =
   let arr = List.hd params in
   match arr with
   | Arr (rez, _) -> Float (float_of_int (Resizable.len rez))
-  | _ -> raise (Invalid_argument "Invalid Argument: Expected an array as the first argument to Array.len")
+  | _ -> report_error ("Expected an array as the 'array' argument to Array.len")
 
 let array_append params =
   let (arr, params) = (match params with x::xs -> (x, xs) | _ -> assert false;) in
   let arr = match arr with
 	| Arr (rez, locked) ->
        if locked
-       then raise (Invalid_argument "Invalid Argument: Cannot apply Array.append to a locked array")
+       then report_error ("Cannot apply Array.append to a locked array")
        else rez
-	| _ -> raise (Invalid_argument "Invalid Argument: Expected an array as the first argument to Array.append")
+	| _ -> report_error ("Expected an array as the 'array' argument to Array.append")
                            
   in
     List.iter (Resizable.append arr) params; 
@@ -40,58 +43,58 @@ let string_insert params =
   let str = match str with
     | String (rez, locked) ->
        if locked
-       then raise (Invalid_argument "Invalid Argument: Cannot apply String.insert to a locked string")
+       then report_error ("Cannot apply String.insert to a locked string")
        else rez
-    | _ -> raise (Invalid_argument "Invalid Argument: Expected a string as the first argument to String.insert")
+    | _ -> report_error ("Expected a string as the 'str' argument to String.insert")
   in
   let (elem, params) = (match params with x::xs -> (x, xs) | _ -> assert false;) in
   let elem = match elem with
     | String (p, _) -> p
-    | _ -> raise (Invalid_argument "Invalid Argument:Expected a string as the 'elem' argument to String.insert")
+    | _ -> report_error ("Expected a string as the 'substr' argument to String.insert")
   in
   let index = match List.hd params with
 	| Float fl -> if Float.trunc fl <> fl
-                  then raise (Invalid_argument "Invalid Argument: String.insert cannot be applied with a floating-point number as 'index'")
+                  then report_error ("String.insert cannot be applied with a floating-point number as 'index'")
                   else int_of_float fl
-	| _ -> raise (Invalid_argument "Invalid Argument: Expected a number as the 'index' argument to String.insert")
+	| _ -> report_error ("Expected a number as the 'index' argument to String.insert")
   in
   try 
     Resizable.insert_rez str elem index; Nil
-  with Invalid_argument _ -> raise (Invalid_argument "Invalid Argument: 'index' out of bounds - String.insert")
+  with Invalid_argument _ -> report_error ("'index' out of bounds - String.insert")
 
 let array_insert params =
   let (arr, params) = (match params with x::xs -> (x, xs) | _ -> assert false;) in
   let arr = match arr with
     | Arr (rez, locked) ->
        if locked
-       then raise (Invalid_argument "Invalid Argument: Cannot apply Array.insert to a locked array")
+       then report_error ("Cannot apply Array.insert to a locked array")
        else rez
-    | _ -> raise (Invalid_argument "Invalid Argument: Expected an array as the first argument to Array.insert")
+    | _ -> report_error ("Expected an array as the 'array' argument to Array.insert")
   in
   let (elem, params) = (match params with x::xs -> (x, xs) | _ -> assert false;) in
   let index = match List.hd params with
 	| Float fl -> if Float.trunc fl <> fl
-                  then raise (Invalid_argument "Invalid Argument: Array.insert cannot be applied with a floating-point number as 'index'")
+                  then report_error ("Array.insert cannot be applied with a floating-point number as 'index'")
                   else int_of_float fl
-	| _ -> raise (Invalid_argument "Invalid Argument: Expected an array as the first argument to Array.insert")
+	| _ -> report_error ("Expected an array as the 'array' argument to Array.insert")
   in
   try 
     Resizable.insert arr index elem; Nil
-  with Invalid_argument _ -> raise (Invalid_argument "Invalid Argument: 'index' out of bounds - String.insert")
+  with Invalid_argument _ -> report_error ("'index' out of bounds - String.insert")
 
 let string_extend params =
   let (str1, params) = (match params with x::xs -> (x, xs) | _ -> assert false;) in
   let str1 = match str1 with
     | String (rez, locked) ->
        if locked
-       then raise (Invalid_argument "Invalid Argument: Cannot apply String.extend to a locked string")
+       then report_error ("Cannot apply String.extend to a locked string")
        else rez
-  | _ -> raise (Invalid_argument "Invalid Argument: Expected a string  as the first argument to String.extend")
+  | _ -> report_error ("Expected a string as the 'str' argument to String.extend")
   in
   List.iter (fun str2 ->
       match str2 with
       | String (str2, _) -> Resizable.extend str1 str2
-      | _ -> raise (Invalid_argument "Invalid Argument: Expected strings as the remaining arguments to String.extend")
+      | _ -> report_error ("Expected strings as the remaining arguments to String.extend")
     ) params;
   Nil
 
@@ -100,48 +103,40 @@ let array_extend params =
   let arr1 = match arr1 with
     | Arr (rez, locked) ->
        if locked
-       then raise (Invalid_argument "Invalid Argument: Cannot apply Array.extend to a locked array")
+       then report_error ("Cannot apply Array.extend to a locked array")
        else rez
-  | _ -> raise (Invalid_argument "Invalid Argument: Expected an array as the first argument to Array.extend")
+  | _ -> report_error ("Expected an array as the 'array' argument to Array.extend")
   in
   List.iter (fun arr2 ->
       match arr2 with
       | Arr (arr2, _) -> Resizable.extend arr1 arr2
-      | _ -> raise (Invalid_argument "Invalid Argument: Expected arrays as the remaining arguments to Array.extend")
+      | _ -> report_error ("Expected arrays as the remaining arguments to Array.extend")
     ) params;
   Nil
 
 let string_merge params =
-  let (str1, params) = (match params with x::xs -> (x, xs) | _ -> assert false;) in
-  let str1 = match str1 with
-    | String (rez, _) -> rez
-    | _ -> raise (Invalid_argument "Invalid Argument: String.merge only accepts arguments of type 'string'")
-  in
+  let init = Resizable.make () in
   let rez = List.fold_left (fun acc str2 ->
       match str2 with
       | String (str2, _) -> (Resizable.merge acc str2)
-      | _ -> raise (Invalid_argument "Invalid Argument: String.merge only accepts arguments of type 'string'")
-    ) str1 params in
+      | _ -> report_error ("String.merge only accepts arguments of type 'string'")
+    ) init params in
   String(rez, false)
   
 let array_merge params =
-  let (arr1, params) = (match params with x::xs -> (x, xs) | _ -> assert false;) in
-  let arr1 = match arr1 with
-    | Arr (rez, _) -> rez
-    | _ -> raise (Invalid_argument "Invalid Argument: Array.merge only accepts arguments of type 'array'")
-  in
+  let init = Resizable.make () in
   let rez = List.fold_left (fun acc arr2 ->
       match arr2 with
       | Arr (arr2, _) -> (Resizable.merge acc arr2)
-      | _ -> raise (Invalid_argument "Invalid Argument: Array.merge only accepts arguments of type 'array'")
-    ) arr1 params in
+      | _ -> report_error ("Array.merge only accepts arguments of type 'array'")
+    ) init params in
   Arr (rez, false)
 
 let string_index params =
   let (str1, str2) = (match params with x::y::_ -> (x, y) | _ -> assert false;) in
   let (str1, str2) = match (str1, str2) with
   | String (rez1, _), String (rez2, _) -> (rez1, rez2) 
-  | _ -> raise (Invalid_argument "Invalid Argument: String.index only accepts arguments of type 'string'")
+  | _ -> report_error ("String.index only accepts arguments of type 'string'")
   in
   Float (float_of_int (Resizable.index_rez str1 str2))
   
@@ -149,7 +144,7 @@ let array_index params =
   let (arr, elem) = (match params with x::y::_ -> (x, y) | _ -> assert false;) in
   let arr = match arr with
     | Arr (rez, _) -> rez
-    | _ -> raise (Invalid_argument "Invalid Argument: Expected an array as the first argument to Array.index")
+    | _ -> report_error ("Expected an array as the 'array' argument to Array.index")
   in
   Float (float_of_int (Resizable.index arr elem))
 
@@ -158,40 +153,43 @@ let string_pop params =
   let str = match str with
     | String (rez, locked) ->
        if locked
-       then raise (Invalid_argument "Invalid Argument: Cannot apply String.pop to a locked string")
+       then report_error ("Cannot apply String.pop to a locked string")
        else rez
-    | _ -> raise (Invalid_argument "Invalid Argument: Expected a string as the first argument to String.pop")
+    | _ -> report_error ("Expected a string as the 'str' argument to String.pop")
   in
   List.iter (fun index ->
       let index = match index with
         | Float fl ->
            if Float.trunc fl <> fl
-           then raise (Invalid_argument "Invalid Argument: Cannot subscript with floating-point number - String.pop") 
+           then report_error ("Cannot subscript with floating-point number - String.pop") 
 	       else int_of_float fl
-        | _ -> raise (Invalid_argument "Invalid Argument: Expected numbers as the remaining arguments to String.pop")
+        | _ -> report_error ("Expected numbers as the remaining arguments to String.pop")
       in
-      Resizable.pop str index;
-    ) params;
-  Nil
-
+      try 
+        Resizable.pop str index
+      with Invalid_argument _ -> report_error ("'indices...' out of bounds - String.pop")
+    ) params; Nil
+                                 
 let array_pop params =
   let (arr, params) = (match params with x::xs -> (x, xs) | _ -> assert false;) in
   let arr = match arr with
     | Arr (rez, locked) ->
        if locked
-       then raise (Invalid_argument "Invalid Argument: Cannot apply Array.pop to a locked array")
+       then report_error ("Cannot apply Array.pop to a locked array")
        else rez
-    | _ -> raise (Invalid_argument "Invalid Argument: Expected an array as the first argument to Array.pop")
+    | _ -> report_error ("Expected an array as the 'array' argument to Array.pop")
   in
   List.iter (fun index ->
       let index = match index with
         | Float fl ->
            if Float.trunc fl <> fl
-           then raise (Invalid_argument "Invalid Argument: Cannot subscript with floating-point number - Array.pop") 
+           then report_error ("Cannot subscript with floating-point number - Array.pop") 
 	       else int_of_float fl
-        | _ -> raise (Invalid_argument "Invalid Argument: Expected numbers as the remaining arguments to Array.pop")
+        | _ -> report_error ("Expected numbers as the remaining arguments to Array.pop")
       in
-      Resizable.pop arr index;
+      try 
+        Resizable.pop arr index
+      with Invalid_argument _ -> report_error ("'indices...' out of bounds - Array.pop")
     ) params;
   Nil
 
@@ -200,14 +198,14 @@ let string_remove params =
   let str = match str with
     | String (rez, locked) ->
        if locked
-       then raise (Invalid_argument "Invalid Argument: Cannot apply String.remove to a locked string")
+       then report_error ("Cannot apply String.remove to a locked string")
        else rez
-    | _ -> raise (Invalid_argument "Invalid Argument: String.remove only accepts arguments of type 'string'")
+    | _ -> report_error ("String.remove only accepts arguments of type 'string'")
   in
   List.iter (fun str2 ->
       let str2 = match str2 with
         | String (rez, _) -> rez
-        | _ -> raise (Invalid_argument "Invalid Argument: String.remove only accepts arguments of type 'string'")
+        | _ -> report_error ("String.remove only accepts arguments of type 'string'")
       in
       Resizable.remove_rez str str2
     ) params;
@@ -218,9 +216,9 @@ let array_remove params =
   let arr = match arr with
     | Arr (rez, locked) ->
        if locked
-       then raise (Invalid_argument "Invalid Argument: Cannot apply Array.remove to a locked array")
+       then report_error ("Cannot apply Array.remove to a locked array")
        else rez
-    | _ -> raise (Invalid_argument "Invalid Argument: Expected an array as the first argument to Array.remove")
+    | _ -> report_error ("Expected an array as the 'array' argument to Array.remove")
   in
   List.iter (Resizable.remove arr) params;
   Nil
@@ -230,9 +228,9 @@ let string_clear params =
   let str = match str with
     | String (rez, locked) ->
        if locked
-       then raise (Invalid_argument "Invalid Argument: Cannot apply String.clear to a locked string")
+       then report_error ("Cannot apply String.clear to a locked string")
        else rez
-    | _ -> raise (Invalid_argument "Invalid Argument: Expected a string as the first argument to String.clear")
+    | _ -> report_error ("String.clear only accepts arguments of type 'string'")
   in
   Resizable.clear str;
   Nil
@@ -242,9 +240,9 @@ let array_clear params =
   let arr = match arr with
     | Arr (rez, locked) ->
        if locked
-       then raise (Invalid_argument "Invalid Argument: Cannot apply Array.clear to a locked array")
+       then report_error ("Cannot apply Array.clear to a locked array")
        else rez
-    | _ -> raise (Invalid_argument "Invalid Argument: Expected an array as the first argument to Array.clear")
+    | _ -> report_error ("Expected an array as the 'array' argument to Array.clear")
   in
   Resizable.clear arr;
   Nil
@@ -253,7 +251,7 @@ let string_count params =
   let (str1, str2) = (match params with x::y::_ -> (x, y) | _ -> assert false;) in
   let (str1, str2) = match (str1, str2) with
     | (String (rez1, _), String (rez2, _)) -> (rez1, rez2)
-    | _ -> raise (Invalid_argument "Invalid Argument: String.count only accepts arguments of type 'string'")
+    | _ -> report_error ("String.count only accepts arguments of type 'string'")
   in
   let lst1 = Resizable.len str1  in
   let lst2 = Resizable.len str2  in
@@ -273,7 +271,7 @@ let array_count params =
   let (arr, elem) = (match params with x::y::_ -> (x, y) | _ -> assert false;) in
   let arr = match arr with
     | Arr(rez, _) -> rez
-    | _ -> raise (Invalid_argument "Invalid_argument: Expected an array as the first argument to Array.count")
+    | _ -> report_error ("Expected an array as the 'array' argument to Array.count")
   in
   Float (float_of_int (Resizable.count arr elem))
 
@@ -285,7 +283,7 @@ let fields params =
   let obj = List.hd params in
   let env = match obj with
 	| Object (env, _) -> env
-	| _ -> raise (Invalid_argument "Non-object value was passed as a first parameter to fields")
+	| _ -> report_error ("Expected an object as the 'object' argument to Object.fields")
   in
   let rez = Resizable.make () in
   Hashtbl.iter
@@ -324,7 +322,7 @@ let module_string () =
   Environment.add "len" (NatFunc (1, ["str"], string_len), false) env;
   Environment.add "insert" (NatFunc (3, ["str"; "substr"; "index"], string_insert), false) env;
   Environment.add "extend" (NatFunc (256+2, ["str"; "substrs..."], string_extend), false) env;
-  Environment.add "merge" (NatFunc (256+2, ["str"; "substrs..."], string_merge), false) env;
+  Environment.add "merge" (NatFunc (256+1, ["substrs..."], string_merge), false) env;
   Environment.add "index" (NatFunc (2, ["str"; "substr"], string_index), false) env;
   Environment.add "pop" (NatFunc (256+2, ["str"; "indices..."], string_pop), false) env;
   Environment.add "remove" (NatFunc (256+2, ["str"; "substrs..."], string_remove), false) env;
@@ -339,7 +337,7 @@ let module_array () =
   Environment.add "append" (NatFunc (256+2, ["array"; "elements..."], array_append), false) env;
   Environment.add "insert" (NatFunc (3, ["array"; "element"; "index"], array_insert), false) env;
   Environment.add "extend" (NatFunc (256+2, ["array"; "array..."], array_extend), false) env;
-  Environment.add "merge" (NatFunc (256+2, ["array"; "array..."], array_merge), false) env;
+  Environment.add "merge" (NatFunc (256+1, ["array..."], array_merge), false) env;
   Environment.add "index" (NatFunc (2, ["array"; "element"], array_index), false) env;
   Environment.add "pop" (NatFunc (256+2, ["array"; "indices..."], array_pop), false) env;
   Environment.add "remove" (NatFunc (256+2, ["array"; "elements..."], array_remove), false) env;

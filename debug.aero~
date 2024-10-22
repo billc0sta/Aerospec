@@ -1,0 +1,4 @@
+str = "Привет, мир!"
+IO.print("original: ", str, "\n")
+String.remove(str, "несуществуU")
+IO.print("mutated: ", str, "\n")

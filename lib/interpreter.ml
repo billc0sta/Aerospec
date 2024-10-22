@@ -230,29 +230,57 @@ and evaluate_binary expr1 expr2 op inp =
   | EqualEqual -> begin
 	  let (ev1, ev2) = (ev_both expr1 expr2) in 
 	  match (ev1, ev2) with
-	  | String (str1, _), String (str2, _) -> Bool (str1.arr = str2.arr)
+	  | String (str1, _), String (str2, _) -> Bool (Resizable.equal str1 str2)
 	  | Float fl1, Float fl2 -> Bool (fl1 = fl2)
 	  | Bool b1, Bool b2 -> Bool (b1 = b2)
-	  | Arr (arr1, _), Arr (arr2, _) -> Bool (arr1.arr = arr2.arr) 
+	  | Arr (arr1, _), Arr (arr2, _) -> Bool (Resizable.equal arr1 arr2) 
 	  | _ -> (Bool false) 
 	end 
   | ExcEqual -> begin
 	  let (ev1, ev2) = (ev_both expr1 expr2) in 
 	  match (ev1, ev2) with
-	  | String (str1, _), String (str2, _) -> Bool (str1.arr <> str2.arr)
+	  | String (str1, _), String (str2, _) -> Bool (not (Resizable.equal str1 str2))
 	  | Float fl1, Float fl2 -> Bool (fl1 <> fl2)
 	  | Bool b1, Bool b2 -> Bool (b1 <> b2)
-	  | Arr (arr1, _), Arr (arr2, _) -> Bool (arr1.arr <> arr2.arr) 
+	  | Arr (arr1, _), Arr (arr2, _) -> Bool (not (Resizable.equal arr1 arr2)) 
 	  | _ -> (Bool false)
 	end
   | Minus -> Float (simple_binary expr1 expr2 (-.))
   | Star -> Float (simple_binary expr1 expr2 ( *. ))
   | Slash -> Float (simple_binary expr1 expr2 (/.))
   | Modulo -> Float (simple_binary expr1 expr2 (fun a b -> a -. (b *. (floor (a /. b)))))
-  | Greater -> Bool (simple_binary expr1 expr2 (>))
-  | Lesser -> Bool (simple_binary expr1 expr2 (<))
-  | GreatEqual -> Bool (simple_binary expr1 expr2 (>=))
-  | LessEqual -> Bool (simple_binary expr1 expr2 (<=))
+  | Greater -> begin
+     let (ev1, ev2) = (ev_both expr1 expr2) in
+     match (ev1, ev2) with
+     | String (str1, _), String (str2, _) ->
+        (Bool ((Resizable.compare (fun c1 c2 -> (Char.code c1) - (Char.code c2)) str1 str2) > 0))
+     | Float fl1, Float fl2 -> Bool (fl1 > fl2)
+     | _ -> raise_error ev1 ev2
+     end
+  | Lesser -> begin
+     let (ev1, ev2) = (ev_both expr1 expr2) in
+     match (ev1, ev2) with
+     | String (str1, _), String (str2, _) ->
+        (Bool ((Resizable.compare (fun c1 c2 -> (Char.code c1) - (Char.code c2)) str1 str2) < 0))
+     | Float fl1, Float fl2 -> Bool (fl1 < fl2)
+     | _ -> raise_error ev1 ev2
+     end
+  | GreatEqual -> begin
+     let (ev1, ev2) = (ev_both expr1 expr2) in
+     match (ev1, ev2) with
+     | String (str1, _), String (str2, _) ->
+        (Bool ((Resizable.compare (fun c1 c2 -> (Char.code c1) - (Char.code c2)) str1 str2) >= 0))
+     | Float fl1, Float fl2 -> Bool (fl1 >= fl2)
+     | _ -> raise_error ev1 ev2
+     end
+  | LessEqual -> begin
+     let (ev1, ev2) = (ev_both expr1 expr2) in
+     match (ev1, ev2) with
+     | String (str1, _), String (str2, _) ->
+        (Bool ((Resizable.compare (fun c1 c2 -> (Char.code c1) - (Char.code c2)) str1 str2) <= 0))
+     | Float fl1, Float fl2 -> Bool (fl1 <= fl2)
+     | _ -> raise_error ev1 ev2
+     end
   | TwoAmper -> 
 	 let ev1 = evaluate expr1 inp in
 	 if truth ev1 then evaluate expr2 inp else ev1
@@ -417,7 +445,7 @@ and assign_subscript expr target index inp =
         	  begin
                 try Resizable.putat rez index (Resizable.get chr 0); value
                 with Invalid_argument _ ->
-                  report_error "Accessing array out of bounds" token inp
+                  report_error "Accessing string out of bounds" token inp
       		  end
          | _ ->
             report_error ("Cannot assign to a string index with value of type '" ^ nameof value ^ "'") token inp
@@ -430,24 +458,27 @@ and assign_ident ismut expr ident inp =
 	match ident with
 	| IdentExpr(tk, global) -> (tk.value, global, tk)
 	| _ -> assert false;
-  in 
-  let env = if global then
-		      try Environment.parent_of inp.env
-		      with Invalid_argument _ -> 
-			    report_error ("Global variable '"^token.value^"' was referenced in global scope") token inp
-		    else inp.env 
   in
-  match (Environment.find name env) with
-  | None -> begin
-	  let value = evaluate expr inp in
-	  Environment.add name (value, ismut) env; value
-	end
-  | Some (_, mut) -> begin 
-	  if not mut then report_error "Cannot re-assign to a constant" token inp
-	  else 
-		let value = evaluate expr inp in
-		Environment.replace name (value, ismut) env; value
-	end
+  if global && not ismut then
+    report_error ("Cannot constant-assgin a global variable") token inp
+  else
+    let env = if global then
+		        try Environment.parent_of inp.env
+		        with Invalid_argument _ -> 
+			      report_error ("Global variable '"^token.value^"' was referenced in global scope") token inp
+		      else inp.env 
+    in
+    match (Environment.find name env) with
+    | None -> begin
+	    let value = evaluate expr inp in
+	    Environment.add name (value, ismut) env; value
+	  end
+    | Some (_, mut) -> begin 
+	    if not mut then report_error "Cannot re-assign to a constant" token inp
+	    else 
+		  let value = evaluate expr inp in
+		  Environment.replace name (value, ismut) env; value
+	  end
 
 and exec_stmt stmt inp =
   match stmt with
