@@ -481,7 +481,8 @@ and loop_stmt parser =
 
 and expr_stmt parser = 
   let (expr, parser) = expression parser in
-  let rec aux = function
+  let rec aux expr =
+    match expr with
     | Builder (range, cond, expr) ->
       let instmt = aux expr in 
       let stmt = match cond with 

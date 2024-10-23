@@ -1,0 +1,36 @@
+arr1 := [1, 2, 3]
+arr2 := ["apple", "banana"]
+arr3 := [Bool.true, Bool.false]
+arr4 := []
+arr5 := [4.5, "orange"]
+arr6 := [_, "test", 42]
+arr7 := ["last", Bool.false]
+
+mergedArray1 := Array.merge(arr1, arr2, arr3, arr4, arr5)
+IO.print("Merged Array 1: ", mergedArray1, "\n")
+IO.print("Size of Merged Array 1: ", Array.len(mergedArray1), "\n")
+
+mergedArray2 := Array.merge(arr6, arr7)
+IO.print("Merged Array 2: ", mergedArray2, "\n")
+IO.print("Size of Merged Array 2: ", Array.len(mergedArray2), "\n")
+
+mergedArray3 := Array.merge(arr1, [], arr2)
+IO.print("Merged Array 3 (with empty array): ", mergedArray3, "\n")
+IO.print("Size of Merged Array 3: ", Array.len(mergedArray3), "\n")
+
+mergedArray4 := Array.merge([], [])
+IO.print("Merged Array 4 (two empty arrays): ", mergedArray4, "\n")
+IO.print("Size of Merged Array 4: ", Array.len(mergedArray4), "\n")
+
+mergedArray5 := Array.merge([1, 2, 3], [4, 5], [6, 7, 8, 9])
+IO.print("Merged Array 5 (multiple arrays): ", mergedArray5, "\n")
+IO.print("Size of Merged Array 5: ", Array.len(mergedArray5), "\n")
+
+mergedArray6 := Array.merge(["string1"], ["string2"], [_])
+IO.print("Merged Array 6 (strings and nil): ", mergedArray6, "\n")
+IO.print("Size of Merged Array 6: ", Array.len(mergedArray6), "\n")
+
+arrEmpty := [0, 1, 2, 3, 4, 5]
+mergedArray7 := Array.merge(arrEmpty, [10, 11, 12])
+IO.print("Merged Array 7 (with filled array): ", mergedArray7, "\n")
+IO.print("Size of Merged Array 7: ", Array.len(mergedArray7), "\n")

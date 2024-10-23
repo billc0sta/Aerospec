@@ -1,0 +1,24 @@
+Initial arr1:
+[1, 2, 3]
+Size: 3
+After extending with arr2 and arr3:
+[1, 2, 3, 4, 5, 6, apple, banana]
+Size: 8
+After extending with arr4 (empty):
+[1, 2, 3, 4, 5, 6, apple, banana]
+Size: 8
+After extending with arr5:
+[1, 2, 3, 4, 5, 6, apple, banana, true, false]
+Size: 10
+After extending with nested arr6:
+[1, 2, 3, 4, 5, 6, apple, banana, true, false, [1, 2], [3, 4]]
+Size: 12
+After extending with arr7:
+[1, 2, 3, 4, 5, 6, apple, banana, true, false, [1, 2], [3, 4], 10, 20, 30]
+Size: 15
+After extending with arr8 (mixed types):
+[1, 2, 3, 4, 5, 6, apple, banana, true, false, [1, 2], [3, 4], 10, 20, 30, nil, test, true]
+Size: 18
+After extending arr1 through arr9 (self-reference):
+[1, 2, 3, 4, 5, 6, apple, banana, true, false, [1, 2], [3, 4], 10, 20, 30, nil, test, true, 100, 200]
+Size: 20

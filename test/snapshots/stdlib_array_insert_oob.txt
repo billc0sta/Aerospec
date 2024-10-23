@@ -1,0 +1,6 @@
+
+::RuntimeError
+  at file: tests\stdlib_array_insert_oob.aero
+  at line: 2
+  Invalid Argument: 'index' out of bounds - String.insert.
+---------------------------

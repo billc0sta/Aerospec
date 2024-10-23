@@ -1,0 +1,6 @@
+
+::RuntimeError
+  at file: tests\stdlib_array_pop_oob2.aero
+  at line: 2
+  Invalid Argument: 'indices...' out of bounds - Array.pop.
+---------------------------

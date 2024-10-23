@@ -1,0 +1,39 @@
+Initial empty arr:
+[]
+Size: 0
+After appending 1, 2, 3:
+[1, 2, 3]
+Size: 3
+After appending nil:
+[1, 2, 3, nil]
+Size: 4
+After appending Bool.true:
+[1, 2, 3, nil, true]
+Size: 5
+After appending an array [4, 5, 6]:
+[1, 2, 3, nil, true, [4, 5, 6]]
+Size: 6
+After appending 'apple', 'banana', nil:
+[1, 2, 3, nil, true, [4, 5, 6], apple, banana, nil]
+Size: 9
+After appending multiple 1s:
+[1, 2, 3, nil, true, [4, 5, 6], apple, banana, nil, 1, 1, 1]
+Size: 12
+After appending nested arrays [10, 20] and [30, 40]:
+[1, 2, 3, nil, true, [4, 5, 6], apple, banana, nil, 1, 1, 1, [10, 20], [30, 40]]
+Size: 14
+After appending to a new empty array arr2:
+[100, 200]
+Size: 2
+After appending arr to arr2:
+[100, 200, [1, 2, 3, nil, true, [4, 5, 6], apple, banana, nil, 1, 1, 1, [10, 20], [30, 40]]]
+Size: 3
+After appending 42, nil, 'test':
+[1, 2, 3, nil, true, [4, 5, 6], apple, banana, nil, 1, 1, 1, [10, 20], [30, 40], 42, nil, test]
+Size: 17
+After appending Bool.false, Bool.true:
+[1, 2, 3, nil, true, [4, 5, 6], apple, banana, nil, 1, 1, 1, [10, 20], [30, 40], 42, nil, test, false, true]
+Size: 19
+After appending an empty array:
+[1, 2, 3, nil, true, [4, 5, 6], apple, banana, nil, 1, 1, 1, [10, 20], [30, 40], 42, nil, test, false, true, []]
+Size: 20

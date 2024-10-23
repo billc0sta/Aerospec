@@ -1,0 +1,10 @@
+arr := [1, 2, 3, "str1", "str2", "str3", Bool.true, Bool.false, IO.print]
+IO.print(arr[0], "\n")
+IO.print(arr[1], "\n")
+IO.print(arr[2], "\n")
+IO.print(arr[3], "\n")
+IO.print(arr[4], "\n")
+IO.print(arr[5], "\n")
+IO.print(arr[6], "\n")
+IO.print(arr[7], "\n")
+IO.print(arr[8], "\n")

@@ -1,0 +1,2 @@
+arr := [1, 2, 3, "str1", "str2", "str3", Bool.true, Bool.false, IO.print]
+Array.insert(arr, 0, -1)

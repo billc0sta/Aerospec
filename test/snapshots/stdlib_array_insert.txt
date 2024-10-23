@@ -1,0 +1,33 @@
+Initial arr:
+[1, 2, 3, apple]
+Size: 4
+After inserting Bool.true at index 0:
+[true, 1, 2, 3, apple]
+Size: 5
+After inserting 4.5 at index 2:
+[true, 1, 4.5, 2, 3, apple]
+Size: 6
+After inserting 'banana' at the end:
+[true, 1, 4.5, 2, 3, apple, banana]
+Size: 7
+After inserting nil at index 3:
+[true, 1, 4.5, nil, 2, 3, apple, banana]
+Size: 8
+After inserting 42 at index 2:
+[true, 1, 42, 4.5, nil, 2, 3, apple, banana]
+Size: 9
+After inserting into empty arr2 at index 0:
+[new element]
+Size: 1
+After inserting into arr2 at index 1:
+[new element, another element]
+Size: 2
+After inserting 'first' at the start of arr:
+[first, true, 1, 42, 4.5, nil, 2, 3, apple, banana]
+Size: 10
+After inserting 'middle' at the middle of arr:
+[first, true, 1, 42, 4.5, middle, nil, 2, 3, apple, banana]
+Size: 11
+After inserting 'last' at the end of arr:
+[first, true, 1, 42, 4.5, middle, nil, 2, 3, apple, banana, last]
+Size: 12

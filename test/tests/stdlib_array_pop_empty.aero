@@ -1,0 +1,2 @@
+arr := []
+Array.pop(arr, 0)

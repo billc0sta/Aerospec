@@ -1,0 +1,33 @@
+arr := [1, 2, 3, "apple"]
+IO.print("Initial arr:\n", arr, "\nSize: ", Array.len(arr), "\n")
+
+Array.insert(arr, Bool.true, 0)
+IO.print("After inserting Bool.true at index 0:\n", arr, "\nSize: ", Array.len(arr), "\n")
+
+Array.insert(arr, 4.5, 2)
+IO.print("After inserting 4.5 at index 2:\n", arr, "\nSize: ", Array.len(arr), "\n")
+
+Array.insert(arr, "banana", Array.len(arr))
+IO.print("After inserting 'banana' at the end:\n", arr, "\nSize: ", Array.len(arr), "\n")
+
+Array.insert(arr, _, 3)
+IO.print("After inserting nil at index 3:\n", arr, "\nSize: ", Array.len(arr), "\n")
+
+Array.insert(arr, 42, 2)
+IO.print("After inserting 42 at index 2:\n", arr, "\nSize: ", Array.len(arr), "\n")
+
+arr2 := []
+Array.insert(arr2, "new element", 0)
+IO.print("After inserting into empty arr2 at index 0:\n", arr2, "\nSize: ", Array.len(arr2), "\n")
+
+Array.insert(arr2, "another element", 1)
+IO.print("After inserting into arr2 at index 1:\n", arr2, "\nSize: ", Array.len(arr2), "\n")
+
+Array.insert(arr, "first", 0)
+IO.print("After inserting 'first' at the start of arr:\n", arr, "\nSize: ", Array.len(arr), "\n")
+
+Array.insert(arr, "middle", 5)
+IO.print("After inserting 'middle' at the middle of arr:\n", arr, "\nSize: ", Array.len(arr), "\n")
+
+Array.insert(arr, "last", Array.len(arr))
+IO.print("After inserting 'last' at the end of arr:\n", arr, "\nSize: ", Array.len(arr), "\n")

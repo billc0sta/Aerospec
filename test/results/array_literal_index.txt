@@ -1,0 +1,9 @@
+1
+2
+3
+str1
+str2
+str3
+true
+false
+<native ( params... )>

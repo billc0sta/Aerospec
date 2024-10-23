@@ -1,0 +1,22 @@
+arr := [1, 2, 3, "apple", Bool.true, 4.5, "banana", 2]
+IO.print("Initial arr:\n", arr, "\n")
+
+IO.print("Index of 1:\n", Array.index(arr, 1), "\n")
+IO.print("Index of 'apple':\n", Array.index(arr, "apple"), "\n")
+IO.print("Index of 2:\n", Array.index(arr, 2), "\n")
+IO.print("Index of Bool.true:\n", Array.index(arr, Bool.true), "\n")
+IO.print("Index of 4.5:\n", Array.index(arr, 4.5), "\n")
+IO.print("Index of non-existent element 5:\n", Array.index(arr, 5), "\n")
+
+nestedArr := [arr, [1, 2, 3]]
+IO.print("Nested arr:\n", nestedArr, "\n")
+IO.print("Index of nested array [1, 2, 3]:\n", Array.index(nestedArr, [1, 2, 3]), "\n")
+IO.print("Index of non-existent nested array [4, 5]:\n", Array.index(nestedArr, [4, 5]), "\n")
+
+arr3 := []
+IO.print("Index of element in empty array:\n", Array.index(arr3, 1), "\n")
+
+Array.append(arr3, "test", "test", "test")
+IO.print("arr3 after appending multiple 'test':\n", arr3, "\n")
+IO.print("Index of first occurrence of 'test' in arr3:\n", Array.index(arr3, "test"), "\n")
+IO.print("Index of non-existent element in arr3:\n", Array.index(arr3, "nonexistent"), "\n")

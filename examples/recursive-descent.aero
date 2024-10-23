@@ -41,8 +41,8 @@ parser := {
 
     raw = ""
     index = 0
-    ended = !!0
-    erred = !!0
+    ended = Bool.false
+    erred = Bool.false
 
     consume := (token, message) {
         ?? (token == peek_char()) forward_char()
@@ -51,7 +51,7 @@ parser := {
 
     error := (message) {
         IO.print("Error: ", message, ".\n")
-        $erred = !0
+        $erred = Bool.true
     }
 
     forward_char := () {
@@ -125,25 +125,24 @@ parser := {
 
     rule_expr := () {
         skip_space()
-        expr := rule_basic()
-        -> expr
+        -> rule_basic()
     }
 
     parse := (raw) {
         $raw   = raw
         $index = 0
-        $ended = !!0
-        $erred = !!0
+        $ended = Bool.false
+        $erred = Bool.false
         -> rule_expr()
     }
 }
 
 kalkul := {
-    erred = !0
+    erred = Bool.false
 
     error := (message) {
         IO.print("Error: ", message, ".\n")
-        $erred = !!0
+        $erred = Bool.true
     }
 
     evaluate := (expr) {
@@ -156,7 +155,7 @@ kalkul := {
     evaluate_binary := (expr) {
         ev1 := evaluate(expr.lhd)
         ev2 := evaluate(expr.rhd)
-        ?? (!$erred) -> _ 
+        ?? (erred) -> _ 
         op := expr.op
         ?? op == "+" -> ev1 + ev2
         ?? op == "-" -> ev1 - ev2

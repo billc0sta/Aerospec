@@ -16,7 +16,7 @@ let append rez elem =
   rez.size <- rez.size + 1
 
 let insert rez index elem =
-  if index < 0 || index >= rez.size then
+  if index < 0 || index > rez.size then
 	raise (Invalid_argument "Resizable.insert: oob")
   else
 	if rez.size = Array.length rez.arr 

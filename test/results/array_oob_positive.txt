@@ -1,0 +1,6 @@
+
+::RuntimeError
+  at file: tests\array_oob_positive.aero
+  at line: 2
+  Accessing array out of bounds.
+---------------------------

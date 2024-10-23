@@ -1,0 +1,6 @@
+
+::RuntimeError
+  at file: tests\string_deeplock_assignment.aero
+  at line: 2
+  Cannot assign to a subscript of a locked string.
+---------------------------

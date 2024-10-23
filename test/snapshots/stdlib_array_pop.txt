@@ -1,0 +1,8 @@
+After popping index 1 from arr1: [1, 3, 4, 5]
+Size of arr1: 4
+After popping indices 0 and 2 from arr2: [banana, cherry]
+Size of arr2: 2
+After popping index 0 from arr3: [false, true]
+Size of arr3: 2
+After popping index 3 from arr4: [nil, test, 42]
+Size of arr4: 3

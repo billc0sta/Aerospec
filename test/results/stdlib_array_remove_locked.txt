@@ -1,0 +1,6 @@
+
+::RuntimeError
+  at file: tests\stdlib_array_remove_locked.aero
+  at line: 2
+  Invalid Argument: Cannot apply Array.remove to a locked array.
+---------------------------

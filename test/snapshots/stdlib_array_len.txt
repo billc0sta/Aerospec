@@ -1,0 +1,5 @@
+Size of arr1: 3
+Size of arr2: 2
+Size of arr3: 2
+Size of arr4 (empty): 0
+Size of arr5: 6

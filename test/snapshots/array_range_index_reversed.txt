@@ -1,0 +1,6 @@
+
+::RuntimeError
+  at file: tests\array_range_index_reversed.aero
+  at line: 2
+  Range subscript is invalid as the begin value exceeds the end value.
+---------------------------

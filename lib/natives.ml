@@ -13,6 +13,10 @@ let report_error message =
 let clock _ = 
   Float (Sys.time ()) 
 
+let truth params =
+  let v = List.hd params in
+  Bool (Value.truth v) 
+
 let string_len params =
   let str = List.hd params in
   match str with
@@ -353,4 +357,11 @@ let module_object () =
 let module_value () =
   let env = Environment.make () in
   Environment.add "copy" (NatFunc (1, ["value"], copy), false) env;
+  Object(env, true)
+
+let module_bool () =
+  let env = Environment.make () in
+  Environment.add "true" (Bool true, false) env;
+  Environment.add "false" (Bool false, false) env;
+  Environment.add "truth" (NatFunc (1, ["value"], truth), false) env;
   Object(env, true)

@@ -1,0 +1,2 @@
+[1, 2, 3, str1, str2, str3, true, false, <native ( params... )>]
+[-1, 0, 1, Hello, , World, !, <object>, <object>, <native ( value )>]

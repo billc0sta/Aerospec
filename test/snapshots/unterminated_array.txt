@@ -1,0 +1,7 @@
+
+::Syntax Error
+  at file: tests\unterminated_array.aero
+  at line: 1
+  here --" [ "-- 
+  Expected an expression.
+---------------------------

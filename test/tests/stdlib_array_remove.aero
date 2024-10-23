@@ -1,0 +1,24 @@
+arr1 := [1, 2, 3, 4, 5, 2, 3]
+arr2 := ["apple", "banana", "cherry", "banana"]
+arr3 := [Bool.true, Bool.false, Bool.true, Bool.true]
+arr4 := [_, "test", 42, Bool.false, _]
+
+Array.remove(arr1, 2)
+IO.print("After removing 2 from arr1: ", arr1, "\n")
+IO.print("Size of arr1: ", Array.len(arr1), "\n")
+
+Array.remove(arr2, "banana")
+IO.print("After removing 'banana' from arr2: ", arr2, "\n")
+IO.print("Size of arr2: ", Array.len(arr2), "\n")
+
+Array.remove(arr3, Bool.true)
+IO.print("After removing Bool.true from arr3: ", arr3, "\n")
+IO.print("Size of arr3: ", Array.len(arr3), "\n")
+
+Array.remove(arr4, _)
+IO.print("After removing nil from arr4: ", arr4, "\n")
+IO.print("Size of arr4: ", Array.len(arr4), "\n")
+
+Array.remove(arr1, 10)
+IO.print("After attempting to remove 10 from arr1 (not found): ", arr1, "\n")
+IO.print("Size of arr1: ", Array.len(arr1), "\n")

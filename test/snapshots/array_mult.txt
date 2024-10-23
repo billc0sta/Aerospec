@@ -1,0 +1,6 @@
+
+::RuntimeError
+  at file: tests\array_mult.aero
+  at line: 2
+  Cannot apply operator '*' to values of types ('array' and 'array').
+---------------------------

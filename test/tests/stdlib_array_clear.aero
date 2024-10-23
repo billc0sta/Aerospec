@@ -1,0 +1,36 @@
+arr1 := [1, 2, "apple", Bool.true]
+arr2 := [3, 4, "banana", Bool.false]
+arr3 := []
+arr4 := [5, 6]
+
+IO.print(arr1, "\n")
+IO.print(Array.len(arr1), "\n")
+Array.clear(arr1)
+IO.print(arr1, "\n")
+IO.print(Array.len(arr1), "\n")
+
+IO.print(arr2, "\n")
+IO.print(Array.len(arr2), "\n")
+Array.clear(arr2)
+IO.print(arr2, "\n")
+IO.print(Array.len(arr2), "\n")
+
+IO.print(arr3, "\n")
+IO.print(Array.len(arr3), "\n")
+Array.clear(arr3)
+IO.print(arr3, "\n")
+IO.print(Array.len(arr3), "\n")
+
+IO.print(arr4, "\n")
+IO.print(Array.len(arr4), "\n")
+Array.clear(arr4)
+IO.print(arr4, "\n")
+IO.print(Array.len(arr4), "\n")
+
+arr5 := [1, 2, 3]
+arr6 := arr5
+IO.print(arr6, "\n")
+IO.print(Array.len(arr6), "\n")
+Array.clear(arr6)
+IO.print(arr5, "\n")
+IO.print(Array.len(arr5), "\n")

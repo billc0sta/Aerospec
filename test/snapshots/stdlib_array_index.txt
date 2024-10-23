@@ -1,0 +1,28 @@
+Initial arr:
+[1, 2, 3, apple, true, 4.5, banana, 2]
+Index of 1:
+0
+Index of 'apple':
+3
+Index of 2:
+1
+Index of Bool.true:
+4
+Index of 4.5:
+5
+Index of non-existent element 5:
+-1
+Nested arr:
+[[1, 2, 3, apple, true, 4.5, banana, 2], [1, 2, 3]]
+Index of nested array [1, 2, 3]:
+1
+Index of non-existent nested array [4, 5]:
+-1
+Index of element in empty array:
+-1
+arr3 after appending multiple 'test':
+[test, test, test]
+Index of first occurrence of 'test' in arr3:
+0
+Index of non-existent element in arr3:
+-1

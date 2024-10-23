@@ -1,0 +1,11 @@
+arr1 := [1, 2, 3]
+arr2 := ["apple", "banana"]
+arr3 := [Bool.true, Bool.false]
+arr4 := []
+arr5 := [1, 2, 3, "apple", Bool.true, _]
+
+IO.print("Size of arr1: ", Array.len(arr1), "\n")
+IO.print("Size of arr2: ", Array.len(arr2), "\n")
+IO.print("Size of arr3: ", Array.len(arr3), "\n")
+IO.print("Size of arr4 (empty): ", Array.len(arr4), "\n")
+IO.print("Size of arr5: ", Array.len(arr5), "\n")

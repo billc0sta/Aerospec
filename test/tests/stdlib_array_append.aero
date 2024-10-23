@@ -1,0 +1,39 @@
+arr := []
+IO.print("Initial empty arr:\n", arr, "\nSize: ", Array.len(arr), "\n")
+
+Array.append(arr, 1, 2, 3)
+IO.print("After appending 1, 2, 3:\n", arr, "\nSize: ", Array.len(arr), "\n")
+
+Array.append(arr, _)
+IO.print("After appending nil:\n", arr, "\nSize: ", Array.len(arr), "\n")
+
+Array.append(arr, Bool.true)
+IO.print("After appending Bool.true:\n", arr, "\nSize: ", Array.len(arr), "\n")
+
+Array.append(arr, [4, 5, 6])
+IO.print("After appending an array [4, 5, 6]:\n", arr, "\nSize: ", Array.len(arr), "\n")
+
+Array.append(arr, "apple", "banana", _)
+IO.print("After appending 'apple', 'banana', nil:\n", arr, "\nSize: ", Array.len(arr), "\n")
+
+Array.append(arr, 1, 1, 1)
+IO.print("After appending multiple 1s:\n", arr, "\nSize: ", Array.len(arr), "\n")
+
+Array.append(arr, [10, 20], [30, 40])
+IO.print("After appending nested arrays [10, 20] and [30, 40]:\n", arr, "\nSize: ", Array.len(arr), "\n")
+
+arr2 := []
+Array.append(arr2, 100, 200)
+IO.print("After appending to a new empty array arr2:\n", arr2, "\nSize: ", Array.len(arr2), "\n")
+
+Array.append(arr2, arr)
+IO.print("After appending arr to arr2:\n", arr2, "\nSize: ", Array.len(arr2), "\n")
+
+Array.append(arr, 42, _, "test")
+IO.print("After appending 42, nil, 'test':\n", arr, "\nSize: ", Array.len(arr), "\n")
+
+Array.append(arr, Bool.false, Bool.true)
+IO.print("After appending Bool.false, Bool.true:\n", arr, "\nSize: ", Array.len(arr), "\n")
+
+Array.append(arr, [])
+IO.print("After appending an empty array:\n", arr, "\nSize: ", Array.len(arr), "\n")

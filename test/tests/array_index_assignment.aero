@@ -1,0 +1,12 @@
+arr := [1, 2, 3, "str1", "str2", "str3", Bool.true, Bool.false, IO.print]
+IO.print(arr, "\n")
+arr[0] = -1
+arr[1] = 0
+arr[2] = 1
+arr[3] = "Hello, "
+arr[4] = "World"
+arr[5] = "!"
+arr[6] = {}
+arr[7] = {}
+arr[8] = Bool.truth
+IO.print(arr)

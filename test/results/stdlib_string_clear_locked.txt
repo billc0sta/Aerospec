@@ -1,0 +1,6 @@
+
+::RuntimeError
+  at file: tests\stdlib_string_clear_locked.aero
+  at line: 2
+  Invalid Argument: Cannot apply String.clear to a locked string.
+---------------------------

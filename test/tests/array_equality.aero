@@ -1,0 +1,30 @@
+arr1 := [5, 10, "orange", Bool.true]
+arr2 := [5, 10, "orange", Bool.false]
+arr3 := [15, 20, "grape", Bool.true]
+arr4 := [5, 10, "orange", Bool.true]
+arr5 := [25, 30, "melon", Bool.false]
+arr6 := [5, 10, "banana", Bool.true]
+
+IO.print(arr1 == arr2, "\n")
+IO.print(arr1 != arr2, "\n")
+
+IO.print(arr1 == arr3, "\n")
+IO.print(arr1 != arr3, "\n")
+
+IO.print(arr1 == arr4, "\n")
+IO.print(arr1 != arr4, "\n")
+
+IO.print(arr2 == arr5, "\n")
+IO.print(arr2 != arr5, "\n")
+
+IO.print(arr3 == arr4, "\n")
+IO.print(arr3 != arr4, "\n")
+
+IO.print(arr5 == arr6, "\n")
+IO.print(arr5 != arr6, "\n")
+
+IO.print(arr1 == arr6, "\n")
+IO.print(arr1 != arr6, "\n")
+
+IO.print(arr2 == arr4, "\n")
+IO.print(arr2 != arr4, "\n")

@@ -1,0 +1,7 @@
+
+::Syntax Error
+  at file: tests\if_stmt_no_stmt.aero
+  at line: 1
+  here --" ?? Bool.true "-- 
+  Expected a statement.
+---------------------------

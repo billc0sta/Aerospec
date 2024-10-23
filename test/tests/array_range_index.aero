@@ -1,0 +1,14 @@
+arr := [1, 2, 3, "str1", "str2", "str3", Bool.true, Bool.false, IO.print]
+
+IO.print(arr[-Float.inf:Float.inf], "\n")
+IO.print(arr[:Float.inf], "\n")
+IO.print(arr[-Float.inf:], "\n")
+IO.print(arr[:], "\n")
+IO.print(arr[0:9], "\n")
+IO.print(arr[0:], "\n")
+IO.print(arr[3:9], "\n")
+IO.print(arr[1:9], "\n")
+IO.print(arr[1:1], "\n")
+IO.print(arr[8:9], "\n")
+IO.print(arr[0:1], "\n")
+IO.print(arr[0:0], "\n")

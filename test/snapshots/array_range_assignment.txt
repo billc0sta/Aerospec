@@ -1,0 +1,7 @@
+
+::Syntax Error
+  at file: tests\array_range_assignment.aero
+  at line: 2
+  here --" arr[1:3] = 1 "-- 
+  Cannot assign to an expression.
+---------------------------

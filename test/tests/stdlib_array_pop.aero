@@ -1,0 +1,20 @@
+arr1 := [1, 2, 3, 4, 5]
+arr2 := ["apple", "banana", "cherry", "date"]
+arr3 := [Bool.true, Bool.false, Bool.true]
+arr4 := [_, "test", 42, Bool.false]
+
+Array.pop(arr1, 1)
+IO.print("After popping index 1 from arr1: ", arr1, "\n")
+IO.print("Size of arr1: ", Array.len(arr1), "\n")
+
+Array.pop(arr2, 0, 2)
+IO.print("After popping indices 0 and 2 from arr2: ", arr2, "\n")
+IO.print("Size of arr2: ", Array.len(arr2), "\n")
+
+Array.pop(arr3, 0)
+IO.print("After popping index 0 from arr3: ", arr3, "\n")
+IO.print("Size of arr3: ", Array.len(arr3), "\n")
+
+Array.pop(arr4, 3)
+IO.print("After popping index 3 from arr4: ", arr4, "\n")
+IO.print("Size of arr4: ", Array.len(arr4), "\n")

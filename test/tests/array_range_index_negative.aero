@@ -1,0 +1,2 @@
+arr := [1, 2, "str1", "str2", Bool.true, Bool.false, IO.print]
+IO.print(arr[-1:4])

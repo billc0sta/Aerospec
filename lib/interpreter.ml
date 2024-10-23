@@ -15,7 +15,8 @@ let add_natives env =
   Environment.add "String" (Natives.module_string (), false) env;
   Environment.add "Array" (Natives.module_array (), false) env;
   Environment.add "Object" (Natives.module_object (), false) env;
-  Environment.add "Value" (Natives.module_value (), false) env
+  Environment.add "Value" (Natives.module_value (), false) env;
+  Environment.add "Bool" (Natives.module_bool (), false) env
 
 let report_error message tk inp =
   raise (RuntimeError (message, inp.path, tk))

@@ -1,0 +1,6 @@
+
+::RuntimeError
+  at file: tests\string_minus.aero
+  at line: 1
+  Cannot apply operator '-' to values of types ('string' and 'string').
+---------------------------

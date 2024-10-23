@@ -1,0 +1,6 @@
+
+::RuntimeError
+  at file: tests\stdlib_array_count_untype.aero
+  at line: 1
+  Invalid Argument: Expected an array as the 'array' argument to Array.count.
+---------------------------

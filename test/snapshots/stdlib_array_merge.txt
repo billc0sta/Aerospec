@@ -1,0 +1,14 @@
+Merged Array 1: [1, 2, 3, apple, banana, true, false, 4.5, orange]
+Size of Merged Array 1: 9
+Merged Array 2: [nil, test, 42, last, false]
+Size of Merged Array 2: 5
+Merged Array 3 (with empty array): [1, 2, 3, apple, banana]
+Size of Merged Array 3: 5
+Merged Array 4 (two empty arrays): []
+Size of Merged Array 4: 0
+Merged Array 5 (multiple arrays): [1, 2, 3, 4, 5, 6, 7, 8, 9]
+Size of Merged Array 5: 9
+Merged Array 6 (strings and nil): [string1, string2, nil]
+Size of Merged Array 6: 3
+Merged Array 7 (with filled array): [0, 1, 2, 3, 4, 5, 10, 11, 12]
+Size of Merged Array 7: 9
