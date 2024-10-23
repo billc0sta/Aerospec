@@ -1,0 +1,8 @@
+original: [[field, 123, true], [field2, [1, 2, 3], true]]
+copied: [[field, 123, true], [field2, [123, 2, 3], true]]
+
+::RuntimeError
+  at file: tests\stdlib_value_copy_locked_object.aero
+  at line: 6
+  Cannot assign property to a locked object.
+---------------------------

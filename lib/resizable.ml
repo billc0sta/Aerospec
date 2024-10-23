@@ -192,3 +192,12 @@ let compare f rez1 rez2 =
       if x <> 0 then x
       else aux (i+1)
     in aux 0
+
+let reverse rez =
+  let length = len rez in
+  if length = 0 then () else
+    for i=0 to (length / 2) do
+      let temp = rez.arr.(i) in 
+      rez.arr.(i) <- rez.arr.(length - i - 1);
+      rez.arr.(length - i - 1) <- temp
+    done

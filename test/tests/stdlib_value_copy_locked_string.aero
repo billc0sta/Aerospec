@@ -1,0 +1,3 @@
+str := &"hello"
+copied := Value.copy(str)
+copied[0] = "g"

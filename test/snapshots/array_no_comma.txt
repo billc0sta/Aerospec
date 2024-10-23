@@ -1,7 +1,7 @@
 
 ::Syntax Error
-  at file: tests\unterminated_array2.aero
+  at file: tests\array_no_comma.aero
   at line: 1
-  here --" [1, 2, 3 "-- 
+  here --" arr = [ 1 1 ] "-- 
   Expected a Comma ',' or a Closing Square Bracket ']'.
 ---------------------------

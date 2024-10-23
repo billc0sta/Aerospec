@@ -366,14 +366,11 @@ and array_expr parser =
     let tk = peek parser in
     match tk.typeof with
     | CSquare -> (exprs, forward parser)
-    | _ -> begin
-      let (expr, parser) = expression parser in
-      let tk = peek parser in
-      match tk.typeof with
-      | CSquare -> aux (expr::exprs) parser
-      | Comma -> aux (expr::exprs) (forward parser)
-      | _ -> report_error "Expected a Comma ','" parser
-    end
+    | Comma -> begin
+        let (expr, parser) = expression (forward parser) in
+        aux (expr::exprs) parser 
+        end
+    | _ -> report_error "Expected a Comma ',' or a Closing Square Bracket ']'" parser
   in
 
   let tk = peek parser in
@@ -384,7 +381,6 @@ and array_expr parser =
     if match expr with Range _ -> true | _ -> false
     then builder_expr expr parser 
     else
-  let parser = if (peek parser).typeof = Comma then forward parser else parser in
   let (exprs, parser) = aux [expr] parser in
   (ArrExpr (List.rev exprs, tk), parser)
 

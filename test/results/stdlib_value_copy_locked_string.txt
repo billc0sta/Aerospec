@@ -1,0 +1,6 @@
+
+::RuntimeError
+  at file: tests\stdlib_value_copy_locked_string.aero
+  at line: 3
+  Cannot assign to a subscript of a locked string.
+---------------------------

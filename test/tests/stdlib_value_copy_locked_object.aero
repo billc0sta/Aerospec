@@ -1,0 +1,6 @@
+obj := &{field = 123; field2=[1, 2, 3]}
+copied := Value.copy(obj)
+copied.field2[0] = 123
+IO.print("original: ", Object.fields(obj), "\n")
+IO.print("copied: ", Object.fields(copied), "\n")
+copied.field = 0

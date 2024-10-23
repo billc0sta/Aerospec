@@ -1,0 +1,6 @@
+[1, 2, 3, [123, 5, 6]]
+::RuntimeError
+  at file: tests\stdlib_value_copy_locked_array.aero
+  at line: 5
+  Cannot assign to a subscript of a locked array.
+---------------------------

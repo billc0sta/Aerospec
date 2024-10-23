@@ -387,7 +387,7 @@ and assignment target expr token inp =
   | IdentExpr (tk, global) -> if global then ignore(evaluate_ident tk global inp); assign_ident mut expr target inp
   | Subscript (target, (index, None), tk) -> 
 	 if not mut then report_error "Cannot constant-assign an index" tk inp
-	 else assign_subscript expr target index inp
+	 else assign_subscript expr target index tk inp
   | PropertyExpr (obj, target) -> assign_property obj target expr mut inp 
   | _ -> assert false
 
@@ -418,12 +418,8 @@ and assign_property obj target expr ismut inp =
 		Environment.replace tk.value (value, ismut) env; value
 	end
 
-and assign_subscript expr target index inp =
-  let (rez, token) =
-    match target with
-    | IdentExpr(tk, global) -> (evaluate_ident tk global inp, tk)
-    | Subscript(expr, subexpr, tk) -> (evaluate_subscript expr subexpr tk inp, tk) 
-    | _ -> assert false
+and assign_subscript expr target index token inp =
+  let rez = evaluate target inp 
   in
   match rez with
   | Arr (rez, locked) ->

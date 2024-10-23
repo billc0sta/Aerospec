@@ -1,0 +1,3 @@
+obj := &&{field = [1, 2, 3]}
+copied := Value.copy(obj)
+copied.field[0] = 123

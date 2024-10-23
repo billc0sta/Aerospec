@@ -1,0 +1,6 @@
+
+::RuntimeError
+  at file: tests\stdlib_value_copy_deeplocked_object.aero
+  at line: 3
+  Cannot assign to a subscript of a locked array.
+---------------------------

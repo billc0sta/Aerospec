@@ -1,0 +1,22 @@
+1
+123
+0
+123.323
+original: duck
+copied: dick
+original: 
+copied: Hello, World!
+original: []
+copied: [123]
+original: [1, 2, 3, 4, 5]
+copied: [0, 2, 3, 4, 5]
+original: [1, 2, 3, [4, 5, 6]]
+copied: [12.3, 2, 3, [412, 5, 6]]
+original: []
+copied: [[new_field, 123, true]]
+original: [[field, 0, true]]
+copied: [[field, 123, true], [new_field, Hello, World, true]]
+original: [[obj, <object>, true], [arr, [1, 2, 3, [4, 5, 6]], true], [string, string, true]]
+original: [[arr, [1, 2, 3, [4, 5, 6]], true], [string, string, true]]
+copied: [[obj, <object>, true], [arr, [123, 2, 3, [123, 5, 6]], true], [string, spring, true]]
+copied: [[arr, [123, 2, 3, [str, 5, 6]], true], [string, spring, true]]

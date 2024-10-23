@@ -1,0 +1,6 @@
+
+::RuntimeError
+  at file: tests\stdlib_object_fields_untype.aero
+  at line: 1
+  Invalid Argument: Expected an object as the 'object' argument to Object.fields.
+---------------------------

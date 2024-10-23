@@ -1,0 +1,55 @@
+simple_obj = {
+    x := 10
+    y = "test"
+    z = [1, 2, 3]
+}
+
+fields_simple = Object.fields(simple_obj)
+IO.print(fields_simple, "\n")
+
+obj_with_function = {
+    a = 42
+    b = (n) { -> n * n }
+    c = Bool.true
+}
+
+fields_with_function = Object.fields(obj_with_function)
+IO.print(fields_with_function, "\n")
+
+nested_obj = {
+    a = 100
+    b = {
+        inner_x = 50
+        inner_y := "constant"
+    }
+    c = "outer"
+}
+
+fields_nested = Object.fields(nested_obj)
+IO.print(fields_nested, "\n")
+
+fields_inner = Object.fields(nested_obj.b)
+IO.print(fields_inner, "\n")
+
+array_obj = {
+    arr = [
+        { field1 = 1 field2 = 2 },
+        { fieldA = "A" fieldB = "B" }
+    ]
+}
+
+fields_array_obj = Object.fields(array_obj)
+IO.print(fields_array_obj, "\n")
+
+empty_obj = {}
+fields_empty = Object.fields(empty_obj)
+IO.print(fields_empty, "\n")
+
+complex_constants = {
+    const_val := 500
+    const_array := [1, 2, 3, 4]
+    const_obj := { key := "constant" }
+}
+
+fields_complex_constants = Object.fields(complex_constants)
+IO.print(fields_complex_constants, "\n")

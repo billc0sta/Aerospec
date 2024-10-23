@@ -1,0 +1,7 @@
+[[z, [1, 2, 3], true], [y, test, true], [x, 10, false]]
+[[a, 42, true], [b, <function ( n )>, true], [c, true, true]]
+[[a, 100, true], [b, <object>, true], [c, outer, true]]
+[[inner_y, constant, false], [inner_x, 50, true]]
+[[arr, [<object>, <object>], true]]
+[]
+[[const_array, [1, 2, 3, 4], false], [const_val, 500, false], [const_obj, <object>, false]]

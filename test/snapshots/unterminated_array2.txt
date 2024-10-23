@@ -3,5 +3,5 @@
   at file: tests\unterminated_array2.aero
   at line: 1
   here --" [1, 2, 3 "-- 
-  Expected a Comma ','.
+  Expected a Comma ',' or a Closing Square Bracket ']'.
 ---------------------------
