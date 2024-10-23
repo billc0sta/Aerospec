@@ -1,0 +1,41 @@
+;[0 < i < 20; i % 2 == 0; IO.print(i, " ")]
+IO.print("\n")
+
+;[1 < i < 20; i % 2 == 0; IO.print(i, " ")]
+IO.print("\n")
+
+;[0 <= i < 20; i % 2 == 0; IO.print(i, " ")]
+IO.print("\n")
+
+;[0 <= i <= 20; i % 2 == 0; IO.print(i, " ")]
+IO.print("\n")
+
+;[10 > i > 0; i % 2 == 0; IO.print(i, " ")]
+IO.print("\n")
+
+;[10 >= i > 0; i % 2 == 0; IO.print(i, " ")]
+IO.print("\n")
+
+;[10 > i > 1; i % 2 == 0; IO.print(i, " ")]
+IO.print("\n")
+
+;[10 >= i >= 1; i % 2 == 0; IO.print(i, " ")]
+IO.print("\n")
+
+;[10 >= i > 0;; IO.print(i, " ")]
+IO.print("\n")
+
+;[10 > i > 0;; IO.print(i, " ")]
+IO.print("\n")
+
+;[5 > i >= 0; i % 2 == 0; IO.print(i, " ")]
+IO.print("\n")
+
+;[10 >= i > 5;; [5 >= j >= 0;; IO.print(j, " ")]]
+IO.print("\n")
+
+;[10 > i > 0;; [i > j > 0;; IO.print(j, " ")]]
+IO.print("\n")
+
+;[0 < i < 10; i % 2 == 0; IO.print(i, " ")]
+IO.print("\n")

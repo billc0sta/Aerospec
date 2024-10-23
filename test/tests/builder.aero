@@ -10,7 +10,25 @@ IO.print(arr, "\n")
 arr = [0 <= i <= 20; i % 2 == 0; i]
 IO.print(arr, "\n")
 
-arr = [1 <= i <= 20; i % 2 != 0; i]
+arr = [10 > i > 0; i % 2 == 0; i]
+IO.print(arr, "\n")
+
+arr = [10 >= i > 0; i % 2 == 0; i]
+IO.print(arr, "\n")
+
+arr = [1 < i < 10; i % 2 == 0; i]
+IO.print(arr, "\n")
+
+arr = [0 < i <= 10; i % 2 == 0; i]
+IO.print(arr, "\n")
+
+arr = [10 <= i < 20; i % 2 == 0; i]
+IO.print(arr, "\n")
+
+arr = [20 > i > 10; i % 2 == 0; i]
+IO.print(arr, "\n")
+
+arr = [1 <= i <= 10; i % 2 != 0; i]
 IO.print(arr, "\n")
 
 arr = [0 <= i < 20;; i]
@@ -22,7 +40,7 @@ IO.print(arr, "\n")
 arr = [0 <= i < 10; i % 2 == 0; [0 <= j < i;; j]]
 IO.print(arr, "\n")
 
-arr = [0 <= i < 10; i % 2 == 0; [0 <= i < 5;; i]]
+arr = [0 < i < 10; i % 2 == 0; [0 <= j < i;; j]]
 IO.print(arr, "\n")
 
 arr = [20 <= i < 20;; i]
@@ -37,9 +55,6 @@ IO.print(arr, "\n")
 arr = [1 <= i < 10; i % 2 == 0; [0 <= j < i; j % 2 == 0; j]]
 IO.print(arr, "\n")
 
-arr = [0 <= i <= 10; i % 1 == 0; i]
-IO.print(arr, "\n")
-
 arr = [10 <= i < 5;; i]
 IO.print(arr, "\n")
 
@@ -50,4 +65,25 @@ arr = [0 <= i <= 10000;; i]
 IO.print(arr, "\n")
 
 arr = [0 <= i <= 10000; i % 2 == 0; i]
+IO.print(arr, "\n")
+
+arr = [10 < i < 5;; i]
+IO.print(arr, "\n")
+
+arr = [5 < i < 10; i % 2 == 1; i]
+IO.print(arr, "\n")
+
+arr = [0 < i < 5; i % 2 != 0; i]
+IO.print(arr, "\n")
+
+arr = [5 < i <= 10; i % 3 == 0; i]
+IO.print(arr, "\n")
+
+arr = [10 < i < 15; i % 4 == 0; i]
+IO.print(arr, "\n")
+
+arr = [0 <= i < 10; i % 2 == 0; [i < j <= 10;; j]]
+IO.print(arr, "\n")
+
+arr = [1 <= i < 20; i % 2 != 0; [0 < j <= i;; j]]
 IO.print(arr, "\n")

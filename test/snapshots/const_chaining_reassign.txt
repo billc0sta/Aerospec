@@ -2,5 +2,5 @@
 ::RuntimeError
   at file: tests\const_chaining_reassign.aero
   at line: 2
-  Cannot re-assign to a constant.
+  Cannot re-assign to the constant 'a'.
 ---------------------------

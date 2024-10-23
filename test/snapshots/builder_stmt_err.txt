@@ -1,0 +1,13 @@
+
+::Syntax Error
+  at file: tests\builder_stmt_err.aero
+  at line: 1
+  here --" ;[;; IO.print(1, " ")] "-- 
+  Expected an expression.
+---------------------------
+::Syntax Error
+  at file: tests\builder_stmt_err.aero
+  at line: 1
+  here --" ;[;; IO.print(1, " ")] "-- 
+  Expected an expression.
+---------------------------
