@@ -240,7 +240,8 @@ and evaluate_binary expr1 expr2 op inp =
 	  | String (str1, _), String (str2, _) -> Bool (Resizable.equal str1 str2)
 	  | Float fl1, Float fl2 -> Bool (fl1 = fl2)
 	  | Bool b1, Bool b2 -> Bool (b1 = b2)
-	  | Arr (arr1, _), Arr (arr2, _) -> Bool (Resizable.equal arr1 arr2) 
+	  | Arr (arr1, _), Arr (arr2, _) -> Bool (Resizable.equal arr1 arr2)
+      | Nil, Nil -> (Bool true)
 	  | _ -> (Bool false) 
 	end 
   | ExcEqual -> begin
@@ -249,7 +250,8 @@ and evaluate_binary expr1 expr2 op inp =
 	  | String (str1, _), String (str2, _) -> Bool (not (Resizable.equal str1 str2))
 	  | Float fl1, Float fl2 -> Bool (fl1 <> fl2)
 	  | Bool b1, Bool b2 -> Bool (b1 <> b2)
-	  | Arr (arr1, _), Arr (arr2, _) -> Bool (not (Resizable.equal arr1 arr2)) 
+	  | Arr (arr1, _), Arr (arr2, _) -> Bool (not (Resizable.equal arr1 arr2))
+      | Nil, Nil -> (Bool false)
 	  | _ -> (Bool false)
 	end
   | Minus -> Float (simple_binary expr1 expr2 (-.))

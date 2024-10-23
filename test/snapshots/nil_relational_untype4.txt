@@ -1,0 +1,6 @@
+
+::RuntimeError
+  at file: tests\nil_relational_untype4.aero
+  at line: 1
+  Cannot apply operator '<=' to values of types ('nil' and 'function').
+---------------------------

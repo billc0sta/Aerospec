@@ -1,0 +1,6 @@
+
+::RuntimeError
+  at file: tests\nil_unplus.aero
+  at line: 1
+  Cannot apply operator '+' to values of type 'nil'.
+---------------------------
