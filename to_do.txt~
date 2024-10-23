@@ -1,0 +1,32 @@
+test arrays
+test builders
+test loops
+test range loops
+test objects
+test functions
+test global access
+test other stdlibs
+test nil value
+test importing
+make the documents
+make a lot of examples
+
+for later:
+	remake the whole thing in C
+	split between natives interface and implementation
+    	add c api
+	add hashmap
+	add integers
+	add static-analyser
+	add tuples
+	improve the standard library
+	add modes, like locked mode and static mode
+	add dunder-like mechanism for objects
+	add meta-info to function environments
+	add inheritance
+	add currying
+	add pipeline operator
+	add optional parameters
+	add parameter unfolding
+	add var arguments to normal functions
+	add tail optimization

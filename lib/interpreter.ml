@@ -37,6 +37,11 @@ let make raw path =
   add_natives inp.env;
   inp
 
+let no_op_range beg endof dir =
+  if dir = 1 && not (beg < endof) || dir = -1 && not (beg > endof)
+  then true
+  else false
+
 let rec evaluate expr inp =
   match expr with
   | FloatLit fl -> Float fl
@@ -56,20 +61,21 @@ let rec evaluate expr inp =
   | NilExpr -> Nil
 
 and evaluate_builder range cond expr inp =
-  let (rcond, name, beg, _, dir) = start_range range inp in
-  let dir = float_of_int dir in
+  let (rcond, name, beg, endof, dir) = start_range range inp in
   let arr = Resizable.make () in
-  let iter = ref (float_of_int beg) in
-  while truth (evaluate rcond inp) do
-	(if truth (evaluate cond inp) then 
-	   Resizable.append arr (evaluate expr inp)
-	);
-	iter := !iter +. dir;
-	Environment.replace name (Float (!iter), true) inp.env
-  done;
-  Environment.remove name inp.env;
-  Resizable.shrink arr;
-  Arr (arr, false)
+  if no_op_range beg endof dir then arr else
+    let dir = float_of_int dir in
+    let iter = ref (float_of_int beg) in
+    while truth (evaluate rcond inp) do
+	  (if truth (evaluate cond inp) then 
+	     Resizable.append arr (evaluate expr inp)
+	  );
+	  iter := !iter +. dir;
+	  Environment.replace name (Float (!iter), true) inp.env
+    done;
+    Environment.remove name inp.env;
+    Resizable.shrink arr;
+    Arr (arr, false)
 
 and evaluate_property expr ident inp =
   let tk = match ident with IdentExpr (tk, _) -> tk | _ -> assert false; in
@@ -529,21 +535,22 @@ and loop_stmt cond stmt inp =
   | _ -> normal_loop cond stmt inp
 
 and range_loop range stmt inp =
-  let (cond, name, beg, _, dir) = start_range range inp in
-  let (beg, dir) = (float_of_int beg, float_of_int dir) in
-  let rec aux iter inp =
-	if truth (evaluate cond inp) then
-	  let inp = exec_stmt stmt inp in
-	  let iter = iter+.dir in
-	  Environment.replace name (Float (iter), true) inp.env;
-	  if inp.state.breaked then {inp with state={inp.state with breaked=false}}
-	  else if inp.state.continued then aux iter {inp with state={inp.state with continued=false}}
-	  else aux iter inp
-	else inp
-  in 
-  let inp = aux beg inp in
-  Environment.remove name inp.env;
-  inp
+  let (cond, name, beg, endof, dir) = start_range range inp in
+  if no_op_range beg endof dir then inp else
+    let (beg, dir) = (float_of_int beg, float_of_int dir) in
+    let rec aux iter inp =
+	  if truth (evaluate cond inp) then
+	    let inp = exec_stmt stmt inp in
+	    let iter = iter+.dir in
+	    Environment.replace name (Float (iter), true) inp.env;
+	    if inp.state.breaked then {inp with state={inp.state with breaked=false}}
+	    else if inp.state.continued then aux iter {inp with state={inp.state with continued=false}}
+	    else aux iter inp
+	  else inp
+    in 
+    let inp = aux beg inp in
+    Environment.remove name inp.env;
+    inp
 
 and normal_loop cond stmt inp =
   let rec aux inp =
@@ -581,12 +588,6 @@ and start_range range inp =
 	| _ -> assert false;
   in
   let endof = (ev_expr expr2) in
-  let () = if dir = 1 && not (beg < endof) then
-		     report_error "Beginning should be less than ending of range expression" tk1 inp
-		   else if dir = -1 && not (beg > endof) then
-		     report_error "Beginning should be greter than ending of range expression" tk1 inp
-		   else ()
-  in
   let name = match ident with IdentExpr (tk, _) -> tk.value | _ -> assert false; in
   Environment.add name (Float (float_of_int beg), true) inp.env;
   (Binary (ident, tk2, FloatLit (float_of_int endof)), name, beg, endof, (dir:int))
