@@ -1,0 +1,13 @@
+
+::Syntax Error
+  at file: tests\builder_err2.aero
+  at line: 1
+  here --" builder = [10;; 10 "-- 
+  Expected an expression.
+---------------------------
+::Syntax Error
+  at file: tests\builder_err2.aero
+  at line: 1
+  here --" builder = [10;; 10] "-- 
+  Expected an expression.
+---------------------------

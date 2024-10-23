@@ -63,7 +63,7 @@ let rec evaluate expr inp =
 and evaluate_builder range cond expr inp =
   let (rcond, name, beg, endof, dir) = start_range range inp in
   let arr = Resizable.make () in
-  if no_op_range beg endof dir then arr else
+  if no_op_range beg endof dir then Arr (arr, false) else
     let dir = float_of_int dir in
     let iter = ref (float_of_int beg) in
     while truth (evaluate rcond inp) do
@@ -71,7 +71,7 @@ and evaluate_builder range cond expr inp =
 	     Resizable.append arr (evaluate expr inp)
 	  );
 	  iter := !iter +. dir;
-	  Environment.replace name (Float (!iter), true) inp.env
+	  Environment.replace name (Float (!iter), false) inp.env
     done;
     Environment.remove name inp.env;
     Resizable.shrink arr;
@@ -481,7 +481,7 @@ and assign_ident ismut expr ident inp =
 	    Environment.add name (value, ismut) env; value
 	  end
     | Some (_, mut) -> begin 
-	    if not mut then report_error "Cannot re-assign to a constant" token inp
+	    if not mut then report_error ("Cannot re-assign to the constant '"^name^"'") token inp
 	    else 
 		  let value = evaluate expr inp in
 		  Environment.replace name (value, ismut) env; value
@@ -542,7 +542,7 @@ and range_loop range stmt inp =
 	  if truth (evaluate cond inp) then
 	    let inp = exec_stmt stmt inp in
 	    let iter = iter+.dir in
-	    Environment.replace name (Float (iter), true) inp.env;
+	    Environment.replace name (Float (iter), false) inp.env;
 	    if inp.state.breaked then {inp with state={inp.state with breaked=false}}
 	    else if inp.state.continued then aux iter {inp with state={inp.state with continued=false}}
 	    else aux iter inp

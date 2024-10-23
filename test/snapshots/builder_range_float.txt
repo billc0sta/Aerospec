@@ -1,0 +1,6 @@
+
+::RuntimeError
+  at file: tests\builder_range_float.aero
+  at line: 1
+  Cannot use floating-point number in range expression.
+---------------------------
