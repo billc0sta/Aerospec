@@ -1,0 +1,6 @@
+
+::RuntimeError
+  at file: tests\string_relational_untype2.aero
+  at line: 1
+  Cannot apply operator '<' to values of types ('string' and 'function').
+---------------------------
