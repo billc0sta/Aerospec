@@ -1,0 +1,156 @@
+1
+2
+3
+4
+5
+6
+7
+8
+9
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+9
+8
+7
+6
+5
+4
+3
+2
+1
+10
+9
+8
+7
+6
+5
+4
+3
+2
+1
+9
+8
+7
+6
+5
+4
+3
+2
+1
+0
+10
+9
+8
+7
+6
+5
+4
+3
+2
+1
+0
+Processing odd number: 1
+Skipping even number: 2
+Processing odd number: 3
+Skipping even number: 4
+Processing odd number: 5
+Skipping even number: 6
+Processing odd number: 7
+Skipping even number: 8
+Processing odd number: 9
+Skipping even number: 10
+i=1
+i=2
+i=3
+i=4
+i=5
+Breaking out of loop at i=5
+Outer loop, i=1
+  Inner loop, i=1
+  Inner loop, i=2
+Outer loop, i=2
+  Inner loop, i=1
+  Inner loop, i=2
+Outer loop, i=3
+  Inner loop, i=1
+  Inner loop, i=2
+i=10
+i=9
+i=8
+i=7
+Exiting loop at i=7
+arr[0] = 10
+arr[1] = 20
+arr[2] = 30
+arr[3] = 40
+arr[4] = 50
+0 is even
+1 is odd
+2 is even
+3 is odd
+4 is even
+5 is odd
+Reached 5, stopping loop
+Processing: 10
+Skipping multiple of 3: 9
+Processing: 8
+Processing: 7
+Skipping multiple of 3: 6
+Processing: 5
+Processing: 4
+Skipping multiple of 3: 3
+Processing: 2
+Processing: 1
+i=0
+i=1
+i=2
+Doubling the range
+i=3
+i=4
+i=5
+Character at index 0: h
+Character at index 1: e
+Character at index 2: l
+Character at index 3: l
+Character at index 4: o
+inloop i=0
+inloop i=1
+inloop i=2
+inloop i=3
+inloop i=4
+inloop i=5
+inloop i=6
+inloop i=7
+inloop i=8
+inloop i=9
+inloop i=10
+outloop i=123

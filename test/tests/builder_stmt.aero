@@ -39,3 +39,10 @@ IO.print("\n")
 
 ;[0 < i < 10; i % 2 == 0; IO.print(i, " ")]
 IO.print("\n")
+
+i = 123
+;[0 < i < 10;; i]
+IO.print(i, "\n")
+
+;[10 < i < 0;; i]
+IO.print(i, "\n")

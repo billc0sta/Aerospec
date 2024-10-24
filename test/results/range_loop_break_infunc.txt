@@ -1,0 +1,6 @@
+
+::RuntimeError
+  at file: tests\range_loop_break_infunc.aero
+  at line: 2
+  Break statement ('**') outside of loop.
+---------------------------

@@ -1,0 +1,6 @@
+
+::RuntimeError
+  at file: tests\loop_continue_infunc.aero
+  at line: 2
+  Continue statement ('<<') outside of loop.
+---------------------------

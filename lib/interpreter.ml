@@ -63,7 +63,9 @@ let rec evaluate expr inp =
 and evaluate_builder range cond expr inp =
   let (rcond, name, beg, endof, dir) = start_range range inp in
   let arr = Resizable.make () in
-  if no_op_range beg endof dir then Arr (arr, false) else
+  if no_op_range beg endof dir
+  then (Environment.remove name inp.env; Arr (arr, false))
+  else
     let dir = float_of_int dir in
     let iter = ref (float_of_int beg) in
     while truth (evaluate rcond inp) do
@@ -536,7 +538,9 @@ and loop_stmt cond stmt inp =
 
 and range_loop range stmt inp =
   let (cond, name, beg, endof, dir) = start_range range inp in
-  if no_op_range beg endof dir then inp else
+  if no_op_range beg endof dir
+  then (Environment.remove name inp.env; inp)
+  else
     let (beg, dir) = (float_of_int beg, float_of_int dir) in
     let rec aux iter inp =
 	  if truth (evaluate cond inp) then

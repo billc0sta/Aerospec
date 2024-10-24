@@ -87,3 +87,10 @@ IO.print(arr, "\n")
 
 arr = [1 <= i < 20; i % 2 != 0; [0 < j <= i;; j]]
 IO.print(arr, "\n")
+
+i = 123
+arr = [1 <= i < 20;;i]
+IO.print(i, "\n")
+
+arr = [10 <= i <= 0;;i]
+IO.print(i, "\n")

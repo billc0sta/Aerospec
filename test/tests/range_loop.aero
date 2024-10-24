@@ -1,0 +1,85 @@
+>> (0 < i < 10) IO.print(i, "\n")
+>> (0 <= i < 10) IO.print(i, "\n")
+>> (0 < i <= 10) IO.print(i, "\n")
+>> (0 <= i <= 10) IO.print(i, "\n")
+>> (10 > i > 0) IO.print(i, "\n")
+>> (10 >= i > 0) IO.print(i, "\n")
+>> (10 > i >= 0) IO.print(i, "\n")
+>> (10 >= i >= 0) IO.print(i, "\n")
+
+>> 1 <= i <= 10 {
+   ?? (i % 2 == 0) {
+      IO.print("Skipping even number: ", i, "\n")
+      <<
+   }
+   IO.print("Processing odd number: ", i, "\n")
+}
+
+>> 1 <= i <= 10 {
+   IO.print("i=", i, "\n")
+   ?? (i == 5) {
+      IO.print("Breaking out of loop at i=", i, "\n")
+      **
+   }
+}
+
+>> 1 <= i <= 3 {
+   IO.print("Outer loop, i=", i, "\n")
+   >> 1 <= i <= 2 {
+      IO.print("  Inner loop, i=", i, "\n")
+   }
+}
+
+>> 10 >= i >= 1 {
+   IO.print("i=", i, "\n")
+   ?? (i == 7) {
+      IO.print("Exiting loop at i=", i, "\n")
+      **
+   }
+}
+
+arr := [10, 20, 30, 40, 50]
+>> 0 <= i < Array.len(arr) {
+   IO.print("arr[", i, "] = ", arr[i], "\n")
+}
+
+>> 0 <= i <= 10 {
+   ?? (i % 2 == 0) {
+      IO.print(i, " is even\n")
+   } ::?? (i % 2 == 1) {
+      IO.print(i, " is odd\n")
+   }
+   ?? (i == 5) {
+      IO.print("Reached 5, stopping loop\n")
+      **
+   }
+}
+
+>> 10 >= i >= 1 {
+   ?? (i % 3 == 0) {
+      IO.print("Skipping multiple of 3: ", i, "\n")
+      <<
+   }
+   IO.print("Processing: ", i, "\n")
+}
+
+start = 0
+end = 5
+>> start <= i <= end {
+   IO.print("i=", i, "\n")
+   ?? (i == 2) {
+      IO.print("Doubling the range\n")
+      end = end * 2
+   }
+}
+
+str := "hello"
+>> 0 <= i < String.len(str) {
+   IO.print("Character at index ", i, ": ", str[i], "\n")
+}
+
+i = 123
+>> (0 <= i <= 10) {
+   IO.print("inloop i=", i, "\n")
+}
+IO.print("outloop i=", i, "\n")
