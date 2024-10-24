@@ -1,0 +1,6 @@
+
+::RuntimeError
+  at file: tests\import_untype.aero
+  at line: 1
+  Expected a string.
+---------------------------

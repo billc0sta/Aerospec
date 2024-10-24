@@ -1,0 +1,4 @@
+Math := #"math_import.aero"
+
+IO.print(Math.sumall([1, 2, 3, 4, 5]), "\n")
+IO.print("PI: ", Math.PI)

@@ -261,9 +261,6 @@ and unary parser =
     (Unary (tk, expr), parser)
   | Hash -> 
     let (expr, parser) = primary (forward parser) in
-    let () = match expr with
-    | StringLit _ -> ()
-    | _ -> report_error "Expected a string" parser in
     (Unary (tk, expr), parser) 
   | _ -> postary parser
 

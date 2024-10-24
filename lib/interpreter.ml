@@ -314,9 +314,10 @@ and evaluate_unary op expr inp =
   | _ -> assert false;
 
 and evaluate_import tk expr inp =
-  let fp = match expr with
-	| StringLit fp -> fp
-	| _ -> assert false;
+
+  let fp = match evaluate expr inp with
+    | String (rez, _) -> stringify_str rez  
+    | _ -> report_error ("Expected a string") tk inp
   in
 
   let file_path = (Filename.dirname inp.path ^ "/") ^ fp in
@@ -345,6 +346,7 @@ and evaluate_import tk expr inp =
           let parsed = Parser.parse parser in
 
           let imp_obj = Environment.make () in
+          add_natives imp_obj;
           let ninp   = {(make parsed file_path) with imported=(file_path::inp.imported); env=imp_obj} in
           run ninp;
 

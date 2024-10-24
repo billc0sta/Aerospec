@@ -1,0 +1,6 @@
+
+::RuntimeError
+  at file: tests/import_self.aero
+  at line: 1
+  Cannot import a file in itself.
+---------------------------

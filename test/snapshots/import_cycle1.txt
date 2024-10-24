@@ -1,0 +1,6 @@
+
+::RuntimeError
+  at file: tests/import_cycle1.aero
+  at line: 1
+  Import cycle detected between 'tests/import_cycle2.aero' and 'tests/import_cycle1.aero'.
+---------------------------

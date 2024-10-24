@@ -1,0 +1,6 @@
+mathlib = "math_import.aero"
+Math := #mathlib
+
+IO.print(mathlib, "\n")
+IO.print(Math.sumall([1, 2, 3, 4, 5]), "\n")
+IO.print(Math.PI, "\n")
