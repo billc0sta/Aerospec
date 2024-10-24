@@ -1,0 +1,8 @@
+object := {
+    assign_non := () {
+        $non = "Hello, World"
+    }
+}
+
+object.assign_non()
+IO.print(object.non)

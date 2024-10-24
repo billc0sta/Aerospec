@@ -1,0 +1,120 @@
+sumall := (arr) {
+    arrs := [arr]
+    sum   = 0
+    >> Array.len(arrs) > 0 {
+       val = arrs[0]
+       Array.pop(arrs, 0)
+       ?? ~val == "float"
+          sum = sum + val
+       ?? ~val == "array"
+          Array.extend(arrs, val)
+    }
+    -> sum
+}
+
+out = "out-of-scope"
+obj := {
+    IO.print("new object initialized\n")
+
+    field_1 = [1, 2, 3, [5, 6, 7]]
+    field_2 = 123
+    field_3 := 123
+    field_4 = "Hello"
+    field_5 := "World"
+    out = "in_of_scope"
+    
+    nested := {
+        field_1 := [1, 2, 3]
+        field_2 = 14.2
+        field_3 := "aerospec"
+        field_4 := $field_1
+
+        print_out := () {
+            IO.print("in nested: ", &out, "\n")
+        }
+
+        modify_out := () {
+            $out = "modified by nested"
+        }
+    }
+
+    append := (el) {
+        Array.append(field_1, el)
+        Array.append(nested.field_1, el)
+    }
+
+    sum_all := () {
+        -> sumall(nested.field_1) + sumall(field_1) 
+    }
+
+    add_new_field := () {
+        obj.field_of_method := "my field"
+    }
+
+    only_call_after_field123 := () {
+        IO.print($field123, "\n")
+    }
+
+    print_out := () {
+        IO.print($out, "\n")
+    }
+}
+
+copy := obj()
+copy.append(123)
+copy.append(123)
+IO.print("field_1 of original: ", obj.field_1, "\n")
+IO.print("field_1 of copy: ", copy.field_1, "\n")
+IO.print("sumall() of original: ", obj.sum_all(), "\n")
+IO.print("sumall() of copy: ", copy.sum_all(), "\n")
+
+obj.new_field_1 = 123
+obj.nested.new_field_2 = "new_field"
+copy.new_field_3 = 8783
+copy.nested.new_field_4 = "another field"
+
+IO.print("original fields: ", Object.fields(obj), "\n")
+IO.print("original nested fields: ", Object.fields(obj.nested), "\n")
+IO.print("copy fields: ", Object.fields(copy), "\n")
+IO.print("copy nested fields: ", Object.fields(copy.nested), "\n")
+
+copy.combine_new_fields := () {
+    -> (String.repr($new_field_3) + copy.nested.new_field_4) 
+}
+
+IO.print("combine new fields: ", copy.combine_new_fields(), "\n")
+
+obj.print_arr := () {
+   IO.print("arr:", $field_1, "\n")
+}
+
+obj.print_arr()
+
+copy.add_new_field()
+
+IO.print("original after copy.add_new_field()", Object.fields(obj), "\n")
+IO.print("copy after copy.add_new_field(): ", Object.fields(copy), "\n")
+
+copy.field123 := 123
+copy.only_call_after_field123()
+
+method_from_variable := copy.sum_all
+method_from_variable()
+
+copy.constant_field := "new constant_field"
+IO.print(copy.constant_field, "\n")
+
+// field_4 wasn't constant
+copy.field_4 := "newly constanted"
+IO.print(copy.field_4, "\n")
+
+variable_to_field = copy.field_1
+Array.append(variable_to_field, "100000000")
+IO.print("variable_to_field: ", variable_to_field, "\n")
+IO.print("copy.field_1: ", copy.field_1, "\n")
+
+copy.nested.print_out()
+copy.nested.modify_out()
+
+IO.print("original out after copy.modify(): ", obj.out, "\n")
+IO.print("copy out after copy.modify(): ", copy.out, "\n")

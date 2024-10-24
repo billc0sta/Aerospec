@@ -1,0 +1,9 @@
+object := &&{
+    field = 123
+    modify_field := () {
+        $field = 0
+    }
+}
+
+object.modify_field()
+IO.print(object.field)

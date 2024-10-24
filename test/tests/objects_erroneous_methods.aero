@@ -1,0 +1,8 @@
+object := {
+    will_error := () {
+        a 
+    }
+}
+
+IO.print("didn't error yet\n")
+object.will_error()

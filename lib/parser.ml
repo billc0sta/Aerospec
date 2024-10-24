@@ -60,7 +60,7 @@ let next_stmt parser =
     match (peek parser).typeof with 
     | Right       | OCurly  | Semicolon 
     | TwoQuestion | TwoStar | Left 
-    | Arrow       | EOF -> parser
+    | Arrow       | EOF     | CCurly -> parser
     | _  -> aux (forward parser)
   in aux parser
 
@@ -197,6 +197,7 @@ and assignexpr parser =
     | _ -> (expr, parser)
   in aux expr parser
 
+
 and ifexpr parser =
   let (expr1, parser) = logical_or parser in
   if (peek parser).typeof = Question then begin
@@ -257,7 +258,7 @@ and unary parser =
   let tk = peek parser in
   match tk.typeof with
   | Exclamation | Plus | Minus | Tilde | Amper | TwoAmper -> 
-    let (expr, parser) = unary (forward parser) in
+     let (expr, parser) = unary (forward parser) in
     (Unary (tk, expr), parser)
   | Hash -> 
     let (expr, parser) = primary (forward parser) in
@@ -492,8 +493,8 @@ and block_stmt parser =
     let tk = (peek parser) in 
     match tk.typeof with
     | CCurly -> (acc, forward parser)
-    | EOF -> report_error "Expected a block limit (closing curly bracket '}')" parser 
-    | _ -> let (stmt, parser) = statement parser in aux (stmt::acc) parser
+    | EOF -> report_error "Expected a Closing Curly Bracket '}'" parser 
+    | _ -> let (stmt, parser) = statement parser in aux (stmt::acc) parser 
   in let (acc, parser) = aux [] parser in
   (Block (List.rev acc), parser)
 

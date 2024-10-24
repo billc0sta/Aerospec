@@ -1,0 +1,6 @@
+
+::RuntimeError
+  at file: tests\object_erroneous_body.aero
+  at line: 1
+  Unbinded variable 'a' was referenced.
+---------------------------

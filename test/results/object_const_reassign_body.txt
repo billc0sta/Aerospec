@@ -1,0 +1,6 @@
+
+::RuntimeError
+  at file: tests\object_const_reassign_body.aero
+  at line: 3
+  Cannot re-assign to the constant 'field'.
+---------------------------

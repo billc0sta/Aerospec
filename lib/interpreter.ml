@@ -388,9 +388,14 @@ and assignment target expr token inp =
 	| _ -> assert false;
   in
   match target with 
-  | IdentExpr (tk, global) -> if global then ignore(evaluate_ident tk global inp); assign_ident mut expr target inp
+  | IdentExpr (tk, global) ->
+     if global && not mut then
+       report_error ("Cannot constant-assign a global variable") tk inp
+     else
+       if global then assign_ident_global expr tk inp
+       else assign_ident mut expr tk inp
   | Subscript (target, (index, None), tk) -> 
-	 if not mut then report_error "Cannot constant-assign an index" tk inp
+     if not mut then report_error "Cannot constant-assign an index" tk inp
 	 else assign_subscript expr target index tk inp
   | PropertyExpr (obj, target) -> assign_property obj target expr mut inp 
   | _ -> assert false
@@ -461,33 +466,33 @@ and assign_subscript expr target index token inp =
        end
   | _ -> report_error ("Value of type '"^nameof rez^"' is not subscriptable") token inp
 
-and assign_ident ismut expr ident inp =
+and assign_ident ismut expr token inp =
+  let name = token.value in
+  match (Environment.find name inp.env) with
+  | None -> begin
+	  let value = evaluate expr inp in
+	  Environment.add name (value, ismut) inp.env; value
+	end
+  | Some (_, mut) -> begin 
+	  if not mut then report_error ("Cannot re-assign to the constant '"^name^"'") token inp
+	  else 
+		let value = evaluate expr inp in
+		Environment.replace name (value, ismut) inp.env; value
+	end
 
-  let (name, global, token) = 
-	match ident with
-	| IdentExpr(tk, global) -> (tk.value, global, tk)
-	| _ -> assert false;
+and assign_ident_global expr token inp =
+  let name = token.value in 
+  let env  = try Environment.parent_of inp.env
+		    with Invalid_argument _ -> 
+			  report_error ("Global variable '"^name^"' was referenced in global scope") token inp
   in
-  if global && not ismut then
-    report_error ("Cannot constant-assgin a global variable") token inp
-  else
-    let env = if global then
-		        try Environment.parent_of inp.env
-		        with Invalid_argument _ -> 
-			      report_error ("Global variable '"^token.value^"' was referenced in global scope") token inp
-		      else inp.env 
-    in
-    match (Environment.find name env) with
-    | None -> begin
-	    let value = evaluate expr inp in
-	    Environment.add name (value, ismut) env; value
-	  end
-    | Some (_, mut) -> begin 
-	    if not mut then report_error ("Cannot re-assign to the constant '"^name^"'") token inp
-	    else 
-		  let value = evaluate expr inp in
-		  Environment.replace name (value, ismut) env; value
-	  end
+  match (Environment.search name env) with
+  | None -> report_error ("Unbinded variable '"^name^"' was referenced") token inp
+  | Some (env, v) ->
+     if (snd v) = false
+     then report_error ("Cannot re-assign to the constant '"^name^"'") token inp
+     else let value = evaluate expr inp in
+          Environment.replace name (value, true) env; value 
 
 and exec_stmt stmt inp =
   match stmt with

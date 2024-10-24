@@ -1,0 +1,2 @@
+object := &{}
+object.new_field := 123

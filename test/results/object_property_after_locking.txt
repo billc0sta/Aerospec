@@ -1,0 +1,6 @@
+
+::RuntimeError
+  at file: tests\object_property_after_locking.aero
+  at line: 2
+  Cannot assign property to a locked object.
+---------------------------

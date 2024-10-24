@@ -1,0 +1,6 @@
+
+::RuntimeError
+  at file: tests\object_deeplocked_method_reassign.aero
+  at line: 4
+  Cannot re-assign to the constant 'field'.
+---------------------------

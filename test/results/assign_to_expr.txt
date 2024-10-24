@@ -1,0 +1,7 @@
+
+::Syntax Error
+  at file: tests\assign_to_expr.aero
+  at line: 1
+  here --" !123 = 123 "-- 
+  Cannot assign to an expression.
+---------------------------

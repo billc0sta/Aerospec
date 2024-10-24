@@ -1,0 +1,12 @@
+object := {
+    field = [1, 2, 3, [4, 5, 6]]
+    lock_up := () {
+        $field = &&($field)
+    }
+}
+
+object.field[0] = 12
+object.field[3][0] = 12
+IO.print(object.field)
+object.lock_up()
+object.field[3][0] = 4

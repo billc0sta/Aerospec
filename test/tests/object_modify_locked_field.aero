@@ -1,0 +1,11 @@
+object := {
+    not_locked_yet = [1, 2, 3, 4]
+    lock_up := () {
+        $not_locked_yet = &not_locked_yet
+    }
+}
+
+object.not_locked_yet[0] = 0
+IO.print(object.not_locked_yet)
+object.lock_up()
+object.not_locked_yet[0] = 1

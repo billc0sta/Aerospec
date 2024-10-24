@@ -121,7 +121,11 @@ let rec deep_lock value =
   | Object (obj, _) -> begin
 	  let new_obj = Environment.make () in
 	  Hashtbl.iter (fun k v ->
-		  Hashtbl.add new_obj.values k ((deep_lock (fst v)), true)
+          let v = match deep_lock (fst v) with
+            | Func (_, params, stmts) -> Func (new_obj, params, stmts)
+            | v -> v
+          in
+		  Hashtbl.add new_obj.values k (v, false)
 		) obj.values; Object (new_obj, true)
 	end
   | _ -> value

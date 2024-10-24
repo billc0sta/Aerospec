@@ -1,0 +1,6 @@
+
+::RuntimeError
+  at file: tests\return_in_global.aero
+  at line: 1
+  Return statement ('->') outside of function.
+---------------------------

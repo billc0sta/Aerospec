@@ -1,0 +1,5 @@
+obj := {
+    call := () {IO.print(field)}
+}
+
+obj.call()

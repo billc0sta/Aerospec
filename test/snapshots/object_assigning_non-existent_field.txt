@@ -1,0 +1,6 @@
+
+::RuntimeError
+  at file: tests\object_assigning_non-existent_field.aero
+  at line: 3
+  Unbinded variable 'non' was referenced.
+---------------------------

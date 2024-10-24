@@ -1,0 +1,6 @@
+
+::RuntimeError
+  at file: tests\object_property_deeplocking_aero
+  at line: 2
+  Cannot assign property to a locked object.
+---------------------------

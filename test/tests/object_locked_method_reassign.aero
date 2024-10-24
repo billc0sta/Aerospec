@@ -1,0 +1,10 @@
+object := &{
+    field = 123
+    modify_field := () {
+        $field = 0
+    }
+}
+
+IO.print("before modify_field(): ", object.field, "\n")
+object.modify_field()
+IO.print("after modify_field(): ", object.field, "\n")

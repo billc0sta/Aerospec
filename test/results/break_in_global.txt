@@ -1,0 +1,6 @@
+
+::RuntimeError
+  at file: tests\break_in_global.aero
+  at line: 1
+  Break statement ('**') outside of loop.
+---------------------------

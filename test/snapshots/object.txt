@@ -1,0 +1,21 @@
+new object initialized
+field_1 of original: [1, 2, 3, [5, 6, 7]]
+field_1 of copy: [1, 2, 3, [5, 6, 7], 123, 123]
+sumall() of original: 30
+sumall() of copy: 522
+original fields: [[field_5, World, false], [field_2, 123, true], [nested, <object>, false], [field_4, Hello, true], [sum_all, <function ( )>, false], [only_call_after_field123, <function ( )>, false], [field_1, [1, 2, 3, [5, 6, 7]], true], [print_out, <function ( )>, false], [field_3, 123, false], [add_new_field, <function ( )>, false], [append, <function ( el )>, false], [new_field_1, 123, true], [out, in_of_scope, true]]
+original nested fields: [[field_2, 14.2, true], [new_field_2, new_field, true], [field_4, [1, 2, 3, [5, 6, 7]], false], [modify_out, <function ( )>, false], [field_1, [1, 2, 3], false], [print_out, <function ( )>, false], [field_3, aerospec, false]]
+copy fields: [[field_2, 123, true], [field_5, World, false], [nested, <object>, false], [field_4, Hello, true], [new_field_3, 8783, true], [sum_all, <function ( )>, false], [field_1, [1, 2, 3, [5, 6, 7], 123, 123], true], [only_call_after_field123, <function ( )>, false], [field_3, 123, false], [print_out, <function ( )>, false], [append, <function ( el )>, false], [add_new_field, <function ( )>, false], [out, in_of_scope, true]]
+copy nested fields: [[field_2, 14.2, true], [field_4, [1, 2, 3, [5, 6, 7]], false], [modify_out, <function ( )>, false], [field_1, [1, 2, 3, 123, 123], false], [field_3, aerospec, false], [print_out, <function ( )>, false], [new_field_4, another field, true]]
+combine new fields: 8783another field
+arr:[1, 2, 3, [5, 6, 7]]
+original after copy.add_new_field()[[field_5, World, false], [field_2, 123, true], [nested, <object>, false], [field_4, Hello, true], [field_of_method, my field, false], [sum_all, <function ( )>, false], [only_call_after_field123, <function ( )>, false], [field_1, [1, 2, 3, [5, 6, 7]], true], [print_out, <function ( )>, false], [field_3, 123, false], [add_new_field, <function ( )>, false], [append, <function ( el )>, false], [new_field_1, 123, true], [print_arr, <function ( )>, false], [out, in_of_scope, true]]
+copy after copy.add_new_field(): [[field_2, 123, true], [field_5, World, false], [nested, <object>, false], [field_4, Hello, true], [new_field_3, 8783, true], [sum_all, <function ( )>, false], [field_1, [1, 2, 3, [5, 6, 7], 123, 123], true], [only_call_after_field123, <function ( )>, false], [field_3, 123, false], [print_out, <function ( )>, false], [append, <function ( el )>, false], [add_new_field, <function ( )>, false], [combine_new_fields, <function ( )>, false], [out, in_of_scope, true]]
+123
+new constant_field
+newly constanted
+variable_to_field: [1, 2, 3, [5, 6, 7], 123, 123, 100000000]
+copy.field_1: [1, 2, 3, [5, 6, 7], 123, 123, 100000000]
+in nested: in_of_scope
+original out after copy.modify(): modified by nested
+copy out after copy.modify(): in_of_scope

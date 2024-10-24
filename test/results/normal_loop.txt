@@ -1,0 +1,7 @@
+
+::Syntax Error
+  at file: tests\normal_loop.aero
+  at line: 3
+  here --"    ?? (i % 2 = 1) << "-- 
+  Cannot assign to an expression.
+---------------------------

@@ -1,0 +1,6 @@
+
+::RuntimeError
+  at file: tests\object_self_reference_body.aero
+  at line: 1
+  Unbinded variable 'object' was referenced.
+---------------------------

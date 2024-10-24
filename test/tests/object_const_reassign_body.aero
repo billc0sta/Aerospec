@@ -1,0 +1,4 @@
+object := {
+    field := 123
+    field := 123
+}

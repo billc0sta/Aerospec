@@ -11,6 +11,17 @@ let remove ident env = Hashtbl.remove env.values ident
 
 let replace ident value env = Hashtbl.replace env.values ident value
 
+let search ident env =
+  let rec aux env =
+    match env with
+    | None -> None
+    | Some env -> begin
+        match find ident env with
+        | None -> aux env.parent
+        | Some v -> Some (env, v)
+      end
+  in aux (Some env)
+
 let child_of env =
   {(make ()) with parent=(Some env)}
 
