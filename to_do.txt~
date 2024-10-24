@@ -1,0 +1,28 @@
+test loops
+test range loops
+test objects
+test functions
+test global access
+test importing
+make the documents
+make a lot of examples
+
+for later:
+	from a tree walker to stack-machine
+	split between native's interface and implementation
+	add c api
+	add hashmap
+	add integers
+	add static-analyser
+	add tuples
+	improve the standard library
+	add modes, like locked mode and static mode
+	add dunder-like mechanism for objects
+	add meta-info to function environments
+	add inheritance
+	add currying
+	add pipeline operator
+	add optional parameters
+	add parameter unfolding
+	add var arguments to normal functions
+	add tail optimization

@@ -1,0 +1,6 @@
+
+::RuntimeError
+  at file: tests\loop_never_enters.aero
+  at line: 4
+  Unbinded variable 'new_variable' was referenced.
+---------------------------

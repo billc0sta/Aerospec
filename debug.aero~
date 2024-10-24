@@ -1,0 +1,70 @@
+IO.print(Value.copy(1), "\n")
+IO.print(Value.copy(123), "\n")
+IO.print(Value.copy(0), "\n")
+IO.print(Value.copy(123.323), "\n")
+
+original_str  = "duck"
+copied_str    = Value.copy(original_str)
+copied_str[1] = "i"
+IO.print("original: ", original_str, "\n")
+IO.print("copied: ", copied_str, "\n")
+
+empty_str    = ""
+copied_empty = Value.copy(empty_str)
+String.extend(copied_empty, "Hello, World!")
+IO.print("original: ", empty_str, "\n")
+IO.print("copied: ", copied_empty, "\n")
+
+empty_arr    = []
+copied_empty = Value.copy(empty_arr)
+Array.append(copied_empty, 123)
+IO.print("original: ", empty_arr, "\n")
+IO.print("copied: ", copied_empty, "\n")
+
+arr         = [1, 2, 3, 4, 5]
+copied_arr  = Value.copy(arr)
+copied_arr[0] = 0
+IO.print("original: ", arr, "\n")
+IO.print("copied: ", copied_arr, "\n")
+
+nested_arr    = [1, 2, 3, [4, 5, 6]]
+copied_nested = Value.copy(nested_arr)
+copied_nested[0] = 12.3
+copied_nested[3][0] = 412
+IO.print("original: ", nested_arr, "\n")
+IO.print("copied: ", copied_nested, "\n")
+
+object        = {}
+copied_object = Value.copy(object)
+copied_object.new_field = 123 
+IO.print("original: ", Object.fields(object), "\n")
+IO.print("copied: ", Object.fields(copied_object), "\n")
+
+object        = { field = 0 }
+copied_object = Value.copy(object)
+copied_object.field = 123
+copied_object.new_field = "Hello, World"
+IO.print("original: ", Object.fields(object), "\n")
+IO.print("copied: ", Object.fields(copied_object), "\n")
+
+nested_mutables = {
+    arr = [1, 2, 3, [4, 5, 6]]
+    obj = {
+        arr = [1, 2, 3, [4, 5, 6]] 
+        string = "string"
+    }
+    string = "string"
+}
+
+copied_mutables = Value.copy(nested_mutables)
+copied_mutables.arr[0] = 123
+copied_mutables.arr[3][0] = 123
+copied_mutables.string[1] = "p"
+copied_mutables.obj.arr[0] = 123
+copied_mutables.obj.arr[3][0] = "str"
+copied_mutables.obj.string[1] = "p"
+
+IO.print("original: ", Object.fields(nested_mutables), "\n")
+IO.print("original: ", Object.fields(nested_mutables.obj), "\n")
+IO.print("copied: ", Object.fields(copied_mutables), "\n")
+IO.print("copied: ", Object.fields(copied_mutables.obj), "\n")

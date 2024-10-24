@@ -1,0 +1,4 @@
+>> (1 != 1)
+   new_variable = 123
+
+IO.print(new_variable, "\n")

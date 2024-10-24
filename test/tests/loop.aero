@@ -1,0 +1,139 @@
+i = -1
+>> (i = i + 1) <= 100 {
+   ?? (i % 2 == 1)
+      <<
+   IO.print(i, " ")
+   ?? (i != 0 && i % 10 == 0)
+      IO.print("\n")
+}
+
+i = 0
+>> (Bool.true) {
+   IO.print(i, "\ ")
+   ?? (i != 0 && i % 10 == 0)
+      IO.print("\n")
+   i = i + 1
+   ?? i == 100
+      **
+}
+
+i = 0
+>> (i < 1) {
+   new_var = 123
+   i = i + 1
+}
+
+IO.print(new_var, "\n")
+
+i = 0
+>> (i < 3) {
+   IO.print(i, "\n")
+   j = 0
+   >> (j < 2) {
+      IO.print(j, "\n")
+      j = j + 1
+   }
+   i = i + 1
+}
+
+i = 0
+>> (i < 20) {
+   IO.print(i, "\n")
+   i = i + 1
+   ?? i == 10 **
+}
+
+i = 0
+>> (i < 20) {
+   ?? (i % 3 == 0 && i % 5 == 0) {
+      IO.print("FizzBuzz, i=", i, "\n")
+   } ::?? (i % 3 == 0) {
+      IO.print("Fizz, i=", i, "\n")
+   } ::?? (i % 5 == 0) {
+      IO.print("Buzz, i=", i, "\n")
+   } :: {
+      IO.print(i, "\n")
+   }
+   i = i + 1
+}
+
+count = 0
+>> (1) {
+   IO.print("Infinite loop iteration: ", count, "\n")
+   count = count + 1
+   ?? (count == 3) {
+      IO.print("Breaking out of infinite loop\n")
+      **
+   }
+}
+
+i = -10
+>> i {
+   IO.print(i, " ")
+   i = i + 1
+}
+
+arr = [1, 2, 3, 4, 5]
+i = 0
+>> (i < Array.len(arr)) {
+   IO.print("Element at index ", i, ": ", arr[i], "\n")
+   i = i + 1
+}
+
+i = 0
+>> (i < 3) {
+   IO.print("Outer loop, i=", i, "\n")
+   j = 0
+   >> (j < 5) {
+      ?? (j == 2) {
+         IO.print("  Breaking inner loop at j=", j, "\n")
+         **
+      }
+      IO.print("  Inner loop, j=", j, "\n")
+      j = j + 1
+   }
+   i = i + 1
+}
+
+i = 0
+>> (i != 0) {
+   i = 123
+}
+IO.print(i, "\n")
+
+printDouble := (n) {
+   IO.print(n * 2, "\n")
+}
+
+i = 1
+>> (i <= 5) {
+   printDouble(i)
+   i = i + 1
+}
+
+limit = 10
+i = 0
+>> (i < limit) {
+   IO.print("i=", i, "\n")
+   i = i + 1
+   ?? (i == 5) {
+      limit = 7
+   }
+}
+
+str = "a"
+i = 0
+>> (i < 5) {
+   IO.print("String at iteration ", i, ": ", str, "\n")
+   String.extend(str, "+a")
+   i = i + 1
+}
+
+arr = [1, 2, 3, 4, 5]
+i = 0
+>> (i < Array.len(arr)) {
+   arr[i] = arr[i] * 2 
+   i = i + 1
+}
+
+IO.print(arr, "\n")
