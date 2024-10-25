@@ -1,0 +1,10 @@
+double_all := (arr) {
+    >> (0 <= i < Array.len(arr)) {
+        arr[i] = arr[i] * 2
+    }
+}
+
+arr := [1, 2, 3, 4, 5]
+IO.print("original array: ", arr, "\n")
+IO.print(double_all(arr), "\n")
+IO.print("array after call: ", arr)

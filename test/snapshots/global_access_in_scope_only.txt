@@ -1,0 +1,6 @@
+
+::RuntimeError
+  at file: tests\global_access_in_scope_only.aero
+  at line: 3
+  Unbinded variable 'a' was referenced.
+---------------------------

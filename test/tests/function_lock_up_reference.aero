@@ -1,0 +1,5 @@
+lock_up := (v) {
+    -> &v
+}
+
+Array.append(lock_up([1, 2, 3, 4]), 123)

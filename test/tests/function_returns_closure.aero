@@ -1,0 +1,18 @@
+multiply := (x, y) { -> x * y }
+create_multiplier := (x) {
+    -> (y) {
+        -> multiply(x, y)
+    }
+}
+
+mult_by_5 := create_multiplier(5)
+mult_by_10 := create_multiplier(10)
+IO.print("mult_by_5(5): ", mult_by_5(5), "\n")
+IO.print("mult_by_5(10): ", mult_by_5(10), "\n")
+IO.print("mult_by_5(3): ", mult_by_5(3), "\n")
+IO.print("mult_by_5(2): ", mult_by_5(2), "\n")
+
+IO.print("mult_by_10(10): ", mult_by_10(10), "\n")
+IO.print("mult_by_10(5): ", mult_by_10(5), "\n")
+IO.print("mult_by_10(3): ", mult_by_10(3), "\n")
+IO.print("mult_by_10(2): ", mult_by_10(2), "\n")

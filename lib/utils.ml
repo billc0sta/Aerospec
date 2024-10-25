@@ -15,3 +15,7 @@ let read_whole_file filename =
   let s = really_input_string ch (in_channel_length ch) in
   close_in ch;
   s
+
+let rec list_dup_at f = function
+  | [] -> None
+  | x::xs -> if List.exists (fun y -> (f x) = (f y)) xs then (Some (f x)) else list_dup_at f xs

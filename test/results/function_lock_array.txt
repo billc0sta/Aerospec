@@ -1,0 +1,6 @@
+
+::RuntimeError
+  at file: tests\function_lock_array.aero
+  at line: 1
+  Unbinded variable 'loc' was referenced.
+---------------------------

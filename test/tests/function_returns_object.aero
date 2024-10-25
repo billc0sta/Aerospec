@@ -1,0 +1,15 @@
+create_point := (x, y) {
+    -> {x = x; y = y}
+}
+
+print_point := (p) {
+    IO.print("Point {", p.x, ", ", p.y, "}\n")
+}
+
+p1 := create_point(10, 10)
+p2 := create_point(20, 20)
+print_point(p1)
+print_point(p2)
+p1.x = 134
+print_point(p1)
+print_point(p2)

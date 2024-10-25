@@ -1,0 +1,8 @@
+mult_by_5(5): 25
+mult_by_5(10): 50
+mult_by_5(3): 15
+mult_by_5(2): 10
+mult_by_10(10): 100
+mult_by_10(5): 50
+mult_by_10(3): 30
+mult_by_10(2): 20

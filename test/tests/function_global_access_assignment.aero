@@ -1,0 +1,7 @@
+a = 123
+modify_a := (a) {
+    $a = a
+}
+IO.print("original a: ", a, "\n")
+modify_a(1000)
+IO.print("modified a: ", a, "\n")

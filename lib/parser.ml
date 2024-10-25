@@ -394,6 +394,7 @@ and builder_expr range parser =
   let parser = consume CSquare "Expected a Closing Square Bracket ']'" parser in
   (Builder (range, condition, expr), parser)
 
+
 and lambda_expr parser =
   let (params, parser) = parameters parser in
   let length = List.length params in
@@ -401,24 +402,33 @@ and lambda_expr parser =
   let block_follows = match tk.typeof with OCurly -> true | _ -> false in
   match length with
   | 0 -> begin
-    if not block_follows 
-      then report_error "Expected an expression" parser 
-    else
-    let (body, parser) = block_stmt parser in 
-    (LambdaExpr (params, body, tk), parser) 
-  end
-  | 1 -> begin
-    let is_ident = match List.hd params with IdentExpr (_, false) -> true | _ -> false in 
-    if is_ident && block_follows then
-      let (body, parser) = block_stmt parser in
-      (LambdaExpr (params, body, tk), parser)
-    else
-      (List.hd params, parser)
-  end 
-  | len when len > 255 -> report_error "No more than 255 parameters are allowed" parser
-  | _ -> let (body, parser) = block_stmt parser in 
+      if not block_follows 
+      then report_error "Expected an expression between parenthesis" parser 
+      else
+        let (body, parser) = block_stmt parser in 
         (LambdaExpr (params, body, tk), parser) 
-
+    end
+  | 1 -> begin
+      let is_ident = match List.hd params with IdentExpr (_, false) -> true | _ -> false in 
+      if is_ident && block_follows then
+        let (body, parser) = block_stmt parser in
+        (LambdaExpr (params, body, tk), parser)
+      else
+        (List.hd params, parser)
+    end 
+  | len when len > 255 -> report_error "No more than 255 parameters are allowed" parser
+  | _ -> begin
+      let dup =
+        Utils.list_dup_at (fun e -> match e with | IdentExpr (tk, false) -> tk.value | _ -> assert false;)
+                          params
+      in
+      let () = match dup with
+      | None -> ()
+      | Some name -> report_error ("Duplicate parameter name '"^name^"' in function definition") parser
+      in
+      let (body, parser) = block_stmt parser in 
+      (LambdaExpr (params, body, tk), parser) 
+    end
 and parameters parser =
   let rec aux acc parser =
     let tk = peek parser in
@@ -426,18 +436,21 @@ and parameters parser =
     | CParen -> (acc, forward parser) 
     | EOF -> report_error "Expected a Closing Parenthesis ')'" parser
     | _ -> begin
-      let (expr, parser) = expression parser in
-      match expr with
-      | IdentExpr _ -> begin
-        let tk = peek parser in
-        let parser = match tk.typeof with
-        | CParen -> parser
-        | Comma -> forward parser
-        | _ -> report_error "Expected a Closing Parenthesis ')'" parser
-        in aux (expr::acc) parser 
+        let (expr, parser) = expression parser in
+        match expr with
+        | IdentExpr (_, false) -> begin
+            let tk = peek parser in
+            let parser = match tk.typeof with
+              | CParen -> parser
+              | Comma -> forward parser
+              | _ -> report_error "Expected a Closing Parenthesis ')'" parser
+            in aux (expr::acc) parser 
+          end
+        | _ -> if List.length acc <> 0 then
+                 report_error "Unexpected expression in parameter list" parser
+               else
+                 (expr::acc, consume CParen "Expected a Closing Parenthesis ')'" parser)
       end
-      | _ -> (expr::acc, consume CParen "Expected a Closing Parenthesis ')'" parser)
-    end
   in let (params, parser) = aux [] parser in (List.rev params, parser)
 
 and build_binary ops f parser =

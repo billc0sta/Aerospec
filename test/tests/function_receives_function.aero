@@ -1,0 +1,8 @@
+map := (f, arr) {
+    -> [0 <= i < Array.len(arr);; f(arr[i])]
+}
+
+IO.print(map((x){ -> x * 2 }, [1, 2, 3, 4, 5]))
+IO.print(map((x){ -> x * x }, [10, 5, 8, 0, 5]))
+IO.print(map((x){ -> x - 1 }, [1, 2, 3, 4, 5]))
+IO.print(map((x){ -> _ }, [1, 2, 3, 4, 5]))

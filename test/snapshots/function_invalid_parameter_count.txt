@@ -1,0 +1,7 @@
+
+::Syntax Error
+  at file: tests\function_invalid_parameter_count.aero
+  at line: 13
+  here --"               p241, p242, p243, p244, p245, p246, p247, p248, p249, p250, p251, p252, p253, p254, p255, p256) { "-- 
+  No more than 255 parameters are allowed.
+---------------------------

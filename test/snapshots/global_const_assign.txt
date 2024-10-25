@@ -1,0 +1,6 @@
+
+::RuntimeError
+  at file: tests\global_const_assign.aero
+  at line: 2
+  Cannot constant-assign a global variable.
+---------------------------

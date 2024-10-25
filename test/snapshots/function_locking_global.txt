@@ -1,0 +1,6 @@
+[0, 2, 3]
+::RuntimeError
+  at file: tests\function_locking_global.aero
+  at line: 6
+  Cannot assign to a subscript of a locked array.
+---------------------------

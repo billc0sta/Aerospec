@@ -1,0 +1,6 @@
+get_len := (str) {
+    -> String.len(str)
+}
+
+IO.print(get_len("Hello, World"), "\n")
+IO.print(get_len({}), "\n")

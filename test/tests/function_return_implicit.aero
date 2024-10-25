@@ -1,0 +1,5 @@
+f := () {
+    IO.print("no return statements, implicitly returns nil ('_')")
+}
+
+IO.print(f())

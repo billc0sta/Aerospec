@@ -1,0 +1,8 @@
+add_new_field := (object) {
+     object.new_field = 123
+}
+
+object := {}
+IO.print("original object: ", Object.fields(object), "\n")
+IO.print(add_new_field(object), "\n")
+IO.print("object after call: ", Object.fields(object), "\n")

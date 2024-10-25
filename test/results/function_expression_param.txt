@@ -1,0 +1,7 @@
+
+::Syntax Error
+  at file: tests\function_expression_param.aero
+  at line: 1
+  here --" f := (1 + 1, param) { "-- 
+  Expected a Closing Parenthesis ')'.
+---------------------------

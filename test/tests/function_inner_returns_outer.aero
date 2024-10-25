@@ -1,0 +1,7 @@
+outer := () {
+    inner := () {
+        -> outer
+    }
+    -> inner()
+}
+outer()

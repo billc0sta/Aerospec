@@ -254,7 +254,7 @@ and evaluate_binary expr1 expr2 op inp =
 	  | Bool b1, Bool b2 -> Bool (b1 <> b2)
 	  | Arr (arr1, _), Arr (arr2, _) -> Bool (not (Resizable.equal arr1 arr2))
       | Nil, Nil -> (Bool false)
-	  | _ -> (Bool false)
+	  | _ -> (Bool true)
 	end
   | Minus -> Float (simple_binary expr1 expr2 (-.))
   | Star -> Float (simple_binary expr1 expr2 ( *. ))

@@ -1,0 +1,8 @@
+f := () {
+    -> [1, 2, 3]
+}
+arr1 := f()
+arr2 := f()
+Array.append(arr2, 4, 5)
+IO.print(arr1)
+IO.print(arr2)

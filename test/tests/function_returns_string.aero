@@ -1,0 +1,6 @@
+f := (name) {
+  -> "Hello, " + name "!"
+}
+
+IO.print(f("Johnson"))
+IO.print(f("Collada"))

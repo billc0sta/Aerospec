@@ -1,0 +1,6 @@
+
+::RuntimeError
+  at file: tests\function_locals_persists.aero
+  at line: 5
+  Unbinded variable 'a' was referenced.
+---------------------------

@@ -1,0 +1,6 @@
+
+::RuntimeError
+  at file: tests\global_assign_non-existent.aero
+  at line: 1
+  Unbinded variable 'a' was referenced.
+---------------------------

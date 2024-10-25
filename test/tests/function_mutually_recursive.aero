@@ -1,0 +1,18 @@
+is_even := (n) { 
+    -> n == 0 ? Bool.true : is_odd(n - 1)
+}
+
+is_odd := (n) { 
+    -> n == 0 ? Bool.false : is_even(n - 1)
+}
+
+IO.print(is_even(0), "\n")
+IO.print(is_odd(0), "\n")
+IO.print(is_even(1), "\n")
+IO.print(is_odd(1), "\n")
+IO.print(is_even(2), "\n")
+IO.print(is_odd(2), "\n")
+IO.print(is_even(3), "\n")
+IO.print(is_odd(3), "\n")
+IO.print(is_even(4), "\n")
+IO.print(is_odd(4), "\n")

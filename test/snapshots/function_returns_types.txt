@@ -1,0 +1,6 @@
+get_example("string"): Hello, World
+get_example("array"): [1, 2, str, <object>, <native ( params... )>]
+get_example("native"): <native ( params... )>
+get_example("float"): 123.123
+get_example("objet"): <object>
+get_example("nil"): nil

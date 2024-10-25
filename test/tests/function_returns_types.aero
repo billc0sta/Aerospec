@@ -1,0 +1,15 @@
+get_example := (type) {
+    ?? type == "string" -> "Hello, World"
+    ?? type == "array"  -> [1, 2, "str", {}, IO.print]
+    ?? type == "native" -> IO.print
+    ?? type == "float"  -> 123.123
+    ?? type == "object" -> {field = 123; field2 = [1, 2, 3]}
+    ?? type == "nil"    -> _
+}
+
+IO.print("get_example(\"string\"): ", get_example("string"), "\n")
+IO.print("get_example(\"array\"): ", get_example("array"), "\n")
+IO.print("get_example(\"native\"): ", get_example("native"), "\n")
+IO.print("get_example(\"float\"): ", get_example("float"), "\n")
+IO.print("get_example(\"objet\"): ", get_example("object"), "\n")
+IO.print("get_example(\"nil\"): ", get_example("nil"), "\n")

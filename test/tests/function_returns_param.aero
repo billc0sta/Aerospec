@@ -1,0 +1,8 @@
+f := (b) {
+    -> b
+}
+IO.print(f(123), "\n")
+IO.print(f("Hello, World"), "\n")
+IO.print(f(IO.print), "\n")
+IO.print(f(_), "\n")
+IO.print(f(f), "\n")

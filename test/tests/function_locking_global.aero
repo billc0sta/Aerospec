@@ -1,0 +1,6 @@
+a = [1, 2, 3]
+lock_up_a := () {$a = &$a}
+a[0] = 0
+IO.print(a)
+lock_up_a()
+a[0] = 1 

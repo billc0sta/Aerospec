@@ -1,0 +1,9 @@
+f := () {
+    a = 0
+    inner := () {
+        $a = 123
+    }
+    inner()
+    IO.print(a)
+}
+f()

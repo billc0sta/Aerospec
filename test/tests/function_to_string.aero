@@ -1,0 +1,10 @@
+all_one := (str) {
+    >> (0 <= i < String.len(str)) {
+       str[i] = "1"
+    }
+}
+
+str := "Hello, World!"
+IO.print("original string: ", str, "\n")
+IO.print(all_one(str), "\n")
+IO.print("after call: ", str, "\n")

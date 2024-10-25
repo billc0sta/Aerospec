@@ -1,0 +1,7 @@
+
+::Syntax Error
+  at file: tests\function_no_body2.aero
+  at line: 1
+  here --" f := ()  "-- 
+  Expected an expression between parenthesis.
+---------------------------

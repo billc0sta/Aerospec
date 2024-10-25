@@ -1,0 +1,2 @@
+multiply := (x, y) {-> x * y}
+multiply("You fucking", "Idiot")

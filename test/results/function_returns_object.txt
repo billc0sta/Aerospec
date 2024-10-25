@@ -1,0 +1,4 @@
+Point {10, 10}
+Point {20, 20}
+Point {134, 10}
+Point {20, 20}

@@ -1,0 +1,6 @@
+
+::RuntimeError
+  at file: tests\object_relational_untype3.aero
+  at line: 1
+  Cannot apply operator '>=' to values of types ('object' and 'function').
+---------------------------

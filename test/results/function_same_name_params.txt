@@ -1,0 +1,7 @@
+
+::Syntax Error
+  at file: tests\function_same_name_params.aero
+  at line: 1
+  here --" f := (param, param) { "-- 
+  Duplicate parameter name 'param' in function definition.
+---------------------------
