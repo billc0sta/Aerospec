@@ -13,11 +13,14 @@ to run programs use:
 ```
 
 ## Testing
-to test fixtures run:
+to test fixtures:
 ```
 ./test/run_all.bat
 ```
+
 for new test cases:
 ```
 ./test/run_nosnaps.bat
 ```
+the results will be stored in [results](test/results).   
+results of test cases with no snapshots should be compared to the expected output. if succeeded, then it should be stored in (snapshots)[test/snapshots
