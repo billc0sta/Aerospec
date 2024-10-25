@@ -23,4 +23,5 @@ for new test cases:
 ./test/run_nosnaps.bat
 ```
 the results will be stored in [results](test/results).   
-results of test cases with no snapshots should be compared to the expected output. if succeeded, then it should be stored in (snapshots)[test/snapshots
+results of test cases with no snapshots should be compared to the expected output.  
+if succeeded, then it should be stored in (snapshots)[test/snapshots]
