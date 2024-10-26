@@ -1,7 +1,10 @@
 # Aerospec
 
 a fully-fledged dynamic imperative programming language with functional traits.  
-documents will be available very soon.
+
+## Docs
+See [docs](docs/).
+still under construction
 
 ## Examples
 See [examples](examples/).
