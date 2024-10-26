@@ -129,3 +129,17 @@ let rec deep_lock value =
 		) obj.values; Object (new_obj, true)
 	end
   | _ -> value
+
+let rec equal value1 value2 =
+  let rec arr_eq arr1 arr2 i =
+    if i = Resizable.len arr1 then true
+    else 
+      equal (Resizable.get arr1 i) (Resizable.get arr2 i) && arr_eq arr1 arr2 (i+1)
+  in
+  match (value1, value2) with
+  | String (str1, _), String (str2, _) -> Resizable.equal str1 str2
+  | Float fl1, Float fl2 -> fl1 = fl2
+  | Bool b1, Bool b2 -> b1 = b2
+  | Arr (arr1, _), Arr (arr2, _) -> (Resizable.len arr1) = (Resizable.len arr2) && arr_eq arr1 arr2 0 
+  | Nil, Nil -> true
+  | _ -> false 

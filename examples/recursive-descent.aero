@@ -25,7 +25,7 @@ char_to_digit := (c) {
     ?? c == "8" -> 8
     ?? c == "9" -> 9
 }
-
+ 
 string_to_number := (str) {
     n = 0
     >> (0 <= i < String.len(str)) {
@@ -144,7 +144,6 @@ kalkul := {
         IO.print("Error: ", message, ".\n")
         $erred = Bool.true
     }
-
     evaluate := (expr) {
         ?? expr.type == parser.BINARY -> evaluate_binary(expr)
         ?? expr.type == parser.NUMBER -> evaluate_number(expr)

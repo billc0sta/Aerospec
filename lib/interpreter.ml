@@ -38,10 +38,8 @@ let make raw path =
   inp
 
 let no_op_range beg endof dir =
-  if dir = 1 && not (beg < endof) || dir = -1 && not (beg > endof)
-  then true
-  else false
-
+  dir = 1 && not (beg < endof) || dir = -1 && not (beg > endof)
+  
 let rec evaluate expr inp =
   match expr with
   | FloatLit fl -> Float fl
@@ -238,23 +236,11 @@ and evaluate_binary expr1 expr2 op inp =
 	end
   | EqualEqual -> begin
 	  let (ev1, ev2) = (ev_both expr1 expr2) in 
-	  match (ev1, ev2) with
-	  | String (str1, _), String (str2, _) -> Bool (Resizable.equal str1 str2)
-	  | Float fl1, Float fl2 -> Bool (fl1 = fl2)
-	  | Bool b1, Bool b2 -> Bool (b1 = b2)
-	  | Arr (arr1, _), Arr (arr2, _) -> Bool (Resizable.equal arr1 arr2)
-      | Nil, Nil -> (Bool true)
-	  | _ -> (Bool false) 
+	  Bool (Value.equal ev1 ev2)
 	end 
   | ExcEqual -> begin
 	  let (ev1, ev2) = (ev_both expr1 expr2) in 
-	  match (ev1, ev2) with
-	  | String (str1, _), String (str2, _) -> Bool (not (Resizable.equal str1 str2))
-	  | Float fl1, Float fl2 -> Bool (fl1 <> fl2)
-	  | Bool b1, Bool b2 -> Bool (b1 <> b2)
-	  | Arr (arr1, _), Arr (arr2, _) -> Bool (not (Resizable.equal arr1 arr2))
-      | Nil, Nil -> (Bool false)
-	  | _ -> (Bool true)
+	  Bool (not (Value.equal ev1 ev2))
 	end
   | Minus -> Float (simple_binary expr1 expr2 (-.))
   | Star -> Float (simple_binary expr1 expr2 ( *. ))

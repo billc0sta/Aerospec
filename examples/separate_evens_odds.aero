@@ -1,0 +1,11 @@
+separate_evens_odds := (arr) {
+    evens := []
+    odds  := []
+    >> (0 <= i < Array.len(arr)) {
+		?? (arr[i] % 2 == 0) Array.append(evens, arr[i])
+		:: Array.append(odds, arr[i]) 
+	}
+	-> [evens, odds]
+}
+
+IO.print(separate_evens_odds([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]))
