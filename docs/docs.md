@@ -31,7 +31,8 @@ Aerospec is a programming language that blends between functional and imperative
 	4. [String index-assignment](#String%20index-assignment)
 	5. [String locking](#String%20locking)
 	6. [String escape characters](#String%20escape%20characters)
-	7. [String standard library](#String%20standard%20library)
+	7. [String copying](%String%20copying)
+	8. [String standard library](#String%20standard%20library)
 		1. [String.len](#String.len)
 		2. [String.insert](#String.insert)
 		3. [String.extend](#String.extend)
@@ -43,6 +44,7 @@ Aerospec is a programming language that blends between functional and imperative
 		9. [String.count](#String.count)
 		10. [String.repr](#String.repr)
 12. [Operators](#Operators)
+	1. [Logical and/Logical or](#Logical%20and/Logical%20or)
 13. [Arrays](#Arrays)
 	1. [Array indexing](#Array%20indexing)
 	2. [Array slicing](#Array%20slicing)
@@ -50,16 +52,18 @@ Aerospec is a programming language that blends between functional and imperative
 	4. [Array index-assignment](#Array%20index-assignment)
 	5. [Array locking](#Array%20locking)
 	6. [Array deep-locking](#Array%20deep-locking)
-	7. [Array standard library](#Array%20standard%20library)
+	7. [Array copying](#Array%20copying)
+	8. [Array standard library](#Array%20standard%20library)
 		1. [Array.len](#Array.len)
 		2. [Array.append](#Array.append)
-		3. [Array.extend](#Array.extend)
-		4. [Array.merge](#Array.merge)
-		5. [Array.index](#Array.index)
-		6. [Array.pop](#Array.pop)
-		7. [Array.remove](#Array.remove)
-		8. [Array.clear](#Array.clear)
-		9. [Array.count](#Array.count)
+		3. [Array.insert](#Array.insert)
+		4. [Array.extend](#Array.extend)
+		5. [Array.merge](#Array.merge)
+		6. [Array.index](#Array.index)
+		7. [Array.pop](#Array.pop)
+		8. [Array.remove](#Array.remove)
+		9. [Array.clear](#Array.clear)
+		10. [Array.count](#Array.count)
 14. [Nil](#Nil)
 15. [Block statement](#Block%20statement)
 16. [If...else statement](#If_else%20statement)
@@ -406,6 +410,8 @@ IO.print("Hello\nWorld!")
 // Hello
 // World!
 ```
+### String copying
+String is a mutable type, for known performance reasons, assigning with a string does not copy the string, but merely a reference to it, which means any modification to the new string are also applied to the original one, if this behavior is not desired, use [Value.copy](#Value.copy).
 ### String standard library
 the standard library for String utilities
 #### String.len
@@ -493,7 +499,7 @@ IO.print(str, "\n") // Lore Ipsum
 ```
 #### String.remove
 `String.remove(str, substrs...)` removes the first occurrence of each `substrs...` from `str`.
-if a substring is not occurring in `str`, it does nothing.   
+if a substring is not occurring in `str`, it gets skipped.   
 a runtime error is raised if `str` is not of type string, if one of `substrs...` is not of type string or if `str` is a locked string.   
 example:
 ```
@@ -516,7 +522,7 @@ IO.print(str, "\n") // ""
 ```
 #### String.count
 `String.count(str, substr)` is the how many times `substr` occurs in `str`.   
-a runtime error is raised if `str` is not of string or if `substr` is not of type string
+a runtime error is raised if `str` is not of type string or if `substr` is not of type string
 example:
 ```
 str = "123123123"
@@ -532,4 +538,220 @@ arr := [1, 2, [3, 4]]
 IO.print(String.repr(arr), "\n") // [1, 2, [3, 4]]
 
 IO.print(String.repr(IO.print)) // <native ( params... )>
+```
+## Operators
+Aerospec follows the traditional precedence rules of C-like languages.   
+as of v0.1.0, Aerospec does not have bitwise or augmented assignment operators, this is expected to change in future releases.
+
+| precedence | operator | description          | associativity |
+| ---------- | -------- | -------------------- | ------------- |
+| 1          | `()`     | grouping parenthesis | LTR           |
+| 1          | `()`     | function call        | LTR           |
+| 1          | `[]`     | subscript            | LTR           |
+| 1          | `$`      | global access        | LTR           |
+| 1          | `.`      | property access      | LTR           |
+| 2          | `!`      | logical not          | RTL           |
+| 2          | `+`      | unary plus           | RTL           |
+| 2          | `-`      | unary minus          | RTL           |
+| 2          | `~`      | type-of              | RTL           |
+| 2          | `&`      | locking              | RTL           |
+| 2          | `&&`     | deep-locking         | RTL           |
+| 2          | `#`      | import               | RTL           |
+| 3          | `/`      | division             | LTR           |
+| 3          | `*`      | multiplication       | LTR           |
+| 3          | `%`      | modulo               | LTR           |
+| 4          | `+`      | addition             | LTR           |
+| 4          | `-`      | subtraction          | LTR           |
+| 5          | `>`      | greater-than         | LTR           |
+| 5          | `<`      | lesser-than          | LTR           |
+| 5          | `>=`     | great-equal          | LTR           |
+| 5          | `<=`     | less-equal           | LTR           |
+| 6          | `==`     | is-equal             | LTR           |
+| 6          | `!=`     | is-not-equal         | LTR           |
+| 7          | `&&`     | logical and          | LTR           |
+| 8          | `\|\|`   | logical or           | LTR           |
+| 9          | `?:`     | ternary conditional  | RTL           |
+| 10         | `=`      | variable assignment  | RTL           |
+| 10         | `:=`     | constant assignment  | RTL           |
+  
+### Logical and/Logical or
+like in most dynamically typed languages, and with taking advantage of short-circuiting; `&&` and `||` are both operators and control flow.   
+`expr1 && expr2` takes the same effect as: `expr1 ? expr2 : expr1`.   
+`expr1 || expr2` takes the same effect as: `expr1 ? expr1 : expr2`.   
+## Arrays
+in Aerospec, arrays are homogeneous, indexable, mutable and resizable.
+in array initialization, trailing commas are not allowed.   
+ a simple array is initialized like this:
+```
+arr := [1, 2, 3, 4] 
+```
+### Array indexing
+Array indexing works identically to string's; indices are zero-based positive non-trap floats with no decimal part that must be less than the length of the array.   
+example:
+```
+arr := [1, 2, 3, 4]
+IO.print(arr, "\n") // [1, 2, 3, 4] 
+IO.print(arr[0], "\n") // 1
+IO.print(arr[3], "\n") // 4
+```
+### Array slicing
+all slicing rules of [String slicing](#String%20slicing) applies to array slicing.  
+example:
+```
+arr := [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+IO.print(arr[:5], "\n")  // [1, 2, 3, 4, 5]
+IO.print(arr[5:], "\n")  // [6, 7, 8, 9, 10]
+IO.print(arr[3:8], "\n") // [4, 5, 6, 7, 8, 9]
+
+IO.print(arr[-Float.inf:Float.inf], "\n") // [1, 2, ... 9, 10]
+IO.print(arr[0:0], "\n") // []
+```
+### Array concatenation
+Array concatenation is the operation of merging two arrays into a new one.  
+be careful, concatenation does not deep-copy reference values within the arrays.   
+example:
+```
+arr1 := [1, 2, "apple", Bool.true]
+arr2 := [3, 4, "banana", Bool.false]
+arr3 := [5, 6, "cherry", Bool.true]
+arr4 := [7, 8, "date", Bool.false]
+
+IO.print(arr1 + arr2, "\n") // [1, 2, apple, true, 3, 4, banana, false]
+IO.print(arr3 + arr4, "\n") // [5, 6, cherry, true, 7, 8, date, false]
+IO.print(arr1 + arr3, "\n") // [1, 2, apple, true, 5, 6, cherry, true]
+```
+### Array index-assignment
+Array index-assignment is the operation of changing a value at a specified index of an array.  
+Array indices cannot be constant-assigned.   
+example:
+```
+arr    = [1, 2]
+temp   = arr[0]
+arr[0] = arr[1]
+arr[1] = temp
+```
+### Array locking
+applying the lock operator `&` to an array creates a locked version of it.  
+a locked array cannot be index assigned or used with any modifying standard library functions.
+locking an array does not copy it, but simply creates a locked reference to the same array
+locking the array does not prevent elements within the array to be modified, but only the array itself: 
+```
+arr = ["Hello", 1, 2]
+arr[0][1] = "J" 
+IO.print(arr[0]) // "Jello"
+
+arr[0] = "Lorem" // error
+```
+this is called shallow-locking, if you want the behavior of locking elements within the array, there's something called deep-locking
+### Array deep-locking
+applying deep-locking operator `&&` to an array creates a deep-locked version of it, a deep-locked array recursively applies locking behavior on the array and elements within, deep-locking DOES copy the array
+example:
+```
+arr = ["Hello", 1, 2]
+arr[0][1] = "J" // error
+arr[0] = "Lorem" // error
+```
+### Array copying
+Since array is a reference type, assigning with an array does not copy it, but a reference to the same array, which makes all modification applied to the new array also modifying for the original one, if this behavior is not desired, use [Value.copy](#Value.copy)
+### Array standard library
+the standard library for Array utilities
+#### Array.len
+`Array.len(arr)` is the length of array `arr`.  
+a runtime error is raised if `arr` is not of type array.   
+example:
+```
+IO.print(Array.len([1, 2, 3]), "\n") // 3
+IO.print(Array.len([[1, 2, 3], 4]), "\n") // 2
+IO.print(Array.len([]), "\n") // 0
+```
+#### Array.append
+`Array.append(arr, elements...)` appends variable argument `elements...` to `arr`.   
+a runtime error is raised if `arr` is not of type array or if `arr` is a locked array.  
+example:
+```
+arr := [1, 2, 3]
+Array.append(arr, 4, 5, 6)
+IO.print(arr) // [1, 2, 4, 5, 6]
+```
+#### Array.insert
+`Array.insert(arr, element, index)` insert `element` in `arr` at `index`.   
+a runtime error is raised if `arr` is not of type array, if `index` is not of type float, if `index` is not a valid index, if `index` is greater than the length of `arr`.   
+example:
+```
+arr := [1, 2, 3]
+Array.insert(arr, 0, 0)
+Array.insert(arr, 4, Array.len(arr))
+IO.print(arr) // [0, 1, 2, 3, 4]
+```
+#### Array.merge
+`Array.merge(arrays...)` concatenates variable argument `arrays...` into a new array.   
+`Array.merge(arr1, arr2, arr3)` takes the same effect as `arr1 + arr2 + arr3`.   
+a runtime error is raised if one of `arrays...` is not of type array.   
+example:
+```
+arr1 := [1, 2, "apple", Bool.true]
+arr2 := [3, 4, "banana", Bool.false]
+arr3 := [5, 6, "cherry", Bool.true]
+arr4 := [7, 8, "date", Bool.false]
+
+IO.print(Array.merge(arr1, arr2), "\n") 
+// [1, 2, apple, true, 3, 4, banana, false]
+
+IO.print(Array.merge(arr3, arr4), "\n") 
+// [5, 6, cherry, true, 7, 8, date, false]
+
+IO.print(Array.merge(arr1, arr3), "\n") 
+// [1, 2, apple, true, 5, 6, cherry, true]
+```
+#### Array.index
+`Array.index(arr, element)` is the index at which `element` occurs first in `arr`.   
+if `element` does not exist in `arr`, the result is `-1`.   
+a runtime error is raised if `arr` is not of type array.   
+example:
+```
+arr := [1, 2, 3, 1]
+IO.print(Array.index(arr, 1), "\n") // 0
+IO.print(Array.index(arr, 3), "\n") // 2
+IO.print(Array.index(arr, 4), "\n") // -1
+```
+#### Array.pop
+`Array.pop(arr, indices...)` removes and shifts elements at each of variable argument `indices...` from `arr`.   
+note that `indices...` are not accumulated, rather each index is removed independently and the next indices treat the array as a full one: `Array.pop([1, 2, 3], 0, 1) // [2] not [3]`.   
+a runtime error is raised if `arr` is not of type array, if one of the `indices...` is not a valid index, if one of `indices...` is out of bounds or if `arr` is a locked array.   
+example:
+```
+arr := [0, 5, 1, 2, 6, 3, 4]
+Array.pop(arr, 1, 3)
+IO.print(arr, "\n") // [0, 1, 2, 3, 4]
+
+Array.pop(arr, 0)
+IO.print(arr, "\n")  // [1, 2, 3, 4]
+```
+#### Array.remove 
+`Array.remove(arr, elements...)` removes the first occurrence of each value in variable argument `elements` from arr.   
+if an element of `elements...` is not occurring in `arr`, it gets skipped.   
+a runtime error is raised if `arr` is not of type array or if `arr` is a locked array.
+```
+arr := ["Hello", "World", 1, 1.01, 2, Bool.false]
+Array.remove(arr, "Hello", 2)
+IO.print(arr)
+```
+#### Array.clear
+`Array.clear(arr)` clears `arr` and sets it's size to 0 without deallocating it's capacity, this is useful if `arr` will be later used.   
+a runtime error is raised if `arr` is not of type array.   
+example:
+```
+arr := [1, 2, 3, "apple"]
+Array.clear(arr)
+IO.print(arr) // []
+```
+#### Array.count
+`Array.count(arr, element)` is the how many times `element` occurs in `arr`.   
+a runtime error is raised if `arr` is not of type array.   
+example:
+```
+arr := [1, 2, 3, 1]
+IO.print(Array.count(arr, 1), "\n") // 2
+IO.print(Array.count(arr, 2), "\n") // 1
+IO.print(Array.count(arr, 5), "\n") // 0
 ```
