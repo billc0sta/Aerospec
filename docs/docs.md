@@ -30,9 +30,8 @@ Aerospec is a programming language that blends between functional and imperative
 	3. [String concatenation](#String%20concatenation)
 	4. [String index-assignment](#String%20index-assignment)
 	5. [String locking](#String%20locking)
-	6. [String utf-8 encoding](#String%20utf-8%20encoding)
-	7. [String escape characters](#String%20escape%20characters)
-	8. [String standard library](#String%20standard%20library)
+	6. [String escape characters](#String%20escape%20characters)
+	7. [String standard library](#String%20standard%20library)
 		1. [String.len](#String.len)
 		2. [String.insert](#String.insert)
 		3. [String.extend](#String.extend)
@@ -77,8 +76,9 @@ Aerospec is a programming language that blends between functional and imperative
 	3. [First-class](#First-class)
 	4. [Return](#Return)
 	5. [Native functions](#Native%20functions)
-	6. [Closures (nested functions)](#Closures%20nested%20functions)
-	7. [Recursion](#Recursion)
+		1. [Variable arguments](#Variable%20arguments)
+	1. [Closures (nested functions)](#Closures%20nested%20functions)
+	2. [Recursion](#Recursion)
 25. [Global access](#Global%20access)
 26. [Global assignment](#Global%20assignment)
 27. [NO-OP statement](#NO-OP%20statement)
@@ -219,7 +219,7 @@ As of v0.1.0, Aerospec has 8 eight built-in data types, which are:
 5. Functions
 6. Native Functions
 7. Objects
-8. Nil
+8. Nil   
 Aerospec is dynamically and strongly typed, although somehow flexible, it doesn't try to suppress type errors at all costs.
 ## Type-of operator
 Type-of operator is a unary operator which evaluates to the type name of the value in a string representation, mostly used for runtime type-checking.  
@@ -238,11 +238,11 @@ IO.print(~_, "\n")              // nil
 although integer literals exist, as of v0.1.0, All numeric values are represented as 64bit float, This is might change in the future, See [Ideas for future releases](#Ideas%20for%20future%20releases).
 ### Basic arithmetic
 Floats supports the gang of five binary arithmetic operators, which are:
-- Plus (`+`)
-- Minus (`-`)
-- Multiply (`*`)
-- Divide (`/`)
-- Modulo (`%`)
+- Plus `+`
+- Minus `-`
+- Multiply `*`
+- Divide `/`
+- Modulo `%`   
 and the unary operators: `-` and `+`.
 ### Float standard library
 the standard library for float utilities
@@ -273,17 +273,17 @@ Equality operators are: Equal(`==`), Not-Equal(`!=`), Used to check the equality
 - Native is never equal to any native, even itself.
 - Object is never equal to other object, even itself.
 - Values of different types are never equal.
-rules are inverted for Not-Equal (`!=`)
+rules are inverted for Not-Equal `!=`
 ### Comparison
 Comparison operators are:
-- Greater-Than (`>`)
-- Lesser-than (`<`)
-- Greater-Equal (`>=`)
-- Lesser-Equal (`<=`)
+- Greater-Than `>`
+- Lesser-than `<`
+- Greater-Equal `>=`
+- Lesser-Equal `<=`   
 Used to check how two values compare to each other based on specified rules.  
 - Two floats are obvious.
 - Two strings are compared [lexicographically](https://en.wikipedia.org/wiki/Lexicographic_order).
-- Anything else raises a runtime error.
+- Anything else raises a runtime error.   
 ### Logical not
 Logical not (`!`) is a unary operator that inverts whether a value is truthy  
 A truth value of a value can be obtained using `!!expression`.   
@@ -293,7 +293,7 @@ A value is truthy if
 - It's a string whose length is greater than zero.
 - It's an array whose length is greater than zero.
 - It's a function, native or object
-- It's not a nil
+- It's not a nil   
 ### Bool standard library
 the standard library for Boolean utilities
 #### Bool.true
@@ -301,7 +301,7 @@ the constant `true`
 #### Bool.false
 the constant `false`
 #### Bool.truth
-`Bool.truth(v)` is the truth value of `v`
+`Bool.truth(v)` is the truth value of `v`   
 
 example:
 ```
@@ -381,10 +381,155 @@ str[0] = "Hello" // error (v0.1.0)
 In Aerospec, locking operator `&` is a unary operator that returns a locked version of the value it is applied to, which prevents any modification on this locked value.   
 there are two types of locking: shallow-locking and deep-locking, for strings, there's only shallow-locking, and deep-locking has no other effect over shallow-locking, more on locking later.
 when applied to a string, it returns a locked version, which cannot be index-assigned, and cannot be used with String standard library's modifying natives like `String.extend` or `String.insert`.   
-string locking does not copy the string, but simply creates a locked reference to the same string.   
+locking does not copy the string, but simply creates a locked reference to the same string.   
 example:
 ```
 str := &"Aerospec"
 str[0] = "n" // error
 String.extend(str, " Hello") // error
+```
+### String escape characters
+Strings support the escape characters of
+- Double Quote `\"`
+- Backslash `\\`
+- New line `\n`
+- Carriage Return `\r`
+- Tab `\t`
+- Vertical Tab `\t`
+- Form Feed `\f`
+- Backspace `\b`   
+if any other letter has occurred after the backslash, then the backslash gets ignored.   
+as of v0.1.0, Aerospec doesn't support hexadecimal, octal or any other digital representation of escape characters.   
+example:
+```
+IO.print("Hello\nWorld!")
+// Hello
+// World!
+```
+### String standard library
+the standard library for String utilities
+#### String.len
+`String.len(str)` is the length of the string `str`.   
+a runtime error is raised `str` is not of type string.   
+example:
+```
+IO.print(String.len("Hello, World!"), "\n") // 13
+IO.print(String.len("Aerospec"), "\n") // 8
+IO.print(String.len(""), "\n") // 0
+```
+#### String.insert
+`String.insert(str, substr, index)` insert `substr` string at index `index` of string `str`.   
+a runtime error is raised if `str` is not of type string, if `substr` is not of type string or if `str` is a locked string.   
+`index` must be less or equal to the length of `str`, otherwise a runtime error is raised.   
+example:
+```
+str = "Lorem  "
+String.insert(str, "ipsum", 6)
+IO.print(str, "\n") // Lorem ipsum
+
+str = "Beginning"
+String.insert(str, "Start: ", 0)
+IO.print(str) // Start: Beginning
+```
+#### String.extend
+`String.extend(str, substrs...)` extends the string `str` with [variable argument](#Variable%20arguments) `substrs...`
+a runtime error is raised if `str` is not of type string, if one of `substrs...` is not of type string or if `str` is a locked string.   
+example:
+```
+str = "Hello"
+String.extend(str, ", ", "World", "!")
+IO.print(str, "\n") // Hello, World!
+
+str = "Добро"
+String.extend(str, " пожаловать") 
+IO.print(str, "\n") // Добро пожаловать 
+```
+#### String.merge
+`String.merge(substrs...)` concatenates variable argument `substrs...` into a new one.   
+a runtime error is raised if one of `substrs...` is not of type string.   
+`String.merge(str1, str2, str3)` takes the same effect as: `str1 + str2 + str3`.   
+example:
+```
+str1 := "Hello, "
+str2 := "World!"
+str3 := String.merge(str1, str2)
+IO.print(str3, "\n") // Hello, World!
+
+str4 := str1 + str2
+IO.print(str4, "\n") // Hello, World!
+```
+#### String.index
+`String.index(str, substr)` is the index of the first occurrence of `substr` in `str`. 
+if `substr` doesn't occur in `str`, then it results in `-1`.   
+a runtime error is raised if `str` is not of type string or `substr` is not of type string.   
+example:
+```
+str = "Hello, world!"
+IO.print(String.index(str, "world"), "\n") // 7 
+IO.print(String.index(str, "Hello"), "\n") // 0
+
+str = "Short"
+IO.print(String.index(str, "LongerSubstring"), "\n") // -1
+
+str = "こんにちは、世界！"
+index1 := String.index(str, "世界")
+index2 := String.index(str, "こ")
+IO.print(str[index1:], "\n") // 世界！
+IO.print(str[index2:], "\n") // こんにちは、世界！
+```
+#### String.pop
+`String.pop(str, indices...)` removes and shifts characters at each index of `indices...` from `str`.   
+note that `indices...` are not accumulated, rather each index is removed independently and the next indices treat the string as a full one: `String.pop("Hello", 0, 1) // "elo", not "llo"`.   
+a runtime error is raised if `str` is not of type string, if one of the `indices...` is not of type float or has a decimal part, if one of `indices...` is out of bounds or if `str` is a locked string.   
+example:
+```
+str = "Abjad Hawaz"
+String.pop(str, 0, 0)
+IO.print(str, "\n") // jad Hawaz
+
+str = "Lorem Ipsum"
+String.pop(str, 4)
+IO.print(str, "\n") // Lore Ipsum
+```
+#### String.remove
+`String.remove(str, substrs...)` removes the first occurrence of each `substrs...` from `str`.
+if a substring is not occurring in `str`, it does nothing.   
+a runtime error is raised if `str` is not of type string, if one of `substrs...` is not of type string or if `str` is a locked string.   
+example:
+```
+str = "dollar for each one"
+String.remove(str, "dollar", "one")
+IO.print(str, "\n") // for each
+
+str = "쓰레기통"
+String.remove(str, "레기")
+IO.print(str, "\n") // 쓰통
+```
+#### String.clear
+`String.clear(str)` clears `str` and sets it's size to 0 without deallocating it's capacity, this is useful if `str` will be later used.   
+a runtime error is raised if `str` is not of type string.   
+example:
+```
+str = "!dlroW ,olleH"
+String.clear(str)
+IO.print(str, "\n") // ""
+```
+#### String.count
+`String.count(str, substr)` is the how many times `substr` occurs in `str`.   
+a runtime error is raised if `str` is not of string or if `substr` is not of type string
+example:
+```
+str = "123123123"
+IO.print(String.count(str, "123"), "\n") // 3
+IO.print(String.count(str, "4"), "\n") // 0 
+```
+#### String.repr
+`String.repr(value)` is the string representation of `value`, where `value` can be of any type.
+note that `IO.print` uses the representation of the value by default, a call to `String.repr` is not necessary.   
+example:
+```
+arr := [1, 2, [3, 4]]
+IO.print(String.repr(arr), "\n") // [1, 2, [3, 4]]
+
+IO.print(String.repr(IO.print)) // <native ( params... )>
 ```
