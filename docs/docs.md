@@ -67,14 +67,16 @@ Aerospec is a programming language that blends between functional and imperative
 14. [Nil](#Nil)
 15. [Block statement](#Block%20statement)
 16. [If...else statement](#If_else%20statement)
-17. [If...else expression](#If_else%20expression)
-18. [Loop](#Loop)
-19. [Continue](#Continue)
-20. [Break](#Break)
-21. [Range loop](#Range%20loop)
-22. [Builder](#Builder)
-23. [Scope](#Scope)
-24. [Functions](#Functions)	
+17. [Ternary expression](#Ternary%20expression)
+18. [Range expression](#Range%20expression)
+19. [Loop](#Loop)
+	 1. [Regular loop](#Regular%20loop)
+	 2. [Range loop](#Range%20loop)
+	 3. [Continue](#Continue)
+	 4. [Break](#Break)
+20. [Builder](#Builder)
+21. [Scope](#Scope)
+22. [Functions](#Functions)	
 	1. [Parameters](#Parameters)
 	2. [Function calls](#Function%20calls)
 	3. [First-class](#First-class)
@@ -83,10 +85,10 @@ Aerospec is a programming language that blends between functional and imperative
 		1. [Variable arguments](#Variable%20arguments)
 	1. [Closures (nested functions)](#Closures%20nested%20functions)
 	2. [Recursion](#Recursion)
-25. [Global access](#Global%20access)
-26. [Global assignment](#Global%20assignment)
-27. [NO-OP statement](#NO-OP%20statement)
-28. [Objects](#Objects)
+23. [Global access](#Global%20access)
+24. [Global assignment](#Global%20assignment)
+25. [NO-OP statement](#NO-OP%20statement)
+26. [Objects](#Objects)
 	1. [Object initialization](#Object%20initialization)
 	2. [Object copying](#Object%20copying)
 	3. [Methods](#Methods)
@@ -96,13 +98,13 @@ Aerospec is a programming language that blends between functional and imperative
 	7. [Object deep-locking](#Object%20deep-locking)
 	8. [Object standard library](#Object%20standard%20library)
 		1. [Object.fields](#Object.fields)
-29. [Importing](#Importing)
-30. [Miscellaneous standard libraries](#Miscellaneous%20standard%20libraries)
+27. [Importing](#Importing)
+28. [Miscellaneous standard libraries](#Miscellaneous%20standard%20libraries)
 	1. [IO standard library](#IO%20standard%20library)
 	2. [Time standard library](#Time%20standard%20library)
 	3. [Value standard library](#Value%20standard%20library)
-31. [Ideas for future releases](#Ideas%20for%20future%20releases)
-32. [Implementation](#Implementation)
+29. [Ideas for future releases](#Ideas%20for%20future%20releases)
+30. [Implementation](#Implementation)
 ## Installation
 Go to [Releases](https://github.com/billc0sta/Aerospec/releases/) page and download the latest version.   
 for now, Aerospec is only compiled for Windows.  
@@ -145,7 +147,8 @@ however, there might be times where there's syntactic ambiguity:
 ```
 a = b [1] // (a = b[1]) or (a = b) ([1])??
 ```
-for that use a [NO-OP](#NO-OP) statement or simply put the expression between parenthesis.
+for that use a [NO-OP](#NO-OP) statement or simply put the expression between parenthesis.   
+Aerospec does not have entry function. it executes the code in the global [scope](#Scope).
 ## Comments
 Aerospec adopts C-like commenting style, example:
 ```
@@ -754,4 +757,169 @@ arr := [1, 2, 3, 1]
 IO.print(Array.count(arr, 1), "\n") // 2
 IO.print(Array.count(arr, 2), "\n") // 1
 IO.print(Array.count(arr, 5), "\n") // 0
+```
+## Nil
+Nil is a standalone type and value that represents the absence of a value, akin to C#'s and JS's `null`.  
+it is the return value of non-returning functions and natives.   
+it's also often used to indicate the failure of a returning function, this is likely to change with the addition of `err` type in later versions, See [Ideas for future releases](#Ideas%20for%20future%20releases).   
+it is represented in the language with the `_` (Underscore) symbol.   
+example:
+```
+return_of_print := IO.print(_, "\n") // "nil"
+IO.print(return_of_print, "\n") // IO.print returns nil
+```
+## Block statement
+Block statement (also called compound statement) is a sequence of zero or more statements enclosed within curly braces.   
+it can show wherever a statement is allowed.   
+primarily used with if and looping statements.   
+example:
+```
+i = 0
+>> i < 10 {
+	IO.print(i, "\n")
+	i = i + 1
+}
+```
+## if...else statement
+If...else statements is a control flow construct to execute code branches based on a condition.   
+in Aerospec, if statements (represented with `??`) requires condition expression and a statement, both parenthesis around the condition expression and block statements are optional.   
+the condition expression is evaluated to it's truth value and branches are executed based on it.   
+else statement (represented with `::`) is optional, and is always bound to the closest if statement.   
+in Aerospec, if statements does not introduce a new scope.   
+example:
+```
+i = 8
+?? i % 2 == 0
+	IO.print("'i' is even\n")
+::
+	IO.print("'i' is odd\n")
+
+age = 20
+?? (age >= 18) {
+   IO.print("Adult\n")
+   
+   ?? (age >= 21) {
+      IO.print("Legal drinking age (don't drink though)\n")
+   } :: {
+      IO.print("Not of legal drinking age\n")
+   }
+   
+} :: {
+   IO.print("Minor\n")
+}
+```
+## Ternary expression
+Ternary expression is an expression that evaluates to one of two values based on a condition. 
+in Aerospec, it's syntax and semantics is identical to C.   
+example:
+```
+fizzbuzz_30 :=
+30 % 3 == 0 && 30 % 5 == 0 
+? "fizzbuzz"
+: 30 % 3 == 0 
+? "fizz"
+: 30 % 3 == 1 
+? "buzz"
+: "30"
+
+IO.print(fizzbuzz_30)
+```
+## Range expression
+a range is an expression which is only valid in specific contexts, it defines a constant identifier and increments/decrements it based on specified lower and upper bounds non-decimal floats.   
+the syntax for ranges is akin to math's Interval notation: `lbound < x < ubound`.
+all relational comparison operators are allowed in a range expression, but `< | <=` cannot be used in the same expression along `> | >=`:
+```
+0 < i < 10
+i  = name of the iterator, the identifier 'i' is optional
+0  = the lower bound
+10 = the higher bound
+
+this expression reads as:
+"define 'i' iterator starting with a number greater than 0: (1), increment until 'i' is equal to a number lesser than 10: (9)"
+
+0 <= i <= 10
+"define 'i' iterator starting with a number equal to 0: (0), increment until 'i' is equal to a number equal to 10: (10)"
+
+0 < i <= 10, 0 <= i < 10 are also allowed
+```
+a range expression which uses (`<` | `<=`) is an incrementing range expression.   
+an incrementing range expression must have it's lower bound lesser than it's upper bound, otherwise it's a NO-OP
+```
+10 > i > 1
+"define 'i' iterator starting with a number lesser than 10: (9), decrement until 'i' is equal to a number greater than 1: (2)"
+
+10 >= i >= 1
+"define 'i' iterator starting with a number equal to 10: (10), decrement until 'i'
+is equal to a number equal to 1: (1)"
+
+10 > i >= 0, 10 >= i > 0 are also allowed
+```
+a range expression which uses (`>` | `>=`) is a decrementing range expression.   
+a decrementing range expression must have it's lower bound greater than it's higher bound,
+otherwise it's a NO-OP.   
+## Loop
+In Aerospec, a loop is an iterative construct that keeps executing code as long as a specific rule holds.   
+unlike traditional behavior, loops do not introduce a new scope.   
+### Regular loop
+Regular loop is one of the two iterative constructs in Aerospec, it executes a statement until a condition expression truth value is false.   
+it requires an expression as a condition and a statement.   
+it does not require parenthesis around the condition expression nor does it require a block statement.   
+example:
+```
+i = 0 
+>> i < 10 {
+	eval = i % 2 == 0 ? "even" : "odd" 
+	IO.print("i = ", i, ": ", eval, "\n")
+	i = i + 1
+}
+
+// i = 0, is: even
+// ...
+// i = 9: odd
+```
+### Range loop
+Range loop is an iterative construct which defines an iterator for a specified [range](#Range%20expression) and keeps iterating until the range is finished.   
+the iterator is removed from [scope](#Scope) upon exiting the loop.   
+example:
+```
+arr := [1, 2, 3, 4, 5]
+>> 0 <= i < Array.len(arr)
+	IO.print("arr[", i, "] = ", arr[i], "\n")
+
+// "arr[0] = 1"
+// ...
+// "arr[4] = 5"
+```
+### Continue
+Continue statement (represented with `<<`) skips the remaining execution path of the current iteration and starts a new one.   
+A Continue statement must occur only in a loop statement.   
+for regular loop statements, it skips the rest of the iteration.   
+for range loops statements, it advances the iterator then skips the rest of the iteration.   
+example:
+```
+>> 0 <= i <= 10 {
+    ?? i % 2 == 1
+        <<
+    IO.print(i, "\n")
+}
+
+// 0 // 2 // ... // 8 // 10
+```
+### Break
+Break statement (represented with `**`) skips the remaining execution path of the current iteration and exits the loop.   
+example:
+```
+i = 0
+>> Bool.true {
+	?? i == 100 
+		**
+	
+	IO.print(i, "\t")
+	?? i != 0 && i % 10 == 0
+		IO.print("\n")
+	i = i + 1 
+}
+// 1 ... 10
+// ...
+// 90 ... 99
 ```
