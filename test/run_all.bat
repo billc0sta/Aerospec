@@ -3,6 +3,11 @@ SetLocal EnableExtensions DisableDelayedExpansion
 
 Set /A passed=failed=nosnaps=0
 
+If Not Exist "snapshots" ( MkDir "snapshots" )
+If Not Exist "results" ( MkDir "results" )
+If Not Exist "nosnaps" ( MkDir "nosnaps" )
+If Not Exist "failure" ( MkDir "failure" )
+
 For %%G In ("tests\*") Do (
     
     dune.exe exec ..\_build\default\bin\main.exe "%%G" 1>"results\%%~nG.txt" 2>NUL

@@ -102,8 +102,12 @@ Aerospec is a programming language that blends between functional and imperative
 27. [Importing](#importing)
 28. [Miscellaneous standard libraries](#miscellaneous-standard-libraries)
 	1. [IO standard library](#io-standard-library)
+		1. [IO.print](#ioprint)
+		2. [IO.input](#ioinput)
 	2. [Time standard library](#time-standard-library)
+		1. [Time.clock](#timeclock)
 	3. [Value standard library](#value-standard-library)
+		1. [Value.copy](#valuecopy)
 29. [Ideas for future releases](#ideas-for-future-releases)
 30. [Implementation](#implementation)
 ## Installation
@@ -433,7 +437,8 @@ String is a mutable type, for known performance reasons, assigning with a string
 the standard library for String utilities
 #### String.len
 `String.len(str)` is the length of the string `str`.   
-a runtime error is raised `str` is not of type string.   
+a runtime error is raised if:
+- `str` is not of type string.   
 example:
 ```
 IO.print(String.len("Hello, World!"), "\n") // 13
@@ -442,8 +447,11 @@ IO.print(String.len(""), "\n") // 0
 ```
 #### String.insert
 `String.insert(str, substr, index)` insert `substr` string at index `index` of string `str`.   
-a runtime error is raised if `str` is not of type string, if `substr` is not of type string or if `str` is a locked string.   
-`index` must be less or equal to the length of `str`, otherwise a runtime error is raised.   
+a runtime error is raised if:
+- `str` is not of type string.
+- `substr` is not of type string.
+- `str` is a locked string.   
+- `index` greater than the length of `str`
 example:
 ```
 str = "Lorem  "
@@ -456,7 +464,10 @@ IO.print(str) // Start: Beginning
 ```
 #### String.extend
 `String.extend(str, substrs...)` extends the string `str` with [variable argument](#Variable%20arguments) `substrs...`
-a runtime error is raised if `str` is not of type string, if one of `substrs...` is not of type string or if `str` is a locked string.   
+a runtime error is raised if: 
+- `str` is not of type string.
+- one of `substrs...` is not of type string.
+- `str` is a locked string.   
 example:
 ```
 str = "Hello"
@@ -469,7 +480,8 @@ IO.print(str, "\n") // Добро пожаловать
 ```
 #### String.merge
 `String.merge(substrs...)` concatenates variable argument `substrs...` into a new one.   
-a runtime error is raised if one of `substrs...` is not of type string.   
+a runtime error is raised if: 
+- one of `substrs...` is not of type string.   
 `String.merge(str1, str2, str3)` takes the same effect as: `str1 + str2 + str3`.   
 example:
 ```
@@ -484,7 +496,9 @@ IO.print(str4, "\n") // Hello, World!
 #### String.index
 `String.index(str, substr)` is the index of the first occurrence of `substr` in `str`. 
 if `substr` doesn't occur in `str`, then it results in `-1`.   
-a runtime error is raised if `str` is not of type string or `substr` is not of type string.   
+a runtime error is raised if:
+- `str` is not of type string.
+- `substr` is not of type string.   
 example:
 ```
 str = "Hello, world!"
@@ -503,7 +517,11 @@ IO.print(str[index2:], "\n") // こんにちは、世界！
 #### String.pop
 `String.pop(str, indices...)` removes and shifts characters at each index of `indices...` from `str`.   
 note that `indices...` are not accumulated, rather each index is removed independently and the next indices treat the string as a full one: `String.pop("Hello", 0, 1) // "elo", not "llo"`.   
-a runtime error is raised if `str` is not of type string, if one of the `indices...` is not of type float or has a decimal part, if one of `indices...` is out of bounds or if `str` is a locked string.   
+a runtime error is raised if:
+- `str` is not of type string.
+- one of the `indices...` is not of type float or has a decimal part.
+- one of `indices...` is out of bounds.
+- `str` is a locked string.   
 example:
 ```
 str = "Abjad Hawaz"
@@ -517,7 +535,10 @@ IO.print(str, "\n") // Lore Ipsum
 #### String.remove
 `String.remove(str, substrs...)` removes the first occurrence of each `substrs...` from `str`.
 if a substring is not occurring in `str`, it gets skipped.   
-a runtime error is raised if `str` is not of type string, if one of `substrs...` is not of type string or if `str` is a locked string.   
+a runtime error is raised if:
+- `str` is not of type string.
+- one of `substrs...` is not of type string.
+- `str` is a locked string.   
 example:
 ```
 str = "dollar for each one"
@@ -530,7 +551,8 @@ IO.print(str, "\n") // 쓰통
 ```
 #### String.clear
 `String.clear(str)` clears `str` and sets it's size to 0 without deallocating it's capacity, this is useful if `str` will be later used.   
-a runtime error is raised if `str` is not of type string.   
+a runtime error is raised if:
+- `str` is not of type string.   
 example:
 ```
 str = "!dlroW ,olleH"
@@ -539,7 +561,9 @@ IO.print(str, "\n") // ""
 ```
 #### String.count
 `String.count(str, substr)` is the how many times `substr` occurs in `str`.   
-a runtime error is raised if `str` is not of type string or if `substr` is not of type string
+a runtime error is raised if:
+- `str` is not of type string.
+- `substr` is not of type string.   
 example:
 ```
 str = "123123123"
@@ -670,7 +694,8 @@ Since array is a reference type, assigning with an array does not copy it, but a
 the standard library for Array utilities
 #### Array.len
 `Array.len(arr)` is the length of array `arr`.  
-a runtime error is raised if `arr` is not of type array.   
+a runtime error is raised if:
+- `arr` is not of type array.   
 example:
 ```
 IO.print(Array.len([1, 2, 3]), "\n") // 3
@@ -679,7 +704,9 @@ IO.print(Array.len([]), "\n") // 0
 ```
 #### Array.append
 `Array.append(arr, elements...)` appends variable argument `elements...` to `arr`.   
-a runtime error is raised if `arr` is not of type array or if `arr` is a locked array.  
+a runtime error is raised if:
+- `arr` is not of type array.
+- `arr` is a locked array.  
 example:
 ```
 arr := [1, 2, 3]
@@ -688,7 +715,11 @@ IO.print(arr) // [1, 2, 4, 5, 6]
 ```
 #### Array.insert
 `Array.insert(arr, element, index)` insert `element` in `arr` at `index`.   
-a runtime error is raised if `arr` is not of type array, if `index` is not of type float, if `index` is not a valid index, if `index` is greater than the length of `arr`.   
+a runtime error is raised if:
+- `arr` is not of type array.
+- `index` is not of type float.
+- `index` is not a valid index.
+- `index` is greater than the length of `arr`.   
 example:
 ```
 arr := [1, 2, 3]
@@ -699,7 +730,8 @@ IO.print(arr) // [0, 1, 2, 3, 4]
 #### Array.merge
 `Array.merge(arrays...)` concatenates variable argument `arrays...` into a new array.   
 `Array.merge(arr1, arr2, arr3)` takes the same effect as `arr1 + arr2 + arr3`.   
-a runtime error is raised if one of `arrays...` is not of type array.   
+a runtime error is raised if:
+- one of `arrays...` is not of type array.   
 example:
 ```
 arr1 := [1, 2, "apple", Bool.true]
@@ -719,7 +751,8 @@ IO.print(Array.merge(arr1, arr3), "\n")
 #### Array.index
 `Array.index(arr, element)` is the index at which `element` occurs first in `arr`.   
 if `element` does not exist in `arr`, the result is `-1`.   
-a runtime error is raised if `arr` is not of type array.   
+a runtime error is raised if:
+- `arr` is not of type array.   
 example:
 ```
 arr := [1, 2, 3, 1]
@@ -730,7 +763,11 @@ IO.print(Array.index(arr, 4), "\n") // -1
 #### Array.pop
 `Array.pop(arr, indices...)` removes and shifts elements at each of variable argument `indices...` from `arr`.   
 note that `indices...` are not accumulated, rather each index is removed independently and the next indices treat the array as a full one: `Array.pop([1, 2, 3], 0, 1) // [2] not [3]`.   
-a runtime error is raised if `arr` is not of type array, if one of the `indices...` is not a valid index, if one of `indices...` is out of bounds or if `arr` is a locked array.   
+a runtime error is raised if:
+- `arr` is not of type array.
+- one of the `indices...` is not a valid index.
+- one of `indices...` is out of bounds.
+- `arr` is a locked array.   
 example:
 ```
 arr := [0, 5, 1, 2, 6, 3, 4]
@@ -743,7 +780,9 @@ IO.print(arr, "\n")  // [1, 2, 3, 4]
 #### Array.remove 
 `Array.remove(arr, elements...)` removes the first occurrence of each value in variable argument `elements` from arr.   
 if an element of `elements...` is not occurring in `arr`, it gets skipped.   
-a runtime error is raised if `arr` is not of type array or if `arr` is a locked array.
+a runtime error is raised if:
+- `arr` is not of type array.
+- `arr` is a locked array.   
 ```
 arr := ["Hello", "World", 1, 1.01, 2, Bool.false]
 Array.remove(arr, "Hello", 2)
@@ -751,7 +790,8 @@ IO.print(arr)
 ```
 #### Array.clear
 `Array.clear(arr)` clears `arr` and sets it's size to 0 without deallocating it's capacity, this is useful if `arr` will be later used.   
-a runtime error is raised if `arr` is not of type array.   
+a runtime error is raised if:
+- `arr` is not of type array.   
 example:
 ```
 arr := [1, 2, 3, "apple"]
@@ -760,7 +800,8 @@ IO.print(arr) // []
 ```
 #### Array.count
 `Array.count(arr, element)` is the how many times `element` occurs in `arr`.   
-a runtime error is raised if `arr` is not of type array.   
+a runtime error is raised if:
+- `arr` is not of type array.   
 example:
 ```
 arr := [1, 2, 3, 1]
@@ -1320,3 +1361,112 @@ date_fields := Object.fields(date)
 IO.print(date_fields)
 // [[month, 1, true], [day, 1, true], [year, 1970, false]]
 ```
+## Importing
+Importing is the operation which allows one file to use bound values defined in another file.   
+the import operator `#` applies to a string, which is a relative or absolute path to another Aerospec code file, it runs the code within the file then it evaluates to an object which stores all the assigned identifiers as object fields.   
+it's recommended to always lock an imported object and assign it to an identifier starting with upper letter.   
+in Aerospec, Importing is a runtime operation.   
+importing a file caches it in memory; using the import operator on the same path does not copy the imported object.   
+a runtime error is raised if:
+- the import operator `#` is applied to a value which is not of type string.
+- if the string is a valid relative or absolute path.
+- if there's cyclical import.
+- if a file imports itself.   
+example:
+```
+file1.aero:
+
+map := (f, arr) {
+	-> [0 <= i < Array.len(arr);; f(arr[i])]
+}
+
+--------------------------
+fil2.aero:
+
+Map := &(#"file1.aero")
+
+arr        := [1, 2, 3, 4, 5]
+square_arr := Map.map((x){ -> x * x}, arr)
+IO.print(square_arr) // [1, 4, 9, 16, 25]
+```
+## Miscellaneous standard libraries
+utility standard libraries for general use.   
+### IO standard library
+the standard library for IO utilities.
+#### IO.print
+`IO.print(params...)` prints the string representation of each value of variable argument `params...` to the standard output.   
+it does not print a new-line character at the end by default.  
+example:
+```
+IO.print("Hello, World!\n")
+```
+#### IO.input
+`IO.input()` Flushes standard output, then read characters from standard input until a newline character is encountered.   
+Return the string of all characters read, without the newline character at the end.   
+example:
+```
+line := IO.input()
+IO.print(line, "\n")
+```
+### Time standard library
+the standard library for Time utilities
+#### Time.clock
+`Time.clock()` is the processor time in seconds, used by the program since the beginning of execution.   
+example:
+```
+begin := Time.clock()
+>> 0 <= i <= 1000000;
+end := Time.clock()
+
+IO.print("from 0 to 1000000 took: ", end - begin, "\n")
+```
+### Value standard library
+the standard library for Value utilities, functions defined here can be applied to a value of any type. 
+#### Value.copy
+`Value.copy(v)` is a deep-copy of `v`.   
+if `v` is not of a reference type, it returns `v` unchanged.   
+example:
+```
+arr  := [1, 2, 3]
+copy := Value.copy(arr)
+copy[0] = 0
+
+IO.print(arr, "\n")  // [1, 2, 3]
+IO.print(copy, "\n") // [0, 2, 3]
+```
+## Ideas for future releases
+1. implementing the interpreter as a stack machine.
+2. adding hexadecimal escape characters.
+3. adding hexadecimal literals.
+4. adding command argument support.
+5. adding type-hinting.
+6. modify string index-assignment to longer strings.
+8. adding a C API.
+9. adding Hashmaps.
+10. adding integers.
+11. adding static-analysis. 
+12. adding tuples.
+13. adding modes, like locked mode and static mode.
+14. adding operator overloading mechanism for objects.
+15. adding meta-info to function environments.
+16. adding the ability to extend objects.
+17. adding currying.
+18. adding pipeline operator.
+19. adding optional parameters.
+20. adding parameter unfolding.
+21. adding variable arguments to normal functions.
+22. adding tail optimization.
+23. expanding the standard library.
+## Implementation
+Aerospec is fully made in OCaml and is highly influenced by it.   
+the parser is a recursive-descent.   
+the interpreter is a tree walker and is planned to be reworked.   
+scopes and objects are implemented as OCaml hashtables.   
+builder expression statements is optimized as a range loop syntax sugar.   
+as of v0.1.0, it does not do any static-analyses whatsoever and most errors are delegated to runtime.   
+as of v0.1.0, the structure of the implementation is as follows:
+- `lib/lexer.ml`: the lexer.
+- `lib/parser.ml`: the parser.
+- `lib/interpreter.ml`: the interpreter.
+- `lib/natives.ml`: all standard library functions are defined here.
+- `lib/resizable.ml`: the underlying type of strings and arrays.

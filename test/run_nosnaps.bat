@@ -3,6 +3,9 @@ SetLocal EnableExtensions DisableDelayedExpansion
 
 Set /A nosnaps=0
 
+If Not Exist "nosnaps" ( MkDir "nosnaps" )
+If Not Exist "results" ( MkDir "results" )
+
 For %%G In ("tests\*") Do (
 
     If Not Exist "snapshots\%%~nG.txt" (
