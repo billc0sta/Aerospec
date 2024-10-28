@@ -349,7 +349,7 @@ and evaluate_ident tk global inp =
 	   begin
 		 let env = 
 		   try Environment.parent_of env 
-		   with Invalid_argument _ -> report_error ("Unbinded variable '"^tk.value^"' was referenced") tk inp 
+		   with Invalid_argument _ -> report_error ("Unbinded identifier '"^tk.value^"' was referenced") tk inp 
 		 in aux env
 	   end
 	| Some (value, _) -> value
@@ -473,7 +473,7 @@ and assign_ident_global expr token inp =
 			  report_error ("Global variable '"^name^"' was referenced in global scope") token inp
   in
   match (Environment.search name env) with
-  | None -> report_error ("Unbinded variable '"^name^"' was referenced") token inp
+  | None -> report_error ("Unbinded identifier '"^name^"' was referenced") token inp
   | Some (env, v) ->
      if (snd v) = false
      then report_error ("Cannot re-assign to the constant '"^name^"'") token inp

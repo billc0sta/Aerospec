@@ -31,8 +31,9 @@ Aerospec is a programming language that blends between functional and imperative
 	4. [String index-assignment](#string-index-assignment)
 	5. [String locking](#string-locking)
 	6. [String escape characters](#string-escape-characters)
-	7. [String copying](#string-copying)
-	8. [String standard library](#string-standard-library)
+	7. [String multi-line](#string-multi-line)
+	8. [String copying](#string-copying)
+	9. [String standard library](#string-standard-library)
 		1. [String.len](#stringlen)
 		2. [String.insert](#stringinsert)
 		3. [String.extend](#stringextend)
@@ -84,26 +85,27 @@ Aerospec is a programming language that blends between functional and imperative
 	5. [Native functions](#native-functions)
 	6. [Closures (nested functions)](#closures-nested-functions)
 	7. [Recursion](#recursion)
-24. [Global access](#global-access)
-25. [Global assignment](#global-assignment)
-26. [NO-OP statement](#no-op-statement)
-27. [Objects](#objects)
+24. [Global access operator](#global-access-operator)
+	1. [Global access](#global-access)
+	2. [Global assignment](#global-assignment)
+25. [NO-OP statement](#no-op-statement)
+26. [Objects](#objects)
 	1. [Object initialization](#object-initialization)
 	2. [Object copying](#object-copying)
 	3. [Methods](#methods)
-	4. [Property access](#property-access)
-	5. [Property assignment](#property-assignment)
+	4. [Field access](#field-access)
+	5. [Field assignment](#Field-assignment)
 	6. [Object locking](#object-locking)
 	7. [Object deep-locking](#object-deep-locking)
 	8. [Object standard library](#object-standard-library)
 		1. [Object.fields](#objectfields)
-28. [Importing](#importing)
-29. [Miscellaneous standard libraries](#miscellaneous-standard-libraries)
+27. [Importing](#importing)
+28. [Miscellaneous standard libraries](#miscellaneous-standard-libraries)
 	1. [IO standard library](#io-standard-library)
 	2. [Time standard library](#time-standard-library)
 	3. [Value standard library](#value-standard-library)
-30. [Ideas for future releases](#ideas-for-future-releases)
-31. [Implementation](#implementation)
+29. [Ideas for future releases](#ideas-for-future-releases)
+30. [Implementation](#implementation)
 ## Installation
 Go to [Releases](https://github.com/billc0sta/Aerospec/releases/) page and download the latest version.   
 for now, Aerospec is only compiled for Windows.  
@@ -412,6 +414,19 @@ IO.print("Hello\nWorld!")
 // Hello
 // World!
 ```
+### String multi-line
+In Aerospec, multi-line strings are allowed and the string will contain a new-line character at the position of the new-line:
+```
+mstr := 
+"
+multi-line
+string
+"
+
+IO.print(mstr)
+// multi-line
+// string
+```
 ### String copying
 String is a mutable type, for known performance reasons, assigning with a string does not copy the string, but merely a reference to it, which means any modification to the new string are also applied to the original one, if this behavior is not desired, use [Value.copy](#Value.copy).
 ### String standard library
@@ -551,7 +566,7 @@ as of v0.1.0, Aerospec does not have bitwise or augmented assignment operators, 
 | 1          | `()`     | function call        | LTR           |
 | 1          | `[]`     | subscript            | LTR           |
 | 1          | `$`      | global access        | LTR           |
-| 1          | `.`      | property access      | LTR           |
+| 1          | `.`      | field access         | LTR           |
 | 2          | `!`      | logical not          | RTL           |
 | 2          | `+`      | unary plus           | RTL           |
 | 2          | `-`      | unary minus          | RTL           |
@@ -978,6 +993,16 @@ IO.print(str, "\n") // !dlroW ,olleH
 
 IO.print(reverse_string, "\n") // <function ( str )>
 ```
+the body of the function is not executed until the function is called; a function with erroneous body will not raise an error until it's called:
+```
+f := (){
+	// Unbinded identifier 'a' 
+	IO.print(a)
+}
+// nothing happens...
+
+f() // error
+```
 ### Parameters
 parameters is one way functions communicate with the function call, used as a variable to refer to one input provided to the function at the function call.   
 In Aerospec, parameters are identifiers enclosed within parenthesis and separated by commas followed by a block contained code.   
@@ -1007,6 +1032,7 @@ print_range(0, 100) // 1 2 ... 99 100
 Return statement (represented with `->`) ends the execution of the function and evaluates the function call to the expression followed.   
 In Aerospec, functions must return a value, a function that doesn't explicitly return, evaluates to nil. 
 the return expression after the return statement cannot be omitted, if the function shouldn't return anything, simply return a nil: `-> _`.   
+return can only occur within a function.   
 example:
 ```
 max := (x, y) {
@@ -1073,7 +1099,7 @@ IO.print(multiply_by_10(4), "\n") // 40
 ```
 ### Recursion
 Recursion is the operation of calling a function in itself.   
-in Aerospec, function have access to themselves by default, and also have access to the functions defined after them.    
+in Aerospec, function have access to themselves by default, and also have access to the functions defined after them, allowing mutual recursion.   
 example:
 ```
 quick_sort := (arr) {
@@ -1092,4 +1118,205 @@ quick_sort := (arr) {
 arr    := [1, 9, 2, 8, 3, 7, 4, 6, 5]
 sorted := quick_sort(arr)
 IO.print(sorted) // [1, 2, 3, 4, 5, 6, 7, 8, 9]
+```
+## Global access operator
+Global access operator (represented as `$`) is an operator used to re-assign to a variable outside of the current scope and access an identically named identifiers inside and out of the current scope.  
+it leaves the current scope and searches downward the stack of scopes, and chooses the closest identifier to the current scope.   
+global access operator is not necessary if no identically named identifier exists in the current scope.    
+a runtime error is raised when the global access operator is used in the global scope.
+### Global access
+accessing an identifier within and outside of the current scope.   
+example:
+```
+a := "global"
+f := () {
+	a = "non-local"
+	
+	f := () {
+		a = "inner"
+		IO.print(a, "\n")
+		IO.print($a, "\n")
+	}
+	f()
+	IO.print($a, "\n")
+}
+f()
+// inner // non-local // global
+```
+### Global assignment
+Global access operator can also be used to modify a variable outside of the current scope.   
+Global identifiers cannot be constant assigned.   
+example:
+```
+a = "Hello"
+f := () {
+	$a = "modified by f"
+}
+IO.print(a, "\n")
+
+f()
+IO.print(a, "\n")
+```
+## NO-OP statement
+no operation statement (represented with `;`) is a statement that does not affect the execution of the program and is usually ignored by the parser.   
+it's primarily used to disambiguate expressions and as the statement part of if and loop statements that do nothing.   
+example:
+```
+// infinite loop
+>> Bool.true
+	;
+
+arr  := [1, 2, 3, 4]
+arr2 := arr
+; [1]
+// an array that contains one elements, discarded
+// without the ';', the above expression would've parsed as (arr2 := arr[1]) = 2 
+```
+## Objects
+In Aerospec, objects are collections of data and methods which have access to this data.   
+Objects are the building blocks of OOP in the language.   
+think of objects as inner programs which have access to the outer one, quite actually that's how they're implemented.   
+as of v0.1.0, some of the prototype-OOP features are missing from the language, like extending objects with others.   
+### Object initialization
+Objects are initialized as a group of statements enclosed within two curly braces.   
+statements within the objects modify the state of the object.   
+assignment and constant-assignment expressions introduce fields to the objects which are exposed outside of the object as attributes.   
+example:
+```
+john := {
+	first_name = "John"
+	last_name  = "Doe"
+	age        = 33
+}
+```
+### Object copying
+Objects are reference values; they're not copied when assigned to other identifiers, which means any modification to the newly assigned object will affect the original one.   
+to copy an object, use the object in a function call, this deep-copies the object and is equivalent to `Value.copy(obj)`:
+```
+jane := john()
+jane.first_name = "Jane"
+
+IO.print(john.first_name, "\n") // John
+IO.print(jane.first_name, "\n") // Jane
+```
+### Methods
+Methods are functions defined within an object, they have access to the data within the object and can apply modifications to it.   
+Methods can call functions and other methods.   
+like regular functions, Methods modify and access identifiers using the global access operator.   
+as of v0.1.0, methods cannot refer to the object of which they're called from.   
+methods will always work as if they were called within the object, that means it works correctly even if it's assigned to an identifier.   
+example:
+```
+Point := {
+	x = 15
+	y = 40
+
+	repr := () {
+		-> "Point{" + String.repr(x) + ", " + String.repr(y) + "}"
+	}
+}
+
+IO.print(Point.repr(), "\n") // Point{15, 40}
+
+repr_of_point = Point.repr
+IO.print(repr_of_point(), "\n") // Point{15, 40}
+```
+### Field access
+Field access is the operation of obtaining a value of a field.   
+it's performed using the dot `.` operator, with the object as a left hand and the field identifier as the right hand.   
+accessing a non-existent field raises a runtime error.   
+example:
+```
+object := {
+	field_1 := 123
+	field_2 := "field"
+}
+
+IO.print(object.field_1, "\n") // 123
+IO.print(object.field_2, "\n") // field
+```
+### Field assignment
+Field assignment is the operation of assigning a field outside of the object it is defined in.   
+constant fields cannot be re-assigned outside or within the object.   
+assigning to a non-existent fields pops it into existence.   
+assigning a new field with a function turns it into a method and can be treated as such.   
+example:
+```
+person := { first_name = "John" }
+
+IO.print(person.first_name, "\n") // John
+
+// there are no fields named last_name or age
+// this method will raise a runtime error if called now
+person.print := () {
+	IO.print(
+	"first name: ", first_name, "\n",
+	"last name: ", last_name, "\n",
+	"age: ", age, "\n"
+	)
+}
+
+person.last_name = "Doe"
+person.age       = 33
+
+person.print()
+// first name: John
+// last name: Doe
+// age: 33
+```
+### Object locking
+applying the locking operator (`&`) on an object creates a locked object.   
+a locked object prevents any field assignments to be performed on it.   
+the body of the object is unaffected by this operator.   
+locking an object does not copy the object, but just creates locked reference to the same object.   
+example:
+```
+obj := {field = 123}
+locked_obj = &obj
+
+obj.field = 0        // fine
+locked_obj.field = 0 // error
+```
+### Object deep-locking
+applying the deep-locking operator (`&&`) on an object creates a deep-locked object.
+a deep-locked object prevents any field assignment to be performed on it.   
+it deep-locks all the fields within itself and converts all variables to constants; any function that attempts to modify or re-assign a field will raise a runtime error.   
+deep-locking an object does copy the object.   
+example:
+```
+obj := {
+	field = 123
+	modify_field := (n) {
+		$field = n
+	}
+}
+
+locked_obj      = &obj
+deep_locked_obj = &&obj
+
+obj.field = 0       // fine
+obj.modify_field(0) // fine
+
+locked_obj.field = 0       // error
+locked_obj.modify_field(0) // fine
+
+deep_locked_obj.field = 0       // error
+deep_locked_obj.modify_field(0) // error
+```
+### Object standard library
+the standard library for Object utilities, it's planned for this library to be expanded in the next release, See [Ideas for future releases](#Ideas-for-future-releases).
+#### Object.fields
+`Object.fields(obj)` is an array of arrays which contains the name, value and whether a field is a variable (in contrast to a constant) for every field `obj` currently contains, this includes fields defined within and outside of `obj`.   
+a runtime error is raised if `obj` is not of type object.   
+example:
+```
+date := {
+	day   = 1
+	month = 1
+	year  := 1970
+}
+
+date_fields := Object.fields(date)
+IO.print(date_fields)
+// [[month, 1, true], [day, 1, true], [year, 1970, false]]
 ```
