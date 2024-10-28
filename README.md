@@ -4,7 +4,6 @@ a fully-fledged dynamic imperative programming language with functional traits.
 
 ## Docs
 See [docs](docs/).
-still under construction
 
 ## Examples
 See [examples](examples/).
