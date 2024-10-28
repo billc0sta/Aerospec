@@ -1,0 +1,16 @@
+quick_sort := (arr) {
+	len := Array.len(arr)
+	?? len < 2 
+		-> arr
+
+	pivot := arr[0]
+	less  := [0 <= i < len; arr[i] < pivot; arr[i]]
+	equal := [0 <= i < len; arr[i] == pivot; arr[i]]
+	great := [0 <= i < len; arr[i] > pivot; arr[i]]
+
+	-> quick_sort(less) + equal + quick_sort(great) 
+}
+
+arr    := [1, 9, 2, 8, 3, 7, 4, 6, 5]
+sorted := quick_sort(arr)
+IO.print(sorted)

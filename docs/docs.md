@@ -6,105 +6,104 @@ Aerospec is a programming language that blends between functional and imperative
 4. [Comments](#Comments)
 5. [Identifiers](#Identifiers)
 6. [Assignment](#Assignment)
-	1. [Variable assignment](#Variable%20assignment)
-	2. [Constant assignment](#Constant%20assignment)
-	3. [Chaining assignments](#Chaining%20assignments)
-7. [Data-Types](#Data-Types)
-8. [Type-of operator](#Type-of%20operator)
+	1. [Variable assignment](#variable-assignment)
+	2. [Constant assignment](#constant-assignment)
+	3. [Chaining assignments](#chaining-assignments)
+7. [Data-Types](#data-Types)
+8. [Type-of operator](#type-of-operator)
 9. [Floats](#Floats)
-	1. [Basic arithmetic](#Basic%20arithmetic)
-	2. [Float standard library](#Float%20standard%20library)
-		1. [Float.inf](#Float.inf)
-		2. [Float.nan](#Float.nan)
-10. [Booleans](#Booleans)
-	1. [Equality](#Equality)
-	2. [Comparison](#Comparison)
-	3. [Logical not](#Logical%20not)
-	4. [Bool standard library](#Bool%20standard%20library)
-		1. [Bool.false](#Bool.false)
-		2. [Bool.true](#Bool.true)
-		3. [Bool.truth](#Bool.truth)
-11. [Strings](#Strings)
-	1. [String indexing](#String%20indexing)
-	2. [String slicing](#String%20slicing)
-	3. [String concatenation](#String%20concatenation)
-	4. [String index-assignment](#String%20index-assignment)
-	5. [String locking](#String%20locking)
-	6. [String escape characters](#String%20escape%20characters)
-	7. [String copying](%String%20copying)
-	8. [String standard library](#String%20standard%20library)
-		1. [String.len](#String.len)
-		2. [String.insert](#String.insert)
-		3. [String.extend](#String.extend)
-		4. [String.merge](#String.merge)
-		5. [String.index](#String.index)
-		6. [String.pop](#String.pop)
-		7. [String.remove](#String.remove)
-		8. [String.clear](#String.clear)
-		9. [String.count](#String.count)
-		10. [String.repr](#String.repr)
-12. [Operators](#Operators)
-	1. [Logical and/Logical or](#Logical%20and/Logical%20or)
-13. [Arrays](#Arrays)
-	1. [Array indexing](#Array%20indexing)
-	2. [Array slicing](#Array%20slicing)
-	3. [Array concatenation](#Array%20concatenation)
-	4. [Array index-assignment](#Array%20index-assignment)
-	5. [Array locking](#Array%20locking)
-	6. [Array deep-locking](#Array%20deep-locking)
-	7. [Array copying](#Array%20copying)
-	8. [Array standard library](#Array%20standard%20library)
-		1. [Array.len](#Array.len)
-		2. [Array.append](#Array.append)
-		3. [Array.insert](#Array.insert)
-		4. [Array.extend](#Array.extend)
-		5. [Array.merge](#Array.merge)
-		6. [Array.index](#Array.index)
-		7. [Array.pop](#Array.pop)
-		8. [Array.remove](#Array.remove)
-		9. [Array.clear](#Array.clear)
-		10. [Array.count](#Array.count)
+	1. [Basic arithmetic](#basic-arithmetic)
+	2. [Float standard library](#float-standard-library)
+		1. [Float.inf](#floatinf)
+		2. [Float.nan](#floatnan)
+10. [Booleans](#booleans)
+	1. [Equality](#equality)
+	2. [Comparison](#comparison)
+	3. [Logical not](#logical-not)
+	4. [Bool standard library](#bool-standard-library)
+		1. [Bool.false](#boolfalse)
+		2. [Bool.true](#booltrue)
+		3. [Bool.truth](#booltruth)
+11. [Strings](#strings)
+	1. [String indexing](#string-indexing)
+	2. [String slicing](#string-slicing)
+	3. [String concatenation](#string-concatenation)
+	4. [String index-assignment](#string-index-assignment)
+	5. [String locking](#string-locking)
+	6. [String escape characters](#string-escape-characters)
+	7. [String copying](#string-copying)
+	8. [String standard library](#string-standard-library)
+		1. [String.len](#stringlen)
+		2. [String.insert](#stringinsert)
+		3. [String.extend](#stringextend)
+		4. [String.merge](#stringmerge)
+		5. [String.index](#stringindex)
+		6. [String.pop](#stringpop)
+		7. [String.remove](#stringremove)
+		8. [String.clear](#stringsclear)
+		9. [String.count](#stringcount)
+		10. [String.repr](#stringrepr)
+12. [Operators](#operators)
+13. [Arrays](#arrays)
+	1. [Array indexing](#array-indexing)
+	2. [Array slicing](#array-slicing)
+	3. [Array concatenation](#array-concatenation)
+	4. [Array index-assignment](#array-index-assignment)
+	5. [Array locking](#array-locking)
+	6. [Array deep-locking](#array-deep-locking)
+	7. [Array copying](#array-copying)
+	8. [Array standard library](#array-standard-library)
+		1. [Array.len](#arraylen)
+		2. [Array.append](#arrayappend)
+		3. [Array.insert](#arrayinsert)
+		4. [Array.extend](#arrayextend)
+		5. [Array.merge](#arraymerge)
+		6. [Array.index](#arrayindex)
+		7. [Array.pop](#arraypop)
+		8. [Array.remove](#arrayremove)
+		9. [Array.clear](#arrayclear)
+		10. [Array.count](#arraycount)
 14. [Nil](#Nil)
-15. [Block statement](#Block%20statement)
-16. [If...else statement](#If_else%20statement)
-17. [Ternary expression](#Ternary%20expression)
-18. [Range expression](#Range%20expression)
-19. [Loop](#Loop)
-	 1. [Regular loop](#Regular%20loop)
-	 2. [Range loop](#Range%20loop)
-	 3. [Continue](#Continue)
-	 4. [Break](#Break)
-20. [Builder](#Builder)
-21. [Scope](#Scope)
-22. [Functions](#Functions)	
-	1. [Parameters](#Parameters)
-	2. [Function calls](#Function%20calls)
-	3. [First-class](#First-class)
-	4. [Return](#Return)
-	5. [Native functions](#Native%20functions)
-		1. [Variable arguments](#Variable%20arguments)
-	1. [Closures (nested functions)](#Closures%20nested%20functions)
-	2. [Recursion](#Recursion)
-23. [Global access](#Global%20access)
-24. [Global assignment](#Global%20assignment)
-25. [NO-OP statement](#NO-OP%20statement)
-26. [Objects](#Objects)
-	1. [Object initialization](#Object%20initialization)
-	2. [Object copying](#Object%20copying)
-	3. [Methods](#Methods)
-	4. [Property access](#Property%20access)
-	5. [Property assignment](#Property%20assignment)
-	6. [Object locking](#Object%20locking)
-	7. [Object deep-locking](#Object%20deep-locking)
-	8. [Object standard library](#Object%20standard%20library)
-		1. [Object.fields](#Object.fields)
-27. [Importing](#Importing)
-28. [Miscellaneous standard libraries](#Miscellaneous%20standard%20libraries)
-	1. [IO standard library](#IO%20standard%20library)
-	2. [Time standard library](#Time%20standard%20library)
-	3. [Value standard library](#Value%20standard%20library)
-29. [Ideas for future releases](#Ideas%20for%20future%20releases)
-30. [Implementation](#Implementation)
+15. [Block statement](#block-statement)
+16. [If...else statement](#if-else-statement)
+17. [Ternary expression](#ternary-expression)
+18. [Logical && and ||](#logical-&&-and-||)
+19. [Range expression](#range-expression)
+20. [Loop](#loop)
+	 1. [Regular loop](#regular-loop)
+	 2. [Range loop](#range-loop)
+	 3. [Continue](#continue)
+	 4. [Break](#break)
+21. [Builder](#builder)
+22. [Scope](#scope)
+23. [Functions](#functions)	
+	1. [Parameters](#parameters)
+	2. [Function calls](#function-calls)
+	3. [Return](#return)
+	4. [First-class](#first-class)
+	5. [Native functions](#native-functions)
+	6. [Closures (nested functions)](#closures-nested-functions)
+	7. [Recursion](#recursion)
+24. [Global access](#global-access)
+25. [Global assignment](#global-assignment)
+26. [NO-OP statement](#no-op-statement)
+27. [Objects](#objects)
+	1. [Object initialization](#object-initialization)
+	2. [Object copying](#object-copying)
+	3. [Methods](#methods)
+	4. [Property access](#property-access)
+	5. [Property assignment](#property-assignment)
+	6. [Object locking](#object-locking)
+	7. [Object deep-locking](#object-deep-locking)
+	8. [Object standard library](#object-standard-library)
+		1. [Object.fields](#objectfields)
+28. [Importing](#importing)
+29. [Miscellaneous standard libraries](#miscellaneous-standard-libraries)
+	1. [IO standard library](#io-standard-library)
+	2. [Time standard library](#time-standard-library)
+	3. [Value standard library](#value-standard-library)
+30. [Ideas for future releases](#ideas-for-future-releases)
+31. [Implementation](#implementation)
 ## Installation
 Go to [Releases](https://github.com/billc0sta/Aerospec/releases/) page and download the latest version.   
 for now, Aerospec is only compiled for Windows.  
@@ -576,11 +575,7 @@ as of v0.1.0, Aerospec does not have bitwise or augmented assignment operators, 
 | 9          | `?:`     | ternary conditional  | RTL           |
 | 10         | `=`      | variable assignment  | RTL           |
 | 10         | `:=`     | constant assignment  | RTL           |
-  
-### Logical and/Logical or
-like in most dynamically typed languages, and with taking advantage of short-circuiting; `&&` and `||` are both operators and control flow.   
-`expr1 && expr2` takes the same effect as: `expr1 ? expr2 : expr1`.   
-`expr1 || expr2` takes the same effect as: `expr1 ? expr1 : expr2`.   
+   
 ## Arrays
 in Aerospec, arrays are homogeneous, indexable, mutable and resizable.
 in array initialization, trailing commas are not allowed.   
@@ -780,7 +775,7 @@ i = 0
 	i = i + 1
 }
 ```
-## if...else statement
+## If...else statement
 If...else statements is a control flow construct to execute code branches based on a condition.   
 in Aerospec, if statements (represented with `??`) requires condition expression and a statement, both parenthesis around the condition expression and block statements are optional.   
 the condition expression is evaluated to it's truth value and branches are executed based on it.   
@@ -823,6 +818,17 @@ fizzbuzz_30 :=
 : "30"
 
 IO.print(fizzbuzz_30)
+```
+## Logical && and ||
+like in most dynamically typed languages, and with taking advantage of short-circuiting; `&&` and `||` are both operators and control flow.   
+`expr1 && expr2` takes the same effect as: `expr1 ? expr2 : expr1`.   
+`expr1 || expr2` takes the same effect as: `expr1 ? expr1 : expr2`.
+example:
+```
+// IO.print returns nil; right hand never evaluates
+nil := IO.print("Hello, ") && IO.print("World!")
+
+one := 0 || 1
 ```
 ## Range expression
 a range is an expression which is only valid in specific contexts, it defines a constant identifier and increments/decrements it based on specified lower and upper bounds non-decimal floats.   
@@ -873,7 +879,7 @@ i = 0
 	i = i + 1
 }
 
-// i = 0, is: even
+// i = 0: even
 // ...
 // i = 9: odd
 ```
@@ -922,4 +928,168 @@ i = 0
 // 1 ... 10
 // ...
 // 90 ... 99
+```
+## Builders
+Builder is a declarative construct for array creation, it is akin to python's list comprehension.   
+syntax: `[range; condition; expression]`, `range` is a range expression, fully adhering to the specification of [ranges](#range-expression), `condition` is a condition which determines whether the current iteration of the range will be added to the array, `condition` can be omitted and will default to `Bool.true`.  `expression` is the expression that evaluates to the current value of the iteration (if `condition` evaluates to true).   
+builders are actually quite powerful,   
+here's how you can do the three transformation functions of `map`, `filter`,`reduce` using builders:
+```
+// creates an array from 0 to 10, inclusive
+arr := [0 <= i <= 10;; i]
+
+// filtering
+only_odds := [0 <= i < Array.len(arr); arr[i] % 2 == 1; arr[i]]
+
+// mapping
+doubled := [0 <= i < Array.len(arr);; arr[i] * 2]
+
+// reduction, this is optimized to avoid array creation
+sum_all = 0 
+;[0 <= i < Array.len(arr);; sum_all = sum_all + arr[i]] 
+```
+## Scope
+a scope is a region of code in which specific identifiers evaluate to specific values.   
+in Aerospec, loops and if statements do not introduce a new scope, however, objects and functions do introduce a new scope, in which can variables and constants be re-assigned without affecting the outer identically named identifiers.
+## Functions
+functions are re-usable modules of code which can process data (parameters), and return data (return values).   
+in Aerospec, functions are just variables or constants with lambda values, emphasizing the first-class nature of functions in the language.   
+when printing a function, it prints the parameter names enclosed within two parenthesis, providing an easy way to better understand the task of the function.   
+functions always return a value, if a function does not explicitly return, the default return value is nil.    
+functions always introduce a new scope, which allows for re-assigning identically named identifiers without affecting the outer ones, which all gets discarded upon function exiting.   
+it is highly recommended to always assign functions to constants instead of variables.   
+example:
+```
+reverse_string := (str) {
+    i = 0
+    j = String.len(str) - 1
+    >> j > i {
+        temp   = str[i]
+        str[i] = str[j]
+        str[j] = temp
+        i = i + 1
+        j = j - 1
+    }
+}
+
+str := "Hello, World!"
+reverse_string(str)
+IO.print(str, "\n") // !dlroW ,olleH
+
+IO.print(reverse_string, "\n") // <function ( str )>
+```
+### Parameters
+parameters is one way functions communicate with the function call, used as a variable to refer to one input provided to the function at the function call.   
+In Aerospec, parameters are identifiers enclosed within parenthesis and separated by commas followed by a block contained code.   
+functions can have at most 255 parameters, and no two parameters can be named identically.   
+as of v0.1.0, Aerospec does not have default or variable arguments.   
+example:
+```
+greet_name := (name) {
+	IO.print("Hello: ", name, "!\n")
+}
+
+greet_name("John Doe") // Hello: John Doe!
+```
+### Function calls
+function calls invokes the execution of the function being called, assigning parameters positionally with arguments being passed.   
+if the function has parameters, it must be called with the same amount of arguments, this may change in future versions upon introducing currying, See [Ideas for future releases](#ideas-for-future-releases).   
+example:
+```
+print_range := (min, max) {
+	>> min <= i <= max
+		IO.print(i, " ")
+}
+
+print_range(0, 100) // 1 2 ... 99 100 
+```
+### Return
+Return statement (represented with `->`) ends the execution of the function and evaluates the function call to the expression followed.   
+In Aerospec, functions must return a value, a function that doesn't explicitly return, evaluates to nil. 
+the return expression after the return statement cannot be omitted, if the function shouldn't return anything, simply return a nil: `-> _`.   
+example:
+```
+max := (x, y) {
+	?? (x > y) -> x
+	:: -> y 
+} 
+
+IO.print(max(123, 123.1)) // 123.1
+```
+### First-class
+In Aerospec, functions are first-class citizens, which means they're treated as any other data-type;
+they can be stored in arrays, returned or passed to other functions.   
+example:
+```
+map := (arr, f) {
+	ret := []
+	>> 0 <= i < Array.len(arr) 
+		Array.append(ret, f(arr[i]))
+	-> ret
+}
+
+arr := [1, 2, 3, 4, 5]
+double  := map(arr, (x){ -> x * 2 })
+increm  := map(arr, (x){ -> x + 1 })
+square  := map(arr, (x){ -> x * x })
+
+IO.print(arr, "\n")
+IO.print(double, "\n")
+IO.print(increm, "\n")
+IO.print(square, "\n")
+```
+### Native functions
+Native functions are functions that are not defined in Aerospec, but in the Aerospec's runtime.   
+all standard library functions are native functions.   
+as of v0.1.0, native functions has features that normal functions do not have, like variable arguments.   
+example:
+```
+// IO.print is a native function
+IO.print(IO.print) // <native ( params... )>
+```
+### Closures (nested functions)
+Aerospec allows nested functions (also known as closures), which are functions defined within other functions, closures have access to the outer function scope (nonlocal scope), which can be modified with the [global access operator](#global-access), most often you won't need to do so however.     
+outer functions can call inner functions and vice versa, which allows nested mutual recursion.  
+functions can return closures, which will keep the nonlocal scope accessible through the closure after the function exits.   
+example:
+```
+multiply := (x, y) {
+	-> x * y
+}
+
+create_multiplier := (x) {
+	-> (y) {
+		-> multiply(x, y)
+	}
+}
+
+multiply_by_5  := create_multiplier(5)
+multiply_by_10 := create_multiplier(10)
+
+IO.print(multiply_by_5(5), "\n") // 25
+IO.print(multiply_by_5(10), "\n") // 50
+IO.print(multiply_by_10(12), "\n") // 120
+IO.print(multiply_by_10(4), "\n") // 40
+```
+### Recursion
+Recursion is the operation of calling a function in itself.   
+in Aerospec, function have access to themselves by default, and also have access to the functions defined after them.    
+example:
+```
+quick_sort := (arr) {
+	len := Array.len(arr)
+	?? len < 2 
+		-> arr
+
+	pivot := arr[0]
+	less  := [0 <= i < len; arr[i] < pivot; arr[i]]
+	equal := [0 <= i < len; arr[i] == pivot; arr[i]]
+	great := [0 <= i < len; arr[i] > pivot; arr[i]]
+
+	-> quick_sort(less) + equal + quick_sort(great) 
+}
+
+arr    := [1, 9, 2, 8, 3, 7, 4, 6, 5]
+sorted := quick_sort(arr)
+IO.print(sorted) // [1, 2, 3, 4, 5, 6, 7, 8, 9]
 ```
