@@ -2,5 +2,5 @@
 ::RuntimeError
   at file: tests\object_non_existent_field.aero
   at line: 2
-  Unbinded variable 'field' was referenced.
+  Unbinded identifier 'field' was referenced.
 ---------------------------

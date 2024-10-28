@@ -3,5 +3,5 @@ didn't error yet
 ::RuntimeError
   at file: tests\objects_erroneous_methods.aero
   at line: 3
-  Unbinded variable 'a' was referenced.
+  Unbinded identifier 'a' was referenced.
 ---------------------------

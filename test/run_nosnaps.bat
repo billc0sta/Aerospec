@@ -9,6 +9,7 @@ For %%G In ("tests\*") Do (
        dune.exe exec ..\_build\default\bin\main.exe "%%G" 1>"results\%%~nG.txt" 2>NUL
        Echo NOSNAP: %%~nG
        Set /A nosnaps += 1
+       Copy "results\%%~nG.txt" "nosnaps\%%~nG.txt" >NUL
     )
 )
 
